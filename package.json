@@ -1,0 +1,28 @@
+{
+	"name": "real-estate-ops",
+	"private": true,
+	"packageManager": "pnpm@11.25.0",
+	"engines": {
+		"node": ">=24.19.0 <25"
+	},
+	"scripts": {
+		"dev": "turbo run dev",
+		"build": "turbo run build",
+		"typecheck": "turbo run typecheck",
+		"test": "vitest run",
+		"test:e2e": "playwright test",
+		"check": "pnpm typecheck && pnpm test && pnpm build",
+		"lint": "biome check apps packages e2e scripts package.json tsconfig.base.json turbo.json vitest.config.ts playwright.config.ts",
+		"security:source": "node scripts/check-secrets.mjs"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.5.15",
+		"@playwright/test": "1.63.0",
+		"@types/node": "26.6.4",
+		"tsx": "4.23.15",
+		"turbo": "2.11.7",
+		"typescript": "7.0.2",
+		"vitest": "5.0.3"
+	},
+	"type": "module"
+}
