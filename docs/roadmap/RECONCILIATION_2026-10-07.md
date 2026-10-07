@@ -1,0 +1,3 @@
+# Seed reconciliation — 7 October 2026
+
+Target: camster91/real-estate-ops. Private and empty before initialization: no contents, branches, issues, PRs or Actions runs. No prior implementation or decisions overwritten. All seed files preserved except explicit action-classification correction in SECURITY.md. Original backlog retained. Eight proposed ADRs and issue criteria are review material, not M0 completion. Brokerage model, workflow/retention policies, entitlements, hosting/auth and Figma remain gates. Outbox/approval foundation belongs to M1; M8/M7 domain/gateway work remains separate. Current GitHub tools lack milestone/Project creation; requested configuration remains documented. No merge/deploy/permission change performed.

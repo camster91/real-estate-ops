@@ -1,0 +1,359 @@
+[
+  {
+    "seed_id": "REO-SEED-001",
+    "title": "EPIC 01: Define service taxonomy and product boundaries",
+    "milestone": "M0",
+    "priority": "P0",
+    "depends_on": [],
+    "status": "proposed; repository reconciliation required",
+    "acceptance_criteria": [
+      "Approve service boundary glossary and map child workflow decisions; record company-specific unknowns.",
+      "Epic closure requires verified child outcomes; document proposals alone do not complete it."
+    ],
+    "verification": "Issue/PR/commit links plus direct test/design/document evidence required; not executed."
+  },
+  {
+    "seed_id": "REO-SEED-002",
+    "title": "EPIC 02: Define roles, teams and permissions model",
+    "milestone": "M0",
+    "priority": "P0",
+    "depends_on": [
+      "REO-SEED-001"
+    ],
+    "status": "proposed; repository reconciliation required",
+    "acceptance_criteria": [
+      "Approve tenant/brokerage/team model and permission matrix with named access/compliance owners.",
+      "Every role has record scope, restricted-data behaviour and approval authority; no executive-to-BOR inference."
+    ],
+    "verification": "Issue/PR/commit links plus direct test/design/document evidence required; not executed."
+  },
+  {
+    "seed_id": "REO-SEED-019",
+    "title": "EPIC 19: Create Figma design system and core UX",
+    "milestone": "M0",
+    "priority": "P0",
+    "depends_on": [
+      "REO-SEED-001",
+      "REO-SEED-002"
+    ],
+    "status": "proposed; repository reconciliation required",
+    "acceptance_criteria": [
+      "Link current Figma evidence and define reusable tokens/components and core flows.",
+      "Close only after child design criteria and responsive/accessibility evidence are reviewed."
+    ],
+    "verification": "Issue/PR/commit links plus direct test/design/document evidence required; not executed."
+  },
+  {
+    "seed_id": "REO-SEED-021",
+    "title": "Map buyer, seller, lease, commercial, referral and property-management workflows",
+    "milestone": "M0",
+    "priority": "P0",
+    "depends_on": [
+      "REO-SEED-022"
+    ],
+    "status": "proposed; repository reconciliation required",
+    "acceptance_criteria": [
+      "Document candidate buyer, seller, lease, commercial, referral and management workflows with actor, inputs, gates and exceptions.",
+      "Separate service completion from legal trade/compliance decisions; unresolved brokerage variants are disabled templates."
+    ],
+    "verification": "Issue/PR/commit links plus direct test/design/document evidence required; not executed."
+  },
+  {
+    "seed_id": "REO-SEED-022",
+    "title": "Define service types, engagement lifecycle and terminology glossary",
+    "milestone": "M0",
+    "priority": "P0",
+    "depends_on": [],
+    "status": "proposed; repository reconciliation required",
+    "acceptance_criteria": [
+      "Define Party, Property, Listing, Transaction and ServiceEngagement boundaries and cardinalities.",
+      "Publish versioned candidate taxonomy and glossary; preserve actual service approval as a client decision."
+    ],
+    "verification": "Issue/PR/commit links plus direct test/design/document evidence required; not executed."
+  },
+  {
+    "seed_id": "REO-SEED-023",
+    "title": "Define external partner and vendor operating model",
+    "milestone": "M0",
+    "priority": "P1",
+    "depends_on": [
+      "REO-SEED-022",
+      "REO-SEED-025"
+    ],
+    "status": "proposed; repository reconciliation required",
+    "acceptance_criteria": [
+      "Specify explicit partner/vendor grants with purpose, expiry, resource projection and revocation.",
+      "Test design against another household member, counterparty and hidden compliance document; invitation is approved."
+    ],
+    "verification": "Issue/PR/commit links plus direct test/design/document evidence required; not executed."
+  },
+  {
+    "seed_id": "REO-SEED-024",
+    "title": "Define authorization matrix for owner, BOR, manager, agent, operations, finance, partner and client",
+    "milestone": "M0",
+    "priority": "P0",
+    "depends_on": [
+      "REO-SEED-025",
+      "REO-SEED-026"
+    ],
+    "status": "proposed; repository reconciliation required",
+    "acceptance_criteria": [
+      "Define action/role/scope/data-classification matrix for owner, BOR, manager, agent, operations, finance, partner and client.",
+      "List deny fixtures for horizontal/vertical escalation, self-approval and expired/revoked grants."
+    ],
+    "verification": "Issue/PR/commit links plus direct test/design/document evidence required; not executed."
+  },
+  {
+    "seed_id": "REO-SEED-025",
+    "title": "Define record-level access and team/branch boundaries",
+    "milestone": "M0",
+    "priority": "P0",
+    "depends_on": [
+      "REO-SEED-022"
+    ],
+    "status": "proposed; repository reconciliation required",
+    "acceptance_criteria": [
+      "Define tenant versus accountable brokerage registration and effective BOR/branch/team assignments.",
+      "Tenant-scoped child foreign keys, RLS runtime roles and access rules are specified; actual organization mapping stays explicit."
+    ],
+    "verification": "Issue/PR/commit links plus direct test/design/document evidence required; not executed."
+  },
+  {
+    "seed_id": "REO-SEED-026",
+    "title": "Define service-account and system-agent identities",
+    "milestone": "M0",
+    "priority": "P1",
+    "depends_on": [
+      "REO-SEED-025"
+    ],
+    "status": "proposed; repository reconciliation required",
+    "acceptance_criteria": [
+      "Specify principal/service/device identity, issuer+subject uniqueness and approved tenant membership.",
+      "An agent gets the intersection of requester and capability rights; no implicit user or admin impersonation."
+    ],
+    "verification": "Issue/PR/commit links plus direct test/design/document evidence required; not executed."
+  },
+  {
+    "seed_id": "REO-SEED-018",
+    "title": "EPIC 18: Platform security, privacy and audit foundation",
+    "milestone": "M1",
+    "priority": "P0",
+    "depends_on": [
+      "REO-SEED-002"
+    ],
+    "status": "proposed; repository reconciliation required",
+    "acceptance_criteria": [
+      "Security foundation epic maps verified auth, tenant, audit, storage, recovery and operations evidence.",
+      "Track partial completion and required security review separately; no production readiness claim from scaffold tests."
+    ],
+    "verification": "Issue/PR/commit links plus direct test/design/document evidence required; not executed."
+  },
+  {
+    "seed_id": "REO-SEED-095",
+    "title": "Initialize pnpm/Turborepo monorepo and CI",
+    "milestone": "M1",
+    "priority": "P0",
+    "depends_on": [
+      "REO-SEED-025",
+      "REO-SEED-026"
+    ],
+    "status": "proposed; repository reconciliation required",
+    "acceptance_criteria": [
+      "Create all four apps and shared packages, pin supported versions and lockfile, validate env and repeatable local startup.",
+      "Clean checkout installs and typechecks/builds; CI has least permissions and no secret leakage; failure states are actionable."
+    ],
+    "verification": "Issue/PR/commit links plus direct test/design/document evidence required; not executed."
+  },
+  {
+    "seed_id": "REO-SEED-096",
+    "title": "Implement organization/tenant boundary and auth foundation",
+    "milestone": "M1",
+    "priority": "P0",
+    "depends_on": [
+      "REO-SEED-095",
+      "REO-SEED-025",
+      "REO-SEED-026"
+    ],
+    "status": "proposed; repository reconciliation required",
+    "acceptance_criteria": [
+      "Implement approved memberships, verified OIDC/session boundary and tenant-scoped persistence.",
+      "Non-owner PostgreSQL tests deny forged tenants, inactive membership, missing context and cross-tenant associations."
+    ],
+    "verification": "Issue/PR/commit links plus direct test/design/document evidence required; not executed."
+  },
+  {
+    "seed_id": "REO-SEED-097",
+    "title": "Implement RBAC/record authorization middleware",
+    "milestone": "M1",
+    "priority": "P0",
+    "depends_on": [
+      "REO-SEED-096",
+      "REO-SEED-024"
+    ],
+    "status": "proposed; repository reconciliation required",
+    "acceptance_criteria": [
+      "Implement one shared default-deny RBAC/ABAC policy and consistent API/worker/storage authorization.",
+      "List/detail/search/export/aggregate and task execution cannot leak unauthorized records; role revocation takes effect."
+    ],
+    "verification": "Issue/PR/commit links plus direct test/design/document evidence required; not executed."
+  },
+  {
+    "seed_id": "REO-SEED-098",
+    "title": "Implement audit event service and sensitive-field redaction",
+    "milestone": "M1",
+    "priority": "P0",
+    "depends_on": [
+      "REO-SEED-096",
+      "REO-SEED-097"
+    ],
+    "status": "proposed; repository reconciliation required",
+    "acceptance_criteria": [
+      "Write redacted actor/purpose/resource/correlation audit atomically with important mutations.",
+      "App cannot edit/delete history; failed domain transaction leaves neither audit nor outbox; sensitive reads/exports are covered."
+    ],
+    "verification": "Issue/PR/commit links plus direct test/design/document evidence required; not executed."
+  },
+  {
+    "seed_id": "REO-SEED-099",
+    "title": "Implement encrypted object storage and malware/file validation",
+    "milestone": "M1",
+    "priority": "P0",
+    "depends_on": [
+      "REO-SEED-096",
+      "REO-SEED-097",
+      "REO-SEED-098"
+    ],
+    "status": "proposed; repository reconciliation required",
+    "acceptance_criteria": [
+      "Implement encrypted versioned object abstraction, quarantine, file validation and scan states with fail-closed access.",
+      "Cross-tenant/download/expiry tests, unsafe files, scan failure, version checksum and retention/hold constraints are evidenced."
+    ],
+    "verification": "Issue/PR/commit links plus direct test/design/document evidence required; not executed."
+  },
+  {
+    "seed_id": "REO-SEED-100",
+    "title": "Implement secrets management, dependency scanning and security CI",
+    "milestone": "M1",
+    "priority": "P0",
+    "depends_on": [
+      "REO-SEED-095"
+    ],
+    "status": "proposed; repository reconciliation required",
+    "acceptance_criteria": [
+      "Validate secrets-store references and run dependency/secret scans with supported pinned versions.",
+      "No source/log credentials; invalid security config fails startup; findings have severity, owner and resolution evidence."
+    ],
+    "verification": "Issue/PR/commit links plus direct test/design/document evidence required; not executed."
+  },
+  {
+    "seed_id": "REO-SEED-101",
+    "title": "Implement backup/restore procedure and test",
+    "milestone": "M1",
+    "priority": "P0",
+    "depends_on": [
+      "REO-SEED-096",
+      "REO-SEED-098",
+      "REO-SEED-099"
+    ],
+    "status": "proposed; repository reconciliation required",
+    "acceptance_criteria": [
+      "Specify approved RPO/RTO, encrypted backups, restore role and migration/forward-repair runbook.",
+      "Isolated restore proves database/object/audit integrity and reports measured recovery against agreed objectives."
+    ],
+    "verification": "Issue/PR/commit links plus direct test/design/document evidence required; not executed."
+  },
+  {
+    "seed_id": "REO-SEED-102",
+    "title": "Implement observability, structured logging and alerting",
+    "milestone": "M1",
+    "priority": "P1",
+    "depends_on": [
+      "REO-SEED-095"
+    ],
+    "status": "proposed; repository reconciliation required",
+    "acceptance_criteria": [
+      "Structured redacted logs/traces, safe error envelopes, correlation IDs and separate health/readiness.",
+      "Sensitive values are absent, unavailable DB changes readiness, trace correlation works and alert ownership is recorded."
+    ],
+    "verification": "Issue/PR/commit links plus direct test/design/document evidence required; not executed."
+  },
+  {
+    "seed_id": "REO-SEED-103",
+    "title": "Create Figma foundations, tokens and reusable component library",
+    "milestone": "M0",
+    "priority": "P0",
+    "depends_on": [
+      "REO-SEED-019"
+    ],
+    "status": "proposed; repository reconciliation required",
+    "acceptance_criteria": [
+      "Create/verify linked Figma typography, colour, spacing and semantic component tokens.",
+      "Keyboard/focus/disabled/error/loading states and contrast are specified in reusable components; no completion without file evidence."
+    ],
+    "verification": "Issue/PR/commit links plus direct test/design/document evidence required; not executed."
+  },
+  {
+    "seed_id": "REO-SEED-104",
+    "title": "Design Command Centre and Operations Inbox",
+    "milestone": "M0",
+    "priority": "P0",
+    "depends_on": [
+      "REO-SEED-103",
+      "REO-SEED-024"
+    ],
+    "status": "proposed; repository reconciliation required",
+    "acceptance_criteria": [
+      "Design role-scoped Command Centre and exception Operations Inbox with owner, source, next action and resolution.",
+      "Hidden records do not leak in counts; waiting/blocked states and readable mobile/tablet/desktop layout are demonstrated."
+    ],
+    "verification": "Issue/PR/commit links plus direct test/design/document evidence required; not executed."
+  },
+  {
+    "seed_id": "REO-SEED-105",
+    "title": "Design Contact 360, Property 360 and Transaction Workspace",
+    "milestone": "M0",
+    "priority": "P0",
+    "depends_on": [
+      "REO-SEED-103",
+      "REO-SEED-022",
+      "REO-SEED-024"
+    ],
+    "status": "proposed; repository reconciliation required",
+    "acceptance_criteria": [
+      "Design distinct Contact 360, Property 360 and Transaction Workspace with safe linked records and clear identity boundaries.",
+      "Empty/loading/error/stale-edit and restricted-data projections are explicit; navigation and keyboard paths reviewed."
+    ],
+    "verification": "Issue/PR/commit links plus direct test/design/document evidence required; not executed."
+  },
+  {
+    "seed_id": "REO-SEED-106",
+    "title": "Design Compliance Centre and agent work queue",
+    "milestone": "M0",
+    "priority": "P0",
+    "depends_on": [
+      "REO-SEED-103",
+      "REO-SEED-024"
+    ],
+    "status": "proposed; repository reconciliation required",
+    "acceptance_criteria": [
+      "Design Compliance Centre and agent queue with applicability/evidence/human review and action levels.",
+      "AI advisory text never resembles regulatory approval; expired/revoked/offline approval states show safe next steps."
+    ],
+    "verification": "Issue/PR/commit links plus direct test/design/document evidence required; not executed."
+  },
+  {
+    "seed_id": "REO-SEED-107",
+    "title": "Define responsive/accessibility acceptance criteria",
+    "milestone": "M0",
+    "priority": "P0",
+    "depends_on": [
+      "REO-SEED-103"
+    ],
+    "status": "proposed; repository reconciliation required",
+    "acceptance_criteria": [
+      "Define representative 390/768/1440px checks, semantic labels, keyboard order, focus visibility and contrast criteria.",
+      "Include forms/errors, zoom/reflow and accessible empty/loading states; actual QA evidence remains required per feature."
+    ],
+    "verification": "Issue/PR/commit links plus direct test/design/document evidence required; not executed."
+  }
+]

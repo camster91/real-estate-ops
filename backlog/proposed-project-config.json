@@ -1,0 +1,89 @@
+{
+  "project_name": "Real Estate Ops \u2014 Build",
+  "fields": {
+    "Status": [
+      "Backlog",
+      "Ready",
+      "In Progress",
+      "Review",
+      "Blocked",
+      "Done"
+    ],
+    "Priority": [
+      "P0",
+      "P1",
+      "P2",
+      "P3"
+    ],
+    "Area": [
+      "Product",
+      "Platform",
+      "CRM",
+      "Leads",
+      "Property",
+      "Transactions",
+      "Work",
+      "Documents",
+      "Compliance",
+      "Integrations",
+      "Communications",
+      "Agent",
+      "Automation",
+      "Finance",
+      "Reporting",
+      "Design",
+      "QA"
+    ],
+    "Risk": [
+      "Low",
+      "Medium",
+      "High"
+    ],
+    "Security review": [
+      "No",
+      "Required",
+      "Complete"
+    ],
+    "Client decision": [
+      "No",
+      "Required",
+      "Resolved"
+    ]
+  },
+  "milestones": [
+    "M0 Product Definition",
+    "M1 Platform Foundation",
+    "M2 CRM + Leads",
+    "M3 Properties + Listings",
+    "M4 Transactions + Work",
+    "M5 Documents + Compliance",
+    "M6 Communications",
+    "M7 Mac Agent Gateway",
+    "M8 Automation + Ops Inbox",
+    "M9 Finance + Reporting",
+    "M10 Pilot",
+    "M11 Production"
+  ],
+  "status": "proposed; not created on GitHub",
+  "requested_additional_fields": {
+    "Milestone": {
+      "preferred": "native milestone"
+    },
+    "Owner": {
+      "preferred": "native assignee plus accountable owner when necessary"
+    },
+    "Dependency": {
+      "preferred": "native issue dependencies; text fallback with canonical issue URLs"
+    },
+    "Pilot requirement": [
+      "Required",
+      "Optional",
+      "Not applicable"
+    ],
+    "Security review": [
+      "No",
+      "Required",
+      "Complete"
+    ]
+  }
+}
