@@ -3,7 +3,7 @@
 Status: Proposed — derived from seed and current user instruction; repository reconciliation pending.
 
 ## Context
-The seed defines product boundaries but lacks implementation-level invariants. No current repository decision has been verified.
+The seed defines product boundaries but lacks implementation-level invariants. The repository was confirmed empty before bootstrap; no earlier repository decisions existed.
 
 ## Decision
 Write domain mutation, minimized AuditEvent and DomainEvent/outbox within one PostgreSQL transaction. Outbox is foundational M1 work; the seed M8 outbox issue should be reconciled and moved/split deliberately rather than duplicated. Rule configuration/simulation stays M8.

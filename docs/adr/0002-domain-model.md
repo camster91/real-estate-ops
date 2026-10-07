@@ -3,7 +3,7 @@
 Status: Proposed — derived from seed and current user instruction; repository reconciliation pending.
 
 ## Context
-The seed defines product boundaries but lacks implementation-level invariants. No current repository decision has been verified.
+The seed defines product boundaries but lacks implementation-level invariants. The repository was confirmed empty before bootstrap; no earlier repository decisions existed.
 
 ## Decision
 Party is either person or organization, with exactly one matching profile. Household is an optional effective-dated grouping of parties, not a person, legal counterparty or permission boundary. Relationship is typed, directed and effective-dated; document relationship provenance without treating it as verified beneficial ownership. Client is a role on an engagement/transaction, not a duplicate contact entity. Auth principal and Party are independent.

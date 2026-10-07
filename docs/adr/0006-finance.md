@@ -3,7 +3,7 @@
 Status: Proposed — derived from seed and current user instruction; repository reconciliation pending.
 
 ## Context
-The seed defines product boundaries but lacks implementation-level invariants. No current repository decision has been verified.
+The seed defines product boundaries but lacks implementation-level invariants. The repository was confirmed empty before bootstrap; no earlier repository decisions existed.
 
 ## Decision
 Accounting remains the authoritative ledger. Store invoice/expense/payment/trust references and reconciliation evidence with source system, source ID, as-of timestamp and discrepancy state. TrustMoneyRecord tracks operational evidence; it cannot execute a transfer or imply that the operational platform is the official ledger.

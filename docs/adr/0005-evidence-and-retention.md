@@ -3,7 +3,7 @@
 Status: Proposed — derived from seed and current user instruction; repository reconciliation pending.
 
 ## Context
-The seed defines product boundaries but lacks implementation-level invariants. No current repository decision has been verified.
+The seed defines product boundaries but lacks implementation-level invariants. The repository was confirmed empty before bootstrap; no earlier repository decisions existed.
 
 ## Decision
 Document points to immutable DocumentVersions with checksum, classification, encrypted object key, scan status, uploader and timestamps. Quarantine uploads until file type/size validation and malware inspection succeed. Download links are short-lived and authorized; tenant IDs and storage prefixes are not authorization. Signature packages snapshot exact versions and approved recipients. Never overwrite completed evidence; corrections create a new version with supersession rationale.

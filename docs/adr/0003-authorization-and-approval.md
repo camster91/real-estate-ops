@@ -3,7 +3,7 @@
 Status: Proposed — derived from seed and current user instruction; repository reconciliation pending.
 
 ## Context
-The seed defines product boundaries but lacks implementation-level invariants. No current repository decision has been verified.
+The seed defines product boundaries but lacks implementation-level invariants. The repository was confirmed empty before bootstrap; no earlier repository decisions existed.
 
 ## Decision
 Authorize the authenticated principal, active tenant membership, role permission, record scope, data classification, purpose and resource state. Owner/executive is not automatically BOR or entitled to identity documents. External partners and clients receive explicit expiring record grants and safe projections. A service identity cannot assume a staff role.

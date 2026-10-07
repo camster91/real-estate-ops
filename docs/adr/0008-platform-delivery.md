@@ -3,7 +3,7 @@
 Status: Proposed — derived from seed and current user instruction; repository reconciliation pending.
 
 ## Context
-The seed defines product boundaries but lacks implementation-level invariants. No current repository decision has been verified.
+The seed defines product boundaries but lacks implementation-level invariants. The repository was confirmed empty before bootstrap; no earlier repository decisions existed.
 
 ## Decision
 Retain pnpm/Turborepo, strict TypeScript, Next.js web, Fastify API, PostgreSQL, a PostgreSQL-backed queue, encrypted S3-compatible storage, OIDC for Google/Microsoft, Vitest and Playwright. Shared packages own domain, db, auth, audit, compliance, integrations, workflows, automation and UI rules. Web never accesses the database directly; gateway never holds broad database credentials.

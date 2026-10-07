@@ -3,7 +3,7 @@
 Status: Proposed — derived from seed and current user instruction; repository reconciliation pending.
 
 ## Context
-The seed defines product boundaries but lacks implementation-level invariants. No current repository decision has been verified.
+The seed defines product boundaries but lacks implementation-level invariants. The repository was confirmed empty before bootstrap; no earlier repository decisions existed.
 
 ## Decision
 Use Organization as the tenant and security boundary. Distinguish the tenant from Party(kind=organization), which represents an external/legal company identity. A tenant may represent a multi-service company; BrokerageRegistration records legal brokerage identity, jurisdiction, registration reference and effective dates. Each regulated Transaction references exactly one responsible brokerage registration and branch where applicable. BOR assignments are effective-dated records, not inferred from tenant ownership. Branch and Team belong to one tenant; an active Membership links a principal to tenant roles/scopes. Team membership alone does not grant access to every client.
