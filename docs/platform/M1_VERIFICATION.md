@@ -10,11 +10,11 @@ Scope: initial tooling and fail-closed application scaffold for issue #95. M1, a
 - pnpm audit reports no known vulnerabilities at check time; coverage is dependency advisories only.
 - Limited source credential-pattern check passes; not a full-history/provider secret scan.
 - Three Playwright tests pass at 390/768/1440px: heading/status, en-CA, keyboard skip-link/main focus, no horizontal overflow. Screenshots were visually inspected.
-- Default Playwright browser download failed with invalid-archive data. Local QA used the existing cached Chromium executable via a test-only path override. Version-matched browser evidence is pending CI.
+- Default Playwright browser download failed with invalid-archive data. Local QA used the existing cached Chromium executable via a test-only path override. Version-matched browser checks passed in GitHub Actions run 37677484535 at commit 1a5248cc65540a3c9c093111d1a768ab40e69e7c.
 - Compiled worker and gateway report disabled diagnostics with no capabilities. Compiled API refuses production startup.
 
 ## Awaiting verification and remaining gates
-GitHub Actions execution is separate evidence and must be inspected after PR creation. No hosted preview, database/restore test, real OIDC login, RLS/ABAC, audit/outbox/queue, object storage, forms, analytics or live integration has been exercised. The public pending-access page has no real records and is noindex; analytics are intentionally absent before a reviewed privacy policy. No external communications, main merge, deployment, account permission or financial action occurred.
+GitHub Actions run 37677484535 passed and was read back on 7 October 2026. No hosted preview, database/restore test, real OIDC login, RLS/ABAC, audit/outbox/queue, object storage, forms, analytics or live integration has been exercised. The public pending-access page has no real records and is noindex; analytics are intentionally absent before a reviewed privacy policy. No external communications, main merge, deployment, account permission or financial action occurred.
 
 CI pins official action commit SHAs and runs locked install, lint, source checks, typecheck/test/build, dependency audit, seed-reconciliation tests and version-matched Playwright QA. CI/dependency tooling limitations must remain explicit rather than marking #95 or M1 complete automatically.
 

@@ -1,9 +1,9 @@
 # ADR 0005-evidence-and-retention: Evidence versions, retention policies and audit integrity
 
-Status: Proposed — derived from seed and current user instruction; repository reconciliation pending.
+Status: Proposed for policy review — current repository reconciled on 7 October 2026; not brokerage-approved.
 
 ## Context
-The seed defines product boundaries but lacks implementation-level invariants. No current repository decision has been verified.
+The imported seed and current planning/tooling branches were inspected on 7 October 2026. These proposals preserve the existing architecture. The original seed archive is not currently exposed by either connected Drive account, so byte-for-byte archive comparison remains unverified. Brokerage-specific choices require the accountable reviewer recorded in DECISION_REGISTER.md.
 
 ## Decision
 Document points to immutable DocumentVersions with checksum, classification, encrypted object key, scan status, uploader and timestamps. Quarantine uploads until file type/size validation and malware inspection succeed. Download links are short-lived and authorized; tenant IDs and storage prefixes are not authorization. Signature packages snapshot exact versions and approved recipients. Never overwrite completed evidence; corrections create a new version with supersession rationale.

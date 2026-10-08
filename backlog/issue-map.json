@@ -5,7 +5,8 @@
     "issue_number": 1,
     "url": "https://github.com/camster91/real-estate-ops/issues/1",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M0 Product Definition"
   },
   {
     "seed_id": "REO-SEED-002",
@@ -13,7 +14,8 @@
     "issue_number": 2,
     "url": "https://github.com/camster91/real-estate-ops/issues/2",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M0 Product Definition"
   },
   {
     "seed_id": "REO-SEED-003",
@@ -21,7 +23,8 @@
     "issue_number": 3,
     "url": "https://github.com/camster91/real-estate-ops/issues/3",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M2 CRM + Leads"
   },
   {
     "seed_id": "REO-SEED-004",
@@ -29,7 +32,8 @@
     "issue_number": 4,
     "url": "https://github.com/camster91/real-estate-ops/issues/4",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M2 CRM + Leads"
   },
   {
     "seed_id": "REO-SEED-005",
@@ -37,7 +41,8 @@
     "issue_number": 5,
     "url": "https://github.com/camster91/real-estate-ops/issues/5",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M3 Properties + Listings"
   },
   {
     "seed_id": "REO-SEED-006",
@@ -45,7 +50,8 @@
     "issue_number": 6,
     "url": "https://github.com/camster91/real-estate-ops/issues/6",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M4 Transactions + Work"
   },
   {
     "seed_id": "REO-SEED-007",
@@ -53,7 +59,8 @@
     "issue_number": 7,
     "url": "https://github.com/camster91/real-estate-ops/issues/7",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M4 Transactions + Work"
   },
   {
     "seed_id": "REO-SEED-008",
@@ -61,7 +68,8 @@
     "issue_number": 8,
     "url": "https://github.com/camster91/real-estate-ops/issues/8",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M5 Documents + Compliance"
   },
   {
     "seed_id": "REO-SEED-009",
@@ -69,7 +77,8 @@
     "issue_number": 9,
     "url": "https://github.com/camster91/real-estate-ops/issues/9",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M5 Documents + Compliance"
   },
   {
     "seed_id": "REO-SEED-010",
@@ -77,7 +86,8 @@
     "issue_number": 10,
     "url": "https://github.com/camster91/real-estate-ops/issues/10",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M5 Documents + Compliance"
   },
   {
     "seed_id": "REO-SEED-011",
@@ -85,7 +95,8 @@
     "issue_number": 11,
     "url": "https://github.com/camster91/real-estate-ops/issues/11",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M6 Communications"
   },
   {
     "seed_id": "REO-SEED-012",
@@ -93,7 +104,8 @@
     "issue_number": 12,
     "url": "https://github.com/camster91/real-estate-ops/issues/12",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M7 Mac Agent Gateway"
   },
   {
     "seed_id": "REO-SEED-013",
@@ -101,7 +113,8 @@
     "issue_number": 13,
     "url": "https://github.com/camster91/real-estate-ops/issues/13",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M7 Mac Agent Gateway"
   },
   {
     "seed_id": "REO-SEED-014",
@@ -109,7 +122,8 @@
     "issue_number": 14,
     "url": "https://github.com/camster91/real-estate-ops/issues/14",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M8 Automation + Ops Inbox"
   },
   {
     "seed_id": "REO-SEED-015",
@@ -117,7 +131,8 @@
     "issue_number": 15,
     "url": "https://github.com/camster91/real-estate-ops/issues/15",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M8 Automation + Ops Inbox"
   },
   {
     "seed_id": "REO-SEED-016",
@@ -125,7 +140,8 @@
     "issue_number": 16,
     "url": "https://github.com/camster91/real-estate-ops/issues/16",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M9 Finance + Reporting"
   },
   {
     "seed_id": "REO-SEED-017",
@@ -133,7 +149,8 @@
     "issue_number": 17,
     "url": "https://github.com/camster91/real-estate-ops/issues/17",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M9 Finance + Reporting"
   },
   {
     "seed_id": "REO-SEED-018",
@@ -141,7 +158,8 @@
     "issue_number": 18,
     "url": "https://github.com/camster91/real-estate-ops/issues/18",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M1 Platform Foundation"
   },
   {
     "seed_id": "REO-SEED-019",
@@ -149,7 +167,8 @@
     "issue_number": 19,
     "url": "https://github.com/camster91/real-estate-ops/issues/19",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M0 Product Definition"
   },
   {
     "seed_id": "REO-SEED-020",
@@ -157,7 +176,8 @@
     "issue_number": 20,
     "url": "https://github.com/camster91/real-estate-ops/issues/20",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M10 Pilot"
   },
   {
     "seed_id": "REO-SEED-021",
@@ -165,7 +185,8 @@
     "issue_number": 21,
     "url": "https://github.com/camster91/real-estate-ops/issues/21",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M0 Product Definition"
   },
   {
     "seed_id": "REO-SEED-022",
@@ -173,7 +194,8 @@
     "issue_number": 22,
     "url": "https://github.com/camster91/real-estate-ops/issues/22",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M0 Product Definition"
   },
   {
     "seed_id": "REO-SEED-023",
@@ -181,7 +203,8 @@
     "issue_number": 23,
     "url": "https://github.com/camster91/real-estate-ops/issues/23",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M0 Product Definition"
   },
   {
     "seed_id": "REO-SEED-024",
@@ -189,7 +212,8 @@
     "issue_number": 24,
     "url": "https://github.com/camster91/real-estate-ops/issues/24",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M0 Product Definition"
   },
   {
     "seed_id": "REO-SEED-025",
@@ -197,7 +221,8 @@
     "issue_number": 25,
     "url": "https://github.com/camster91/real-estate-ops/issues/25",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M0 Product Definition"
   },
   {
     "seed_id": "REO-SEED-026",
@@ -205,7 +230,8 @@
     "issue_number": 26,
     "url": "https://github.com/camster91/real-estate-ops/issues/26",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M0 Product Definition"
   },
   {
     "seed_id": "REO-SEED-027",
@@ -213,7 +239,8 @@
     "issue_number": 27,
     "url": "https://github.com/camster91/real-estate-ops/issues/27",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M2 CRM + Leads"
   },
   {
     "seed_id": "REO-SEED-028",
@@ -221,7 +248,8 @@
     "issue_number": 28,
     "url": "https://github.com/camster91/real-estate-ops/issues/28",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M2 CRM + Leads"
   },
   {
     "seed_id": "REO-SEED-029",
@@ -229,7 +257,8 @@
     "issue_number": 29,
     "url": "https://github.com/camster91/real-estate-ops/issues/29",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M2 CRM + Leads"
   },
   {
     "seed_id": "REO-SEED-030",
@@ -237,7 +266,8 @@
     "issue_number": 30,
     "url": "https://github.com/camster91/real-estate-ops/issues/30",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M2 CRM + Leads"
   },
   {
     "seed_id": "REO-SEED-031",
@@ -245,7 +275,8 @@
     "issue_number": 31,
     "url": "https://github.com/camster91/real-estate-ops/issues/31",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M2 CRM + Leads"
   },
   {
     "seed_id": "REO-SEED-032",
@@ -253,7 +284,8 @@
     "issue_number": 32,
     "url": "https://github.com/camster91/real-estate-ops/issues/32",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M2 CRM + Leads"
   },
   {
     "seed_id": "REO-SEED-033",
@@ -261,7 +293,8 @@
     "issue_number": 33,
     "url": "https://github.com/camster91/real-estate-ops/issues/33",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M2 CRM + Leads"
   },
   {
     "seed_id": "REO-SEED-034",
@@ -269,7 +302,8 @@
     "issue_number": 34,
     "url": "https://github.com/camster91/real-estate-ops/issues/34",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M2 CRM + Leads"
   },
   {
     "seed_id": "REO-SEED-035",
@@ -277,7 +311,8 @@
     "issue_number": 35,
     "url": "https://github.com/camster91/real-estate-ops/issues/35",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M3 Properties + Listings"
   },
   {
     "seed_id": "REO-SEED-036",
@@ -285,7 +320,8 @@
     "issue_number": 36,
     "url": "https://github.com/camster91/real-estate-ops/issues/36",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M3 Properties + Listings"
   },
   {
     "seed_id": "REO-SEED-037",
@@ -293,7 +329,8 @@
     "issue_number": 37,
     "url": "https://github.com/camster91/real-estate-ops/issues/37",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M3 Properties + Listings"
   },
   {
     "seed_id": "REO-SEED-038",
@@ -301,7 +338,8 @@
     "issue_number": 38,
     "url": "https://github.com/camster91/real-estate-ops/issues/38",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M3 Properties + Listings"
   },
   {
     "seed_id": "REO-SEED-039",
@@ -309,7 +347,8 @@
     "issue_number": 39,
     "url": "https://github.com/camster91/real-estate-ops/issues/39",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M4 Transactions + Work"
   },
   {
     "seed_id": "REO-SEED-040",
@@ -317,7 +356,8 @@
     "issue_number": 40,
     "url": "https://github.com/camster91/real-estate-ops/issues/40",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M4 Transactions + Work"
   },
   {
     "seed_id": "REO-SEED-041",
@@ -325,7 +365,8 @@
     "issue_number": 41,
     "url": "https://github.com/camster91/real-estate-ops/issues/41",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M4 Transactions + Work"
   },
   {
     "seed_id": "REO-SEED-042",
@@ -333,7 +374,8 @@
     "issue_number": 42,
     "url": "https://github.com/camster91/real-estate-ops/issues/42",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M4 Transactions + Work"
   },
   {
     "seed_id": "REO-SEED-043",
@@ -341,7 +383,8 @@
     "issue_number": 43,
     "url": "https://github.com/camster91/real-estate-ops/issues/43",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M4 Transactions + Work"
   },
   {
     "seed_id": "REO-SEED-044",
@@ -349,7 +392,8 @@
     "issue_number": 44,
     "url": "https://github.com/camster91/real-estate-ops/issues/44",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M4 Transactions + Work"
   },
   {
     "seed_id": "REO-SEED-045",
@@ -357,7 +401,8 @@
     "issue_number": 45,
     "url": "https://github.com/camster91/real-estate-ops/issues/45",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M4 Transactions + Work"
   },
   {
     "seed_id": "REO-SEED-046",
@@ -365,7 +410,8 @@
     "issue_number": 46,
     "url": "https://github.com/camster91/real-estate-ops/issues/46",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M4 Transactions + Work"
   },
   {
     "seed_id": "REO-SEED-047",
@@ -373,7 +419,8 @@
     "issue_number": 47,
     "url": "https://github.com/camster91/real-estate-ops/issues/47",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M5 Documents + Compliance"
   },
   {
     "seed_id": "REO-SEED-048",
@@ -381,7 +428,8 @@
     "issue_number": 48,
     "url": "https://github.com/camster91/real-estate-ops/issues/48",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M5 Documents + Compliance"
   },
   {
     "seed_id": "REO-SEED-049",
@@ -389,7 +437,8 @@
     "issue_number": 49,
     "url": "https://github.com/camster91/real-estate-ops/issues/49",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M5 Documents + Compliance"
   },
   {
     "seed_id": "REO-SEED-050",
@@ -397,7 +446,8 @@
     "issue_number": 50,
     "url": "https://github.com/camster91/real-estate-ops/issues/50",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M5 Documents + Compliance"
   },
   {
     "seed_id": "REO-SEED-051",
@@ -405,7 +455,8 @@
     "issue_number": 51,
     "url": "https://github.com/camster91/real-estate-ops/issues/51",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M5 Documents + Compliance"
   },
   {
     "seed_id": "REO-SEED-052",
@@ -413,7 +464,8 @@
     "issue_number": 52,
     "url": "https://github.com/camster91/real-estate-ops/issues/52",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M5 Documents + Compliance"
   },
   {
     "seed_id": "REO-SEED-053",
@@ -421,7 +473,8 @@
     "issue_number": 53,
     "url": "https://github.com/camster91/real-estate-ops/issues/53",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M5 Documents + Compliance"
   },
   {
     "seed_id": "REO-SEED-054",
@@ -429,7 +482,8 @@
     "issue_number": 54,
     "url": "https://github.com/camster91/real-estate-ops/issues/54",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M5 Documents + Compliance"
   },
   {
     "seed_id": "REO-SEED-055",
@@ -437,7 +491,8 @@
     "issue_number": 55,
     "url": "https://github.com/camster91/real-estate-ops/issues/55",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M5 Documents + Compliance"
   },
   {
     "seed_id": "REO-SEED-056",
@@ -445,7 +500,8 @@
     "issue_number": 56,
     "url": "https://github.com/camster91/real-estate-ops/issues/56",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M5 Documents + Compliance"
   },
   {
     "seed_id": "REO-SEED-057",
@@ -453,7 +509,8 @@
     "issue_number": 57,
     "url": "https://github.com/camster91/real-estate-ops/issues/57",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M5 Documents + Compliance"
   },
   {
     "seed_id": "REO-SEED-058",
@@ -461,7 +518,8 @@
     "issue_number": 58,
     "url": "https://github.com/camster91/real-estate-ops/issues/58",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M5 Documents + Compliance"
   },
   {
     "seed_id": "REO-SEED-059",
@@ -469,7 +527,8 @@
     "issue_number": 59,
     "url": "https://github.com/camster91/real-estate-ops/issues/59",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M5 Documents + Compliance"
   },
   {
     "seed_id": "REO-SEED-060",
@@ -477,7 +536,8 @@
     "issue_number": 60,
     "url": "https://github.com/camster91/real-estate-ops/issues/60",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M5 Documents + Compliance"
   },
   {
     "seed_id": "REO-SEED-061",
@@ -485,7 +545,8 @@
     "issue_number": 61,
     "url": "https://github.com/camster91/real-estate-ops/issues/61",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M5 Documents + Compliance"
   },
   {
     "seed_id": "REO-SEED-062",
@@ -493,7 +554,8 @@
     "issue_number": 62,
     "url": "https://github.com/camster91/real-estate-ops/issues/62",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M5 Documents + Compliance"
   },
   {
     "seed_id": "REO-SEED-063",
@@ -501,7 +563,8 @@
     "issue_number": 63,
     "url": "https://github.com/camster91/real-estate-ops/issues/63",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M5 Documents + Compliance"
   },
   {
     "seed_id": "REO-SEED-064",
@@ -509,7 +572,8 @@
     "issue_number": 64,
     "url": "https://github.com/camster91/real-estate-ops/issues/64",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M5 Documents + Compliance"
   },
   {
     "seed_id": "REO-SEED-065",
@@ -517,7 +581,8 @@
     "issue_number": 65,
     "url": "https://github.com/camster91/real-estate-ops/issues/65",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M5 Documents + Compliance"
   },
   {
     "seed_id": "REO-SEED-066",
@@ -525,7 +590,8 @@
     "issue_number": 66,
     "url": "https://github.com/camster91/real-estate-ops/issues/66",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M6 Communications"
   },
   {
     "seed_id": "REO-SEED-067",
@@ -533,7 +599,8 @@
     "issue_number": 67,
     "url": "https://github.com/camster91/real-estate-ops/issues/67",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M6 Communications"
   },
   {
     "seed_id": "REO-SEED-068",
@@ -541,7 +608,8 @@
     "issue_number": 68,
     "url": "https://github.com/camster91/real-estate-ops/issues/68",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M6 Communications"
   },
   {
     "seed_id": "REO-SEED-069",
@@ -549,7 +617,8 @@
     "issue_number": 69,
     "url": "https://github.com/camster91/real-estate-ops/issues/69",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M6 Communications"
   },
   {
     "seed_id": "REO-SEED-070",
@@ -557,7 +626,8 @@
     "issue_number": 70,
     "url": "https://github.com/camster91/real-estate-ops/issues/70",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M7 Mac Agent Gateway"
   },
   {
     "seed_id": "REO-SEED-071",
@@ -565,7 +635,8 @@
     "issue_number": 71,
     "url": "https://github.com/camster91/real-estate-ops/issues/71",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M7 Mac Agent Gateway"
   },
   {
     "seed_id": "REO-SEED-072",
@@ -573,7 +644,8 @@
     "issue_number": 72,
     "url": "https://github.com/camster91/real-estate-ops/issues/72",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M7 Mac Agent Gateway"
   },
   {
     "seed_id": "REO-SEED-073",
@@ -581,7 +653,8 @@
     "issue_number": 73,
     "url": "https://github.com/camster91/real-estate-ops/issues/73",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M7 Mac Agent Gateway"
   },
   {
     "seed_id": "REO-SEED-074",
@@ -589,7 +662,8 @@
     "issue_number": 74,
     "url": "https://github.com/camster91/real-estate-ops/issues/74",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M7 Mac Agent Gateway"
   },
   {
     "seed_id": "REO-SEED-075",
@@ -597,7 +671,8 @@
     "issue_number": 75,
     "url": "https://github.com/camster91/real-estate-ops/issues/75",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M7 Mac Agent Gateway"
   },
   {
     "seed_id": "REO-SEED-076",
@@ -605,7 +680,8 @@
     "issue_number": 76,
     "url": "https://github.com/camster91/real-estate-ops/issues/76",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M7 Mac Agent Gateway"
   },
   {
     "seed_id": "REO-SEED-077",
@@ -613,7 +689,8 @@
     "issue_number": 77,
     "url": "https://github.com/camster91/real-estate-ops/issues/77",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M7 Mac Agent Gateway"
   },
   {
     "seed_id": "REO-SEED-078",
@@ -621,7 +698,8 @@
     "issue_number": 78,
     "url": "https://github.com/camster91/real-estate-ops/issues/78",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M7 Mac Agent Gateway"
   },
   {
     "seed_id": "REO-SEED-079",
@@ -629,7 +707,8 @@
     "issue_number": 79,
     "url": "https://github.com/camster91/real-estate-ops/issues/79",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M7 Mac Agent Gateway"
   },
   {
     "seed_id": "REO-SEED-080",
@@ -637,7 +716,8 @@
     "issue_number": 80,
     "url": "https://github.com/camster91/real-estate-ops/issues/80",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M7 Mac Agent Gateway"
   },
   {
     "seed_id": "REO-SEED-081",
@@ -645,7 +725,8 @@
     "issue_number": 81,
     "url": "https://github.com/camster91/real-estate-ops/issues/81",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M8 Automation + Ops Inbox"
   },
   {
     "seed_id": "REO-SEED-082",
@@ -653,7 +734,8 @@
     "issue_number": 82,
     "url": "https://github.com/camster91/real-estate-ops/issues/82",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M8 Automation + Ops Inbox"
   },
   {
     "seed_id": "REO-SEED-083",
@@ -661,7 +743,8 @@
     "issue_number": 83,
     "url": "https://github.com/camster91/real-estate-ops/issues/83",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M1 Platform Foundation"
   },
   {
     "seed_id": "REO-SEED-084",
@@ -669,7 +752,8 @@
     "issue_number": 84,
     "url": "https://github.com/camster91/real-estate-ops/issues/84",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M8 Automation + Ops Inbox"
   },
   {
     "seed_id": "REO-SEED-085",
@@ -677,7 +761,8 @@
     "issue_number": 85,
     "url": "https://github.com/camster91/real-estate-ops/issues/85",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M8 Automation + Ops Inbox"
   },
   {
     "seed_id": "REO-SEED-086",
@@ -685,7 +770,8 @@
     "issue_number": 86,
     "url": "https://github.com/camster91/real-estate-ops/issues/86",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M8 Automation + Ops Inbox"
   },
   {
     "seed_id": "REO-SEED-087",
@@ -693,7 +779,8 @@
     "issue_number": 87,
     "url": "https://github.com/camster91/real-estate-ops/issues/87",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M8 Automation + Ops Inbox"
   },
   {
     "seed_id": "REO-SEED-088",
@@ -701,7 +788,8 @@
     "issue_number": 88,
     "url": "https://github.com/camster91/real-estate-ops/issues/88",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M9 Finance + Reporting"
   },
   {
     "seed_id": "REO-SEED-089",
@@ -709,7 +797,8 @@
     "issue_number": 89,
     "url": "https://github.com/camster91/real-estate-ops/issues/89",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M9 Finance + Reporting"
   },
   {
     "seed_id": "REO-SEED-090",
@@ -717,7 +806,8 @@
     "issue_number": 90,
     "url": "https://github.com/camster91/real-estate-ops/issues/90",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M9 Finance + Reporting"
   },
   {
     "seed_id": "REO-SEED-091",
@@ -725,7 +815,8 @@
     "issue_number": 91,
     "url": "https://github.com/camster91/real-estate-ops/issues/91",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M9 Finance + Reporting"
   },
   {
     "seed_id": "REO-SEED-092",
@@ -733,7 +824,8 @@
     "issue_number": 92,
     "url": "https://github.com/camster91/real-estate-ops/issues/92",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M9 Finance + Reporting"
   },
   {
     "seed_id": "REO-SEED-093",
@@ -741,7 +833,8 @@
     "issue_number": 93,
     "url": "https://github.com/camster91/real-estate-ops/issues/93",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M9 Finance + Reporting"
   },
   {
     "seed_id": "REO-SEED-094",
@@ -749,7 +842,8 @@
     "issue_number": 94,
     "url": "https://github.com/camster91/real-estate-ops/issues/94",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M9 Finance + Reporting"
   },
   {
     "seed_id": "REO-SEED-095",
@@ -757,7 +851,8 @@
     "issue_number": 95,
     "url": "https://github.com/camster91/real-estate-ops/issues/95",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M1 Platform Foundation"
   },
   {
     "seed_id": "REO-SEED-096",
@@ -765,7 +860,8 @@
     "issue_number": 96,
     "url": "https://github.com/camster91/real-estate-ops/issues/96",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M1 Platform Foundation"
   },
   {
     "seed_id": "REO-SEED-097",
@@ -773,7 +869,8 @@
     "issue_number": 97,
     "url": "https://github.com/camster91/real-estate-ops/issues/97",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M1 Platform Foundation"
   },
   {
     "seed_id": "REO-SEED-098",
@@ -781,7 +878,8 @@
     "issue_number": 98,
     "url": "https://github.com/camster91/real-estate-ops/issues/98",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M1 Platform Foundation"
   },
   {
     "seed_id": "REO-SEED-099",
@@ -789,7 +887,8 @@
     "issue_number": 99,
     "url": "https://github.com/camster91/real-estate-ops/issues/99",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M1 Platform Foundation"
   },
   {
     "seed_id": "REO-SEED-100",
@@ -797,7 +896,8 @@
     "issue_number": 100,
     "url": "https://github.com/camster91/real-estate-ops/issues/100",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M1 Platform Foundation"
   },
   {
     "seed_id": "REO-SEED-101",
@@ -805,7 +905,8 @@
     "issue_number": 101,
     "url": "https://github.com/camster91/real-estate-ops/issues/101",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M1 Platform Foundation"
   },
   {
     "seed_id": "REO-SEED-102",
@@ -813,7 +914,8 @@
     "issue_number": 102,
     "url": "https://github.com/camster91/real-estate-ops/issues/102",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M1 Platform Foundation"
   },
   {
     "seed_id": "REO-SEED-103",
@@ -821,7 +923,8 @@
     "issue_number": 103,
     "url": "https://github.com/camster91/real-estate-ops/issues/103",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M0 Product Definition"
   },
   {
     "seed_id": "REO-SEED-104",
@@ -829,7 +932,8 @@
     "issue_number": 104,
     "url": "https://github.com/camster91/real-estate-ops/issues/104",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M0 Product Definition"
   },
   {
     "seed_id": "REO-SEED-105",
@@ -837,7 +941,8 @@
     "issue_number": 105,
     "url": "https://github.com/camster91/real-estate-ops/issues/105",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M0 Product Definition"
   },
   {
     "seed_id": "REO-SEED-106",
@@ -845,7 +950,8 @@
     "issue_number": 106,
     "url": "https://github.com/camster91/real-estate-ops/issues/106",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M0 Product Definition"
   },
   {
     "seed_id": "REO-SEED-107",
@@ -853,7 +959,8 @@
     "issue_number": 107,
     "url": "https://github.com/camster91/real-estate-ops/issues/107",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M0 Product Definition"
   },
   {
     "seed_id": "REO-SEED-108",
@@ -861,7 +968,8 @@
     "issue_number": 108,
     "url": "https://github.com/camster91/real-estate-ops/issues/108",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M10 Pilot"
   },
   {
     "seed_id": "REO-SEED-109",
@@ -869,7 +977,8 @@
     "issue_number": 109,
     "url": "https://github.com/camster91/real-estate-ops/issues/109",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M10 Pilot"
   },
   {
     "seed_id": "REO-SEED-110",
@@ -877,7 +986,8 @@
     "issue_number": 110,
     "url": "https://github.com/camster91/real-estate-ops/issues/110",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M10 Pilot"
   },
   {
     "seed_id": "REO-SEED-111",
@@ -885,7 +995,8 @@
     "issue_number": 111,
     "url": "https://github.com/camster91/real-estate-ops/issues/111",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M10 Pilot"
   },
   {
     "seed_id": "REO-SEED-112",
@@ -893,7 +1004,8 @@
     "issue_number": 112,
     "url": "https://github.com/camster91/real-estate-ops/issues/112",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M10 Pilot"
   },
   {
     "seed_id": "REO-SEED-113",
@@ -901,6 +1013,7 @@
     "issue_number": 113,
     "url": "https://github.com/camster91/real-estate-ops/issues/113",
     "status": "open",
-    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker."
+    "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
+    "milestone": "M11 Production"
   }
 ]

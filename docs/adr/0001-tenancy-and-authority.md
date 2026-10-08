@@ -1,9 +1,9 @@
 # ADR 0001-tenancy-and-authority: Tenant, brokerage and operational authority
 
-Status: Proposed — derived from seed and current user instruction; repository reconciliation pending.
+Status: Proposed for policy review — current repository reconciled on 7 October 2026; not brokerage-approved.
 
 ## Context
-The seed defines product boundaries but lacks implementation-level invariants. No current repository decision has been verified.
+The imported seed and current planning/tooling branches were inspected on 7 October 2026. These proposals preserve the existing architecture. The original seed archive is not currently exposed by either connected Drive account, so byte-for-byte archive comparison remains unverified. Brokerage-specific choices require the accountable reviewer recorded in DECISION_REGISTER.md.
 
 ## Decision
 Use Organization as the tenant and security boundary. Distinguish the tenant from Party(kind=organization), which represents an external/legal company identity. A tenant may represent a multi-service company; BrokerageRegistration records legal brokerage identity, jurisdiction, registration reference and effective dates. Each regulated Transaction references exactly one responsible brokerage registration and branch where applicable. BOR assignments are effective-dated records, not inferred from tenant ownership. Branch and Team belong to one tenant; an active Membership links a principal to tenant roles/scopes. Team membership alone does not grant access to every client.

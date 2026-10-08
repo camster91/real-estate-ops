@@ -1,9 +1,9 @@
 # ADR 0007-integrations-and-gateway: Rights-aware integrations and bounded outbound gateway
 
-Status: Proposed — derived from seed and current user instruction; repository reconciliation pending.
+Status: Proposed for policy review — current repository reconciled on 7 October 2026; not brokerage-approved.
 
 ## Context
-The seed defines product boundaries but lacks implementation-level invariants. No current repository decision has been verified.
+The imported seed and current planning/tooling branches were inspected on 7 October 2026. These proposals preserve the existing architecture. The original seed archive is not currently exposed by either connected Drive account, so byte-for-byte archive comparison remains unverified. Brokerage-specific choices require the accountable reviewer recorded in DECISION_REGISTER.md.
 
 ## Decision
 Shared IntegrationConnection records contain tenant, provider, credential reference, granted OAuth scopes, entitled resources/purposes, contract dates, retention/export limits and revocation state. Credentials live in a secrets store, never domain payloads or logs. ExternalDataRightsPolicy is checked before read, persistence, display, export and AI processing. Expired/unconfirmed rights deny these operations. An IDX advertising entitlement is not evidence of operational MLS, analytics or AI-training rights.

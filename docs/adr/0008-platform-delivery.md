@@ -1,9 +1,9 @@
 # ADR 0008-platform-delivery: Preserve seed stack and establish reviewable foundations
 
-Status: Proposed — derived from seed and current user instruction; repository reconciliation pending.
+Status: Proposed for policy review — current repository reconciled on 7 October 2026; not brokerage-approved.
 
 ## Context
-The seed defines product boundaries but lacks implementation-level invariants. No current repository decision has been verified.
+The imported seed and current planning/tooling branches were inspected on 7 October 2026. These proposals preserve the existing architecture. The original seed archive is not currently exposed by either connected Drive account, so byte-for-byte archive comparison remains unverified. Brokerage-specific choices require the accountable reviewer recorded in DECISION_REGISTER.md.
 
 ## Decision
 Retain pnpm/Turborepo, strict TypeScript, Next.js web, Fastify API, PostgreSQL, a PostgreSQL-backed queue, encrypted S3-compatible storage, OIDC for Google/Microsoft, Vitest and Playwright. Shared packages own domain, db, auth, audit, compliance, integrations, workflows, automation and UI rules. Web never accesses the database directly; gateway never holds broad database credentials.

@@ -1,6 +1,6 @@
 # M1 implementation and acceptance plan
 
-Not started. Repository access and reconciled core-model gate are prerequisites. Package/tool/provider choices require current official documentation during implementation.
+In progress. Tooling scaffold is in PR #116 with passing CI; this does not complete M1-A or M1. Shared authorization contracts are the next isolated slice. Operational authentication/persistence remain gated. Package/tool/provider choices require current official documentation during implementation.
 
 | Slice | Concrete deliverable | Verification |
 |---|---|---|

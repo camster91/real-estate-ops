@@ -1,9 +1,9 @@
 # ADR 0004-events-and-jobs: Transactional outbox and at-least-once execution
 
-Status: Proposed — derived from seed and current user instruction; repository reconciliation pending.
+Status: Proposed for policy review — current repository reconciled on 7 October 2026; not brokerage-approved.
 
 ## Context
-The seed defines product boundaries but lacks implementation-level invariants. No current repository decision has been verified.
+The imported seed and current planning/tooling branches were inspected on 7 October 2026. These proposals preserve the existing architecture. The original seed archive is not currently exposed by either connected Drive account, so byte-for-byte archive comparison remains unverified. Brokerage-specific choices require the accountable reviewer recorded in DECISION_REGISTER.md.
 
 ## Decision
 Write domain mutation, minimized AuditEvent and DomainEvent/outbox within one PostgreSQL transaction. Outbox is foundational M1 work; the seed M8 outbox issue should be reconciled and moved/split deliberately rather than duplicated. Rule configuration/simulation stays M8.

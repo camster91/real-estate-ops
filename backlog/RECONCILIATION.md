@@ -1,6 +1,6 @@
 # GitHub planning reconciliation procedure
 
-No import has run. The seed has 113 items (20 epics + 93 children) and no duplicate normalized exact titles. This is not proof of semantic uniqueness against the repository.
+Import already completed: 113 items (20 epics + 93 children) map to issues #1–#113. On 7 October 2026 all unique seed markers and titles were reconciled against the complete open/closed issue export. No duplicate import occurred. Twelve milestones were created and all 113 issue assignments were read back. Original archive comparison remains unavailable; see DECISION_REGISTER.md. The procedure below remains the repeatable future reconciliation process.
 
 1. Read current repository metadata/default branch/rules/AGENTS.md, all docs/backlog and active branches; enumerate all open/closed issues and PRs, milestones, labels, Actions and existing Project items with pagination.
 2. Compare seed path hashes with current contents and inspect changed decisions. Preserve better/newer work. Map each seed item to existing issue intent: domain, user outcome, acceptance criteria and dependency. Title similarity is only a candidate signal. Record match rationale, existing URL, state and discrepancies.
@@ -19,4 +19,4 @@ No import has run. The seed has 113 items (20 epics + 93 children) and no duplic
 - Brokerage/core data modelling, approved retention policies and integration rights are M0 prerequisites even where feature implementations occur later.
 
 ## Project configuration gaps
-The seed lists Status, Priority, Area, Risk, Security review and Client decision. Add requested Owner, Dependency and Pilot requirement; use GitHub-native Milestone and Assignees where feasible. Owner is accountable human/team, not an invented assignee. Dependency should link blocking issue IDs and explain whether the relation blocks implementation, pilot or production. Configuration is proposed only until Project permissions/field support are observed.
+The seed lists Status, Priority, Area, Risk, Security review and Client decision. Add requested Owner, Dependency and Pilot requirement; use GitHub-native Milestone and Assignees where feasible. Owner is accountable human/team, not an invented assignee. Dependency should link blocking issue IDs and explain whether the relation blocks implementation, pilot or production. Project configuration remains proposed. The current GitHub CLI credential lacks read:project; listing/creation/field/privacy verification cannot proceed without Project access. This is tracked by existing issue #115; repository permissions were not changed.
