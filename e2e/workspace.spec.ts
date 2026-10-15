@@ -3,7 +3,17 @@ import { expect, test } from "@playwright/test";
 test("pending workspace is readable and keyboard accessible", async ({
 	page,
 }, testInfo) => {
-	await page.goto("/");
+	const response = await page.goto("/");
+	const headers = response?.headers() ?? {};
+	expect(headers["x-powered-by"]).toBeUndefined();
+	expect(headers).toMatchObject({
+		"x-content-type-options": "nosniff",
+		"x-frame-options": "DENY",
+		"referrer-policy": "no-referrer",
+	});
+	expect(headers["content-security-policy"]).toContain(
+		"frame-ancestors 'none'",
+	);
 	await expect(page.getByRole("heading", { level: 1 })).toHaveText(
 		"A shared workspace for your real estate team.",
 	);

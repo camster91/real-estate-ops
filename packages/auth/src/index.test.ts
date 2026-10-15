@@ -73,7 +73,7 @@ describe("shared authorization boundaries", () => {
 			auditRequired: true,
 		});
 	});
-	it("denies inactive and revoked membership even with a grant", () => {
+	it("denies inactive membership even with a grant", () => {
 		denied(
 			{ ...request, subject: { ...human, membershipActive: false } },
 			"membership_required",
@@ -262,6 +262,16 @@ describe("shared authorization boundaries", () => {
 		},
 	])("fails closed for malformed runtime context %j", (input) => {
 		denied(input as PolicyRequest, "invalid_context");
+	});
+	it("keeps the action-level policy immutable at runtime", () => {
+		expect(Object.isFrozen(actionLevels)).toBe(true);
+		expect(() =>
+			Object.assign(actionLevels, { "communication.send": 2 }),
+		).toThrow(TypeError);
+		denied(
+			{ ...request, action: "communication.send" },
+			"human_approval_required",
+		);
 	});
 	it("does not mutate trusted policy snapshots", () => {
 		const before = JSON.stringify(request);

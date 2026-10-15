@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 
 const paths = execFileSync(
 	"git",
@@ -7,7 +7,9 @@ const paths = execFileSync(
 	{ encoding: "utf8" },
 )
 	.split("\0")
-	.filter(Boolean);
+	.filter(Boolean)
+	// Tracked files deleted from the working tree have nothing to scan.
+	.filter((path) => existsSync(path));
 const patterns = [
 	new RegExp("-----BEGIN " + "(?:RSA |EC |OPENSSH )?PRIVATE KEY-----"),
 	new RegExp("gh[pousr]_" + "[A-Za-z0-9]{30,}"),

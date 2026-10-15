@@ -1,5 +1,6 @@
 /** Trusted server-side policy snapshots only; never construct these from request claims. */
-export const actionLevels = {
+// Frozen at runtime: `as const` is compile-time only, and authorize() reads this map.
+export const actionLevels = Object.freeze({
 	"record.read": 0,
 	"task.create": 1,
 	"communication.draft": 2,
@@ -13,7 +14,7 @@ export const actionLevels = {
 	"security.bypass": 4,
 	"compliance.bypass": 4,
 	"agent.expand_permissions": 4,
-} as const;
+} as const);
 export type Action = keyof typeof actionLevels;
 export type Classification =
 	| "operational"
@@ -80,12 +81,12 @@ export type Decision =
 	  }
 	| { readonly allowed: false; readonly reason: Denial };
 const deny = (reason: Denial): Decision => ({ allowed: false, reason });
-const classifications: readonly Classification[] = [
+const classifications: readonly Classification[] = Object.freeze([
 	"operational",
 	"personal",
 	"financial",
 	"restricted_compliance",
-];
+]);
 const present = (value: unknown): value is string =>
 	typeof value === "string" && value.trim().length > 0;
 const activeWindow = (start: number, end: number, now: number) =>
