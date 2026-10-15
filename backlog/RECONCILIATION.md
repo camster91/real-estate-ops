@@ -12,9 +12,9 @@ Import already completed: 113 items (20 epics + 93 children) map to issues #1–
 8. Read back every mutation. Persist an issue-map with seed ID, intent, action, rationale, issue URL, milestone and evidence. On partial failure refresh before retry so no duplicate is created.
 
 ## Proposed dependency corrections
-- Seed index 083 (outbox) belongs to M1 infrastructure; deterministic automation rules stay M8. Reassign the matched issue or split its already-defined scope with explicit links; never create another outbox issue blindly.
-- Seed indices 075/076 (action classification/approval tokens) require M1 shared authorization/approval primitives. M7 retains gateway execution/device-specific tests. Reconcile existing scope before splitting.
-- Seed index 064 (data-rights enforcement) must precede the first entitled external-data persistence; establish disabled contracts in M1, provider behaviour in the integration milestone.
+- Seed index values here are 0-based `seed_index` values, one less than the issue number. Seed index 083 = REO-SEED-084 = issue #84 (outbox) belongs to M1 infrastructure; deterministic automation rules stay M8. Reassign the matched issue or split its already-defined scope with explicit links; never create another outbox issue blindly.
+- Seed indices 075/076 = issues #76/#77 (action classification/approval tokens) require M1 shared authorization/approval primitives. M7 retains gateway execution/device-specific tests. Reconcile existing scope before splitting.
+- Seed index 064 = issue #65 (data-rights enforcement) must precede the first entitled external-data persistence; establish disabled contracts in M1, provider behaviour in the integration milestone.
 - Synthetic fixture capability is required in M1; the M10 demo dataset can remain larger pilot content. Avoid duplicate fixture issues.
 - Brokerage/core data modelling, approved retention policies and integration rights are M0 prerequisites even where feature implementations occur later.
 

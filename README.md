@@ -45,6 +45,6 @@ CRM, leads, properties, listings, service engagements, transactions, work, docum
 
 ## Delivery sequence
 
-M0 Product Definition → M1 Platform Foundation → M2 CRM/Leads → M3 Properties/Listings → M4 Transactions/Work → M5 Documents/Compliance → M6 Communications → M7 Mac Agent → M8 Automation/Ops Inbox → M9 Finance/Reporting → M10 Pilot → M11 Production.
+M0 Product Definition → M1 Platform Foundation → M2 CRM + Leads → M3 Properties + Listings → M4 Transactions + Work → M5 Documents + Compliance → M6 Communications → M7 Mac Agent Gateway → M8 Automation + Ops Inbox → M9 Finance + Reporting → M10 Pilot → M11 Production.
 
-See `/docs` and `/backlog/issues.json`.
+See `/docs`. GitHub issues are the canonical backlog; `/backlog/issues.json` is the original import seed.

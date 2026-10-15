@@ -1,6 +1,6 @@
 # Authorization contract verification — 8 October 2026
 
-Scope: review-branch @reo/auth decision contracts; partial groundwork for #97 and #75. Not authenticated middleware or completion of either issue. Existing API operational denial remains enabled.
+Scope: review-branch @reo/auth decision contracts; partial groundwork for #97 and #76. Not authenticated middleware or completion of either issue. Existing API operational denial remains enabled.
 
 ## Completed and verified locally
 

@@ -744,7 +744,7 @@
     "url": "https://github.com/camster91/real-estate-ops/issues/83",
     "status": "open",
     "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
-    "milestone": "M1 Platform Foundation"
+    "milestone": "M8 Automation + Ops Inbox"
   },
   {
     "seed_id": "REO-SEED-084",
@@ -753,7 +753,7 @@
     "url": "https://github.com/camster91/real-estate-ops/issues/84",
     "status": "open",
     "match_rationale": "Repository had no existing issues; imported seed intent with stable marker.",
-    "milestone": "M8 Automation + Ops Inbox"
+    "milestone": "M1 Platform Foundation"
   },
   {
     "seed_id": "REO-SEED-085",

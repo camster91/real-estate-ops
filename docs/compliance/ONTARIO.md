@@ -34,5 +34,8 @@ Support, where applicable:
 
 Do not expose identity documents or sensitive KYC data to AI unless required for an approved task. Prefer metadata/status over document contents.
 
+## Privacy (PIPEDA)
+Client personal information handled in commercial activity is expected to fall under PIPEDA. Consent, purpose limits, access requests, breach records and reporting need privacy-owner review before live client data is stored.
+
 ## CASL
 Marketing email/SMS functionality must track consent basis, proof/source, expiry where applicable, sender identification and unsubscribe state. Operational/transactional communications should be classified separately from marketing campaigns.

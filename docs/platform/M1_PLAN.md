@@ -1,10 +1,10 @@
 # M1 implementation and acceptance plan
 
-In progress. Tooling scaffold is in PR #116 with passing CI; this does not complete M1-A or M1. Shared authorization contracts are the next isolated slice. Operational authentication/persistence remain gated. Package/tool/provider choices require current official documentation during implementation.
+In progress. Tooling scaffold is in PR #116 with passing CI; this does not complete M1-A or M1. Shared authorization contracts are implemented in PR #117 (ADR 0009); the next slice is #96 tenant/membership persistence. Operational authentication/persistence remain gated. Package/tool/provider choices require current official documentation during implementation.
 
 | Slice | Concrete deliverable | Verification |
 |---|---|---|
-| M1-A tooling | Four expected apps, shared packages, strict TS, pinned pnpm/runtime, Turborepo, lockfile, local compose environment and validated env examples | Clean-install typecheck/build and reproducible local startup; no secrets |
+| M1-A tooling | Four expected apps, shared packages, strict TS, pinned pnpm/runtime, Turborepo, lockfile, local compose environment (not yet added) and validated env examples | Clean-install typecheck/build and reproducible local startup; no secrets |
 | M1-B persistence | Tenant/membership foundation, migration runner, runtime RLS roles, synthetic fixtures, optimistic concurrency | PostgreSQL integration tests with non-owner role; cross-tenant FK and RLS denial; migration from clean/previous schema |
 | M1-C auth | Verified Google/Microsoft OIDC issuer/audience/signature/expiry, secure sessions, approved memberships, RBAC/ABAC | Forged/expired/revoked identity, inactive membership and scope-escalation tests; CSRF/state/nonce/PKCE where applicable |
 | M1-D durable work | Audit + transactional outbox + queue contracts, consumer dedupe, lease/retry/dead-letter, approval primitives | Rollback leaves no partial mutation/event; duplicate/concurrent delivery yields one internal effect; stale/reused/self-approved actions denied |
@@ -19,7 +19,7 @@ Repository/seed reconciled; tenant/legal brokerage distinction recorded; Party/p
 Authenticate a synthetic member and read a tenant-scoped assigned work summary through web → API → PostgreSQL. Unauthorized membership/cross-tenant requests return safe errors; responsive UI has empty/loading/error states and keyboard navigation. A reversible internal synthetic task creation adds mutation, audit and outbox atomically. No live integrations, financial actions, regulatory submission or external sends. Add a reviewed approval fixture to prove bypass attempts fail without enabling external execution.
 
 ## QA evidence per PR
-Issue-linked acceptance criteria; unit/integration/E2E output and exact commit; mobile 390px, tablet 768px, desktop 1440px representative QA; keyboard/focus semantics and accessible labels/contrast; error/empty/loading/stale-edit states; tenant/authorization and audit verification; schema/migration/forward-repair implications; logs/traces; dependency/security result; screenshot evidence where useful. Viewport values are proposed QA targets, not tests already run.
+Issue-linked acceptance criteria; unit/integration/E2E output and exact commit; mobile 390px, tablet 768px, desktop 1440px representative QA; keyboard/focus semantics and accessible labels/contrast; error/empty/loading/stale-edit states; tenant/authorization and audit verification; schema/migration/forward-repair implications; logs/traces; dependency/security result; screenshot evidence where useful. The scaffold page runs Playwright checks at these three viewports; feature pages still need their own.
 
 ## Delivery and rollback
 Small reviewable branches/commits and PRs against reconciled issues. No merge to main or production deployment without explicit human approval. Expand/contract migrations maintain compatibility; destructive contraction requires verified backup and explicit approval. Infrastructure restore, OAuth revocation, paused outbox/jobs, gateway revocation and provider reconciliation must be documented. Application rollback alone cannot reverse a sent message or signature package.

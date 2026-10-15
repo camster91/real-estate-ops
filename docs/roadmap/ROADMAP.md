@@ -4,7 +4,7 @@
 Workflows, service taxonomy, roles, permissions, data model, integrations, compliance matrix, UX map.
 
 ## M1 — Platform Foundation
-Monorepo, CI, environments, auth, tenancy, RBAC, database, audit, storage, observability.
+Monorepo, CI, environments, auth, tenancy, RBAC, database, audit, transactional outbox, shared action-level/approval primitives, storage, observability.
 
 ## M2 — CRM + Leads
 Parties, relationships, contact timeline, leads, assignment, qualification, consent, funnel.
@@ -25,7 +25,7 @@ Gmail/M365 and calendar integration, conversation association, drafts, notificat
 Device registration, heartbeat, job execution, Hermes/Codex adapters, approvals, logs, offline handling.
 
 ## M8 — Automation + Ops Inbox
-Domain events, deterministic rules, risk/exception inbox, AI summaries/recommendations.
+Domain event consumers on the M1 outbox, deterministic rules, risk/exception inbox, AI summaries/recommendations.
 
 ## M9 — Finance + Reporting
 Commission model, referral fees, operational finance references, owner/manager/agent/BOR dashboards.
