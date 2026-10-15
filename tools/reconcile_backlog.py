@@ -5,6 +5,10 @@ import re
 from pathlib import Path
 
 
+def _has_text(value):
+    return isinstance(value, str) and bool(value.strip())
+
+
 def build_plan(seed, issues, decisions):
     numbers = [x['number'] for x in issues]
     if len(set(numbers)) != len(numbers):
@@ -22,7 +26,7 @@ def build_plan(seed, issues, decisions):
             matched.setdefault(decision.get('issue_number'), []).append(key)
     for number, keys in matched.items():
         for key in keys:
-            if len(keys) > 1 and not str(decisions[key].get('shared_scope_rationale', '')).strip():
+            if len(keys) > 1 and not _has_text(decisions[key].get('shared_scope_rationale')):
                 raise ValueError(f'{key}: issue #{number} also matched by other seeds; shared_scope_rationale required')
     plan = []
     for item in seed:
@@ -42,7 +46,7 @@ def build_plan(seed, issues, decisions):
         decision = decisions.get(key)
         result = {'seed_id': key, 'title': item['title'], 'candidates': candidates, 'action': 'review_required'}
         if decision:
-            if decision.get('intent_reviewed') is not True or not str(decision.get('rationale', '')).strip():
+            if decision.get('intent_reviewed') is not True or not _has_text(decision.get('rationale')):
                 raise ValueError(f'{key}: intent review and rationale required')
             action = decision.get('action')
             if action == 'match':

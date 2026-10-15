@@ -42,5 +42,14 @@ class ReconciliationTests(unittest.TestCase):
         with self.assertRaises(ValueError): build_plan(seed, issues, d)
         for v in d.values(): v['shared_scope_rationale'] = 'One issue covers isolation and its audit'
         self.assertTrue(build_plan(seed, issues, d)['ready_for_manual_import_review'])
+    def test_non_string_rationales_rejected(self):
+        for bad in (None, False, {}, [], 0):
+            d = {'REO-SEED-001': {'action': 'defer', 'intent_reviewed': True, 'rationale': bad}}
+            with self.assertRaises(ValueError): build_plan(self.seed, [], d)
+        seed = self.seed + [{'seed_id': 'REO-SEED-002', 'title': 'Audit tenant access'}]
+        issues = [{'number': 3, 'title': 'Tenant security', 'state': 'open'}]
+        for bad in (None, False, {}, []):
+            d = {k: {'action': 'match', 'issue_number': 3, 'intent_reviewed': True, 'rationale': 'Same', 'shared_scope_rationale': bad} for k in ('REO-SEED-001', 'REO-SEED-002')}
+            with self.assertRaises(ValueError): build_plan(seed, issues, d)
 
 if __name__ == '__main__': unittest.main()
