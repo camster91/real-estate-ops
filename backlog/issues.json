@@ -1,0 +1,1451 @@
+[
+  {
+    "epic": "EPIC 01",
+    "milestone": "M0",
+    "priority": "P0",
+    "title": "EPIC 01: Define service taxonomy and product boundaries",
+    "labels": [
+      "epic",
+      "p0",
+      "m0"
+    ],
+    "body": "Parent epic for define service taxonomy and product boundaries. Track child implementation issues here.\n\n**Done when:** the scoped capability has approved requirements, implementation, permission/audit handling, tests and operational documentation."
+  },
+  {
+    "epic": "EPIC 02",
+    "milestone": "M0",
+    "priority": "P0",
+    "title": "EPIC 02: Define roles, teams and permissions model",
+    "labels": [
+      "epic",
+      "p0",
+      "m0"
+    ],
+    "body": "Parent epic for define roles, teams and permissions model. Track child implementation issues here.\n\n**Done when:** the scoped capability has approved requirements, implementation, permission/audit handling, tests and operational documentation."
+  },
+  {
+    "epic": "EPIC 03",
+    "milestone": "M2",
+    "priority": "P0",
+    "title": "EPIC 03: Build CRM and party relationship model",
+    "labels": [
+      "epic",
+      "p0",
+      "m2"
+    ],
+    "body": "Parent epic for build crm and party relationship model. Track child implementation issues here.\n\n**Done when:** the scoped capability has approved requirements, implementation, permission/audit handling, tests and operational documentation."
+  },
+  {
+    "epic": "EPIC 04",
+    "milestone": "M2",
+    "priority": "P0",
+    "title": "EPIC 04: Build lead intake, qualification and routing",
+    "labels": [
+      "epic",
+      "p0",
+      "m2"
+    ],
+    "body": "Parent epic for build lead intake, qualification and routing. Track child implementation issues here.\n\n**Done when:** the scoped capability has approved requirements, implementation, permission/audit handling, tests and operational documentation."
+  },
+  {
+    "epic": "EPIC 05",
+    "milestone": "M3",
+    "priority": "P0",
+    "title": "EPIC 05: Build property, unit, ownership and listing model",
+    "labels": [
+      "epic",
+      "p0",
+      "m3"
+    ],
+    "body": "Parent epic for build property, unit, ownership and listing model. Track child implementation issues here.\n\n**Done when:** the scoped capability has approved requirements, implementation, permission/audit handling, tests and operational documentation."
+  },
+  {
+    "epic": "EPIC 06",
+    "milestone": "M4",
+    "priority": "P0",
+    "title": "EPIC 06: Build transaction and service-engagement engine",
+    "labels": [
+      "epic",
+      "p0",
+      "m4"
+    ],
+    "body": "Parent epic for build transaction and service-engagement engine. Track child implementation issues here.\n\n**Done when:** the scoped capability has approved requirements, implementation, permission/audit handling, tests and operational documentation."
+  },
+  {
+    "epic": "EPIC 07",
+    "milestone": "M4",
+    "priority": "P0",
+    "title": "EPIC 07: Build workflow, task, dependency and approval engine",
+    "labels": [
+      "epic",
+      "p0",
+      "m4"
+    ],
+    "body": "Parent epic for build workflow, task, dependency and approval engine. Track child implementation issues here.\n\n**Done when:** the scoped capability has approved requirements, implementation, permission/audit handling, tests and operational documentation."
+  },
+  {
+    "epic": "EPIC 08",
+    "milestone": "M5",
+    "priority": "P0",
+    "title": "EPIC 08: Build document requirements and signature lifecycle",
+    "labels": [
+      "epic",
+      "p0",
+      "m5"
+    ],
+    "body": "Parent epic for build document requirements and signature lifecycle. Track child implementation issues here.\n\n**Done when:** the scoped capability has approved requirements, implementation, permission/audit handling, tests and operational documentation."
+  },
+  {
+    "epic": "EPIC 09",
+    "milestone": "M5",
+    "priority": "P0",
+    "title": "EPIC 09: Build Ontario compliance centre",
+    "labels": [
+      "epic",
+      "p0",
+      "m5"
+    ],
+    "body": "Parent epic for build ontario compliance centre. Track child implementation issues here.\n\n**Done when:** the scoped capability has approved requirements, implementation, permission/audit handling, tests and operational documentation."
+  },
+  {
+    "epic": "EPIC 10",
+    "milestone": "M5",
+    "priority": "P0",
+    "title": "EPIC 10: Research and integrate Toronto/Ontario real-estate systems",
+    "labels": [
+      "epic",
+      "p0",
+      "m5"
+    ],
+    "body": "Parent epic for research and integrate toronto/ontario real-estate systems. Track child implementation issues here.\n\n**Done when:** the scoped capability has approved requirements, implementation, permission/audit handling, tests and operational documentation."
+  },
+  {
+    "epic": "EPIC 11",
+    "milestone": "M6",
+    "priority": "P1",
+    "title": "EPIC 11: Build communication and calendar layer",
+    "labels": [
+      "epic",
+      "p1",
+      "m6"
+    ],
+    "body": "Parent epic for build communication and calendar layer. Track child implementation issues here.\n\n**Done when:** the scoped capability has approved requirements, implementation, permission/audit handling, tests and operational documentation."
+  },
+  {
+    "epic": "EPIC 12",
+    "milestone": "M7",
+    "priority": "P0",
+    "title": "EPIC 12: Build secure Mac agent gateway",
+    "labels": [
+      "epic",
+      "p0",
+      "m7"
+    ],
+    "body": "Parent epic for build secure mac agent gateway. Track child implementation issues here.\n\n**Done when:** the scoped capability has approved requirements, implementation, permission/audit handling, tests and operational documentation."
+  },
+  {
+    "epic": "EPIC 13",
+    "milestone": "M7",
+    "priority": "P0",
+    "title": "EPIC 13: Build AI capability, approval and audit controls",
+    "labels": [
+      "epic",
+      "p0",
+      "m7"
+    ],
+    "body": "Parent epic for build ai capability, approval and audit controls. Track child implementation issues here.\n\n**Done when:** the scoped capability has approved requirements, implementation, permission/audit handling, tests and operational documentation."
+  },
+  {
+    "epic": "EPIC 14",
+    "milestone": "M8",
+    "priority": "P1",
+    "title": "EPIC 14: Build Operations Inbox",
+    "labels": [
+      "epic",
+      "p1",
+      "m8"
+    ],
+    "body": "Parent epic for build operations inbox. Track child implementation issues here.\n\n**Done when:** the scoped capability has approved requirements, implementation, permission/audit handling, tests and operational documentation."
+  },
+  {
+    "epic": "EPIC 15",
+    "milestone": "M8",
+    "priority": "P1",
+    "title": "EPIC 15: Build deterministic automation/event engine",
+    "labels": [
+      "epic",
+      "p1",
+      "m8"
+    ],
+    "body": "Parent epic for build deterministic automation/event engine. Track child implementation issues here.\n\n**Done when:** the scoped capability has approved requirements, implementation, permission/audit handling, tests and operational documentation."
+  },
+  {
+    "epic": "EPIC 16",
+    "milestone": "M9",
+    "priority": "P1",
+    "title": "EPIC 16: Build commission and operational finance module",
+    "labels": [
+      "epic",
+      "p1",
+      "m9"
+    ],
+    "body": "Parent epic for build commission and operational finance module. Track child implementation issues here.\n\n**Done when:** the scoped capability has approved requirements, implementation, permission/audit handling, tests and operational documentation."
+  },
+  {
+    "epic": "EPIC 17",
+    "milestone": "M9",
+    "priority": "P1",
+    "title": "EPIC 17: Build role-specific reporting",
+    "labels": [
+      "epic",
+      "p1",
+      "m9"
+    ],
+    "body": "Parent epic for build role-specific reporting. Track child implementation issues here.\n\n**Done when:** the scoped capability has approved requirements, implementation, permission/audit handling, tests and operational documentation."
+  },
+  {
+    "epic": "EPIC 18",
+    "milestone": "M1",
+    "priority": "P0",
+    "title": "EPIC 18: Platform security, privacy and audit foundation",
+    "labels": [
+      "epic",
+      "p0",
+      "m1"
+    ],
+    "body": "Parent epic for platform security, privacy and audit foundation. Track child implementation issues here.\n\n**Done when:** the scoped capability has approved requirements, implementation, permission/audit handling, tests and operational documentation."
+  },
+  {
+    "epic": "EPIC 19",
+    "milestone": "M0",
+    "priority": "P0",
+    "title": "EPIC 19: Create Figma design system and core UX",
+    "labels": [
+      "epic",
+      "p0",
+      "m0"
+    ],
+    "body": "Parent epic for create figma design system and core ux. Track child implementation issues here.\n\n**Done when:** the scoped capability has approved requirements, implementation, permission/audit handling, tests and operational documentation."
+  },
+  {
+    "epic": "EPIC 20",
+    "milestone": "M10",
+    "priority": "P0",
+    "title": "EPIC 20: Pilot, migration, QA and production readiness",
+    "labels": [
+      "epic",
+      "p0",
+      "m10"
+    ],
+    "body": "Parent epic for pilot, migration, qa and production readiness. Track child implementation issues here.\n\n**Done when:** the scoped capability has approved requirements, implementation, permission/audit handling, tests and operational documentation."
+  },
+  {
+    "epic": "EPIC 01",
+    "milestone": "M0",
+    "priority": "P0",
+    "title": "Map buyer, seller, lease, commercial, referral and property-management workflows",
+    "labels": [
+      "feature",
+      "p0",
+      "m0",
+      "epic-01"
+    ],
+    "body": "Child of **EPIC 01**.\n\n### Goal\nMap buyer, seller, lease, commercial, referral and property-management workflows.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 01",
+    "milestone": "M0",
+    "priority": "P0",
+    "title": "Define service types, engagement lifecycle and terminology glossary",
+    "labels": [
+      "feature",
+      "p0",
+      "m0",
+      "epic-01"
+    ],
+    "body": "Child of **EPIC 01**.\n\n### Goal\nDefine service types, engagement lifecycle and terminology glossary.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 01",
+    "milestone": "M0",
+    "priority": "P1",
+    "title": "Define external partner and vendor operating model",
+    "labels": [
+      "feature",
+      "p1",
+      "m0",
+      "epic-01"
+    ],
+    "body": "Child of **EPIC 01**.\n\n### Goal\nDefine external partner and vendor operating model.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 02",
+    "milestone": "M0",
+    "priority": "P0",
+    "title": "Define authorization matrix for owner, BOR, manager, agent, operations, finance, partner and client",
+    "labels": [
+      "feature",
+      "p0",
+      "m0",
+      "epic-02"
+    ],
+    "body": "Child of **EPIC 02**.\n\n### Goal\nDefine authorization matrix for owner, BOR, manager, agent, operations, finance, partner and client.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 02",
+    "milestone": "M0",
+    "priority": "P0",
+    "title": "Define record-level access and team/branch boundaries",
+    "labels": [
+      "feature",
+      "p0",
+      "m0",
+      "epic-02"
+    ],
+    "body": "Child of **EPIC 02**.\n\n### Goal\nDefine record-level access and team/branch boundaries.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 02",
+    "milestone": "M0",
+    "priority": "P1",
+    "title": "Define service-account and system-agent identities",
+    "labels": [
+      "feature",
+      "p1",
+      "m0",
+      "epic-02"
+    ],
+    "body": "Child of **EPIC 02**.\n\n### Goal\nDefine service-account and system-agent identities.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 03",
+    "milestone": "M2",
+    "priority": "P0",
+    "title": "Implement Party model for people and organizations",
+    "labels": [
+      "feature",
+      "p0",
+      "m2",
+      "epic-03"
+    ],
+    "body": "Child of **EPIC 03**.\n\n### Goal\nImplement Party model for people and organizations.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 03",
+    "milestone": "M2",
+    "priority": "P0",
+    "title": "Implement relationship, household and contact-point models",
+    "labels": [
+      "feature",
+      "p0",
+      "m2",
+      "epic-03"
+    ],
+    "body": "Child of **EPIC 03**.\n\n### Goal\nImplement relationship, household and contact-point models.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 03",
+    "milestone": "M2",
+    "priority": "P1",
+    "title": "Implement CRM activity timeline, notes and tags",
+    "labels": [
+      "feature",
+      "p1",
+      "m2",
+      "epic-03"
+    ],
+    "body": "Child of **EPIC 03**.\n\n### Goal\nImplement CRM activity timeline, notes and tags.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 03",
+    "milestone": "M2",
+    "priority": "P1",
+    "title": "Implement consent records and contact preferences",
+    "labels": [
+      "feature",
+      "p1",
+      "m2",
+      "epic-03"
+    ],
+    "body": "Child of **EPIC 03**.\n\n### Goal\nImplement consent records and contact preferences.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 04",
+    "milestone": "M2",
+    "priority": "P0",
+    "title": "Implement lead capture API and source attribution",
+    "labels": [
+      "feature",
+      "p0",
+      "m2",
+      "epic-04"
+    ],
+    "body": "Child of **EPIC 04**.\n\n### Goal\nImplement lead capture API and source attribution.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 04",
+    "milestone": "M2",
+    "priority": "P0",
+    "title": "Implement assignment rules and manual reassignment",
+    "labels": [
+      "feature",
+      "p0",
+      "m2",
+      "epic-04"
+    ],
+    "body": "Child of **EPIC 04**.\n\n### Goal\nImplement assignment rules and manual reassignment.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 04",
+    "milestone": "M2",
+    "priority": "P1",
+    "title": "Implement response SLA timers and escalation",
+    "labels": [
+      "feature",
+      "p1",
+      "m2",
+      "epic-04"
+    ],
+    "body": "Child of **EPIC 04**.\n\n### Goal\nImplement response SLA timers and escalation.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 04",
+    "milestone": "M2",
+    "priority": "P1",
+    "title": "Implement qualification, conversion and lost-reason flow",
+    "labels": [
+      "feature",
+      "p1",
+      "m2",
+      "epic-04"
+    ],
+    "body": "Child of **EPIC 04**.\n\n### Goal\nImplement qualification, conversion and lost-reason flow.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 05",
+    "milestone": "M3",
+    "priority": "P0",
+    "title": "Implement canonical Canadian property address model",
+    "labels": [
+      "feature",
+      "p0",
+      "m3",
+      "epic-05"
+    ],
+    "body": "Child of **EPIC 05**.\n\n### Goal\nImplement canonical Canadian property address model.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 05",
+    "milestone": "M3",
+    "priority": "P0",
+    "title": "Implement property/unit/ownership separation",
+    "labels": [
+      "feature",
+      "p0",
+      "m3",
+      "epic-05"
+    ],
+    "body": "Child of **EPIC 05**.\n\n### Goal\nImplement property/unit/ownership separation.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 05",
+    "milestone": "M3",
+    "priority": "P0",
+    "title": "Implement listing lifecycle and external identifiers",
+    "labels": [
+      "feature",
+      "p0",
+      "m3",
+      "epic-05"
+    ],
+    "body": "Child of **EPIC 05**.\n\n### Goal\nImplement listing lifecycle and external identifiers.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 05",
+    "milestone": "M3",
+    "priority": "P1",
+    "title": "Implement property timeline, notes, images and service history",
+    "labels": [
+      "feature",
+      "p1",
+      "m3",
+      "epic-05"
+    ],
+    "body": "Child of **EPIC 05**.\n\n### Goal\nImplement property timeline, notes, images and service history.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 06",
+    "milestone": "M4",
+    "priority": "P0",
+    "title": "Implement transaction entity and transaction-party roles",
+    "labels": [
+      "feature",
+      "p0",
+      "m4",
+      "epic-06"
+    ],
+    "body": "Child of **EPIC 06**.\n\n### Goal\nImplement transaction entity and transaction-party roles.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 06",
+    "milestone": "M4",
+    "priority": "P0",
+    "title": "Implement buyer and seller transaction templates",
+    "labels": [
+      "feature",
+      "p0",
+      "m4",
+      "epic-06"
+    ],
+    "body": "Child of **EPIC 06**.\n\n### Goal\nImplement buyer and seller transaction templates.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 06",
+    "milestone": "M4",
+    "priority": "P1",
+    "title": "Implement lease, referral, commercial and property-management templates",
+    "labels": [
+      "feature",
+      "p1",
+      "m4",
+      "epic-06"
+    ],
+    "body": "Child of **EPIC 06**.\n\n### Goal\nImplement lease, referral, commercial and property-management templates.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 06",
+    "milestone": "M4",
+    "priority": "P0",
+    "title": "Implement stage transitions, closing/completion dates and readiness state",
+    "labels": [
+      "feature",
+      "p0",
+      "m4",
+      "epic-06"
+    ],
+    "body": "Child of **EPIC 06**.\n\n### Goal\nImplement stage transitions, closing/completion dates and readiness state.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 07",
+    "milestone": "M4",
+    "priority": "P0",
+    "title": "Implement workflow templates and instances",
+    "labels": [
+      "feature",
+      "p0",
+      "m4",
+      "epic-07"
+    ],
+    "body": "Child of **EPIC 07**.\n\n### Goal\nImplement workflow templates and instances.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 07",
+    "milestone": "M4",
+    "priority": "P0",
+    "title": "Implement tasks, dependencies, checklists and waiting/blocked states",
+    "labels": [
+      "feature",
+      "p0",
+      "m4",
+      "epic-07"
+    ],
+    "body": "Child of **EPIC 07**.\n\n### Goal\nImplement tasks, dependencies, checklists and waiting/blocked states.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 07",
+    "milestone": "M4",
+    "priority": "P0",
+    "title": "Implement human approval requests and evidence",
+    "labels": [
+      "feature",
+      "p0",
+      "m4",
+      "epic-07"
+    ],
+    "body": "Child of **EPIC 07**.\n\n### Goal\nImplement human approval requests and evidence.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 07",
+    "milestone": "M4",
+    "priority": "P1",
+    "title": "Implement recurring work and deadline recalculation",
+    "labels": [
+      "feature",
+      "p1",
+      "m4",
+      "epic-07"
+    ],
+    "body": "Child of **EPIC 07**.\n\n### Goal\nImplement recurring work and deadline recalculation.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 08",
+    "milestone": "M5",
+    "priority": "P0",
+    "title": "Implement document metadata, versions and requirement states",
+    "labels": [
+      "feature",
+      "p0",
+      "m5",
+      "epic-08"
+    ],
+    "body": "Child of **EPIC 08**.\n\n### Goal\nImplement document metadata, versions and requirement states.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 08",
+    "milestone": "M5",
+    "priority": "P0",
+    "title": "Implement retention and sensitive-document classification",
+    "labels": [
+      "feature",
+      "p0",
+      "m5",
+      "epic-08"
+    ],
+    "body": "Child of **EPIC 08**.\n\n### Goal\nImplement retention and sensitive-document classification.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 08",
+    "milestone": "M5",
+    "priority": "P0",
+    "title": "SPIKE: obtain SkySlope partner access and map OAuth scopes",
+    "labels": [
+      "feature",
+      "p0",
+      "m5",
+      "epic-08"
+    ],
+    "body": "Child of **EPIC 08**.\n\n### Goal\nSPIKE: obtain SkySlope partner access and map OAuth scopes.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 08",
+    "milestone": "M5",
+    "priority": "P1",
+    "title": "Implement SkySlope file/envelope/signed-document sync",
+    "labels": [
+      "feature",
+      "p1",
+      "m5",
+      "epic-08"
+    ],
+    "body": "Child of **EPIC 08**.\n\n### Goal\nImplement SkySlope file/envelope/signed-document sync.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 08",
+    "milestone": "M5",
+    "priority": "P1",
+    "title": "Implement signed-document webhook ingestion with replay protection",
+    "labels": [
+      "feature",
+      "p1",
+      "m5",
+      "epic-08"
+    ],
+    "body": "Child of **EPIC 08**.\n\n### Goal\nImplement signed-document webhook ingestion with replay protection.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 09",
+    "milestone": "M5",
+    "priority": "P0",
+    "title": "Implement trade record sheet workflow and completeness checks",
+    "labels": [
+      "feature",
+      "p0",
+      "m5",
+      "epic-09"
+    ],
+    "body": "Child of **EPIC 09**.\n\n### Goal\nImplement trade record sheet workflow and completeness checks.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 09",
+    "milestone": "M5",
+    "priority": "P0",
+    "title": "Implement monthly trust reconciliation workflow and BOR sign-off evidence",
+    "labels": [
+      "feature",
+      "p0",
+      "m5",
+      "epic-09"
+    ],
+    "body": "Child of **EPIC 09**.\n\n### Goal\nImplement monthly trust reconciliation workflow and BOR sign-off evidence.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 09",
+    "milestone": "M5",
+    "priority": "P0",
+    "title": "Implement RECO annual financial filing preparation workspace",
+    "labels": [
+      "feature",
+      "p0",
+      "m5",
+      "epic-09"
+    ],
+    "body": "Child of **EPIC 09**.\n\n### Goal\nImplement RECO annual financial filing preparation workspace.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 09",
+    "milestone": "M5",
+    "priority": "P0",
+    "title": "Implement FINTRAC identity/information-record status and evidence references",
+    "labels": [
+      "feature",
+      "p0",
+      "m5",
+      "epic-09"
+    ],
+    "body": "Child of **EPIC 09**.\n\n### Goal\nImplement FINTRAC identity/information-record status and evidence references.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 09",
+    "milestone": "M5",
+    "priority": "P0",
+    "title": "Implement receipt-of-funds and third-party determination records",
+    "labels": [
+      "feature",
+      "p0",
+      "m5",
+      "epic-09"
+    ],
+    "body": "Child of **EPIC 09**.\n\n### Goal\nImplement receipt-of-funds and third-party determination records.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 09",
+    "milestone": "M5",
+    "priority": "P1",
+    "title": "Implement beneficial-ownership, risk-assessment and ongoing-monitoring records",
+    "labels": [
+      "feature",
+      "p1",
+      "m5",
+      "epic-09"
+    ],
+    "body": "Child of **EPIC 09**.\n\n### Goal\nImplement beneficial-ownership, risk-assessment and ongoing-monitoring records.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 09",
+    "milestone": "M5",
+    "priority": "P0",
+    "title": "Implement compliance retention/export and inspection-ready package",
+    "labels": [
+      "feature",
+      "p0",
+      "m5",
+      "epic-09"
+    ],
+    "body": "Child of **EPIC 09**.\n\n### Goal\nImplement compliance retention/export and inspection-ready package.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 10",
+    "milestone": "M5",
+    "priority": "P0",
+    "title": "SPIKE: confirm brokerage TRREB/PropTx data entitlements and permitted internal uses",
+    "labels": [
+      "feature",
+      "p0",
+      "m5",
+      "epic-10"
+    ],
+    "body": "Child of **EPIC 10**.\n\n### Goal\nSPIKE: confirm brokerage TRREB/PropTx data entitlements and permitted internal uses.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 10",
+    "milestone": "M5",
+    "priority": "P0",
+    "title": "SPIKE: configure CREA DDF test feed and map RESO resources",
+    "labels": [
+      "feature",
+      "p0",
+      "m5",
+      "epic-10"
+    ],
+    "body": "Child of **EPIC 10**.\n\n### Goal\nSPIKE: configure CREA DDF test feed and map RESO resources.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 10",
+    "milestone": "M5",
+    "priority": "P1",
+    "title": "SPIKE: BrokerBay integration capabilities and contractual access",
+    "labels": [
+      "feature",
+      "p1",
+      "m5",
+      "epic-10"
+    ],
+    "body": "Child of **EPIC 10**.\n\n### Goal\nSPIKE: BrokerBay integration capabilities and contractual access.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 10",
+    "milestone": "M5",
+    "priority": "P1",
+    "title": "SPIKE: REALM/Matrix integration capabilities",
+    "labels": [
+      "feature",
+      "p1",
+      "m5",
+      "epic-10"
+    ],
+    "body": "Child of **EPIC 10**.\n\n### Goal\nSPIKE: REALM/Matrix integration capabilities.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 10",
+    "milestone": "M5",
+    "priority": "P1",
+    "title": "SPIKE: GeoWarehouse integration options",
+    "labels": [
+      "feature",
+      "p1",
+      "m5",
+      "epic-10"
+    ],
+    "body": "Child of **EPIC 10**.\n\n### Goal\nSPIKE: GeoWarehouse integration options.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 10",
+    "milestone": "M5",
+    "priority": "P1",
+    "title": "SPIKE: MPAC propertyline integration options",
+    "labels": [
+      "feature",
+      "p1",
+      "m5",
+      "epic-10"
+    ],
+    "body": "Child of **EPIC 10**.\n\n### Goal\nSPIKE: MPAC propertyline integration options.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 10",
+    "milestone": "M5",
+    "priority": "P1",
+    "title": "Create external-data rights registry and usage enforcement rules",
+    "labels": [
+      "feature",
+      "p1",
+      "m5",
+      "epic-10"
+    ],
+    "body": "Child of **EPIC 10**.\n\n### Goal\nCreate external-data rights registry and usage enforcement rules.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 11",
+    "milestone": "M6",
+    "priority": "P0",
+    "title": "Implement Gmail/Microsoft conversation association without copying unnecessary bodies",
+    "labels": [
+      "feature",
+      "p0",
+      "m6",
+      "epic-11"
+    ],
+    "body": "Child of **EPIC 11**.\n\n### Goal\nImplement Gmail/Microsoft conversation association without copying unnecessary bodies.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 11",
+    "milestone": "M6",
+    "priority": "P1",
+    "title": "Implement approved email drafting and send-approval flow",
+    "labels": [
+      "feature",
+      "p1",
+      "m6",
+      "epic-11"
+    ],
+    "body": "Child of **EPIC 11**.\n\n### Goal\nImplement approved email drafting and send-approval flow.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 11",
+    "milestone": "M6",
+    "priority": "P0",
+    "title": "Implement calendar event sync and transaction association",
+    "labels": [
+      "feature",
+      "p0",
+      "m6",
+      "epic-11"
+    ],
+    "body": "Child of **EPIC 11**.\n\n### Goal\nImplement calendar event sync and transaction association.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 11",
+    "milestone": "M6",
+    "priority": "P1",
+    "title": "Implement notification preferences and in-app notifications",
+    "labels": [
+      "feature",
+      "p1",
+      "m6",
+      "epic-11"
+    ],
+    "body": "Child of **EPIC 11**.\n\n### Goal\nImplement notification preferences and in-app notifications.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 12",
+    "milestone": "M7",
+    "priority": "P0",
+    "title": "Implement Mac device registration, revocation and heartbeat",
+    "labels": [
+      "feature",
+      "p0",
+      "m7",
+      "epic-12"
+    ],
+    "body": "Child of **EPIC 12**.\n\n### Goal\nImplement Mac device registration, revocation and heartbeat.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 12",
+    "milestone": "M7",
+    "priority": "P0",
+    "title": "Implement outbound job polling/channel with short-lived credentials",
+    "labels": [
+      "feature",
+      "p0",
+      "m7",
+      "epic-12"
+    ],
+    "body": "Child of **EPIC 12**.\n\n### Goal\nImplement outbound job polling/channel with short-lived credentials.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 12",
+    "milestone": "M7",
+    "priority": "P0",
+    "title": "Implement gateway capability allowlist and filesystem sandbox",
+    "labels": [
+      "feature",
+      "p0",
+      "m7",
+      "epic-12"
+    ],
+    "body": "Child of **EPIC 12**.\n\n### Goal\nImplement gateway capability allowlist and filesystem sandbox.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 12",
+    "milestone": "M7",
+    "priority": "P0",
+    "title": "Integrate Hermes as supervised operations runtime",
+    "labels": [
+      "feature",
+      "p0",
+      "m7",
+      "epic-12"
+    ],
+    "body": "Child of **EPIC 12**.\n\n### Goal\nIntegrate Hermes as supervised operations runtime.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 12",
+    "milestone": "M7",
+    "priority": "P1",
+    "title": "Integrate Codex as bounded specialist tool",
+    "labels": [
+      "feature",
+      "p1",
+      "m7",
+      "epic-12"
+    ],
+    "body": "Child of **EPIC 12**.\n\n### Goal\nIntegrate Codex as bounded specialist tool.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 12",
+    "milestone": "M7",
+    "priority": "P1",
+    "title": "Implement offline/stale-job safety and diagnostics",
+    "labels": [
+      "feature",
+      "p1",
+      "m7",
+      "epic-12"
+    ],
+    "body": "Child of **EPIC 12**.\n\n### Goal\nImplement offline/stale-job safety and diagnostics.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 13",
+    "milestone": "M7",
+    "priority": "P0",
+    "title": "Implement L0-L4 action classification and policy engine",
+    "labels": [
+      "feature",
+      "p0",
+      "m7",
+      "epic-13"
+    ],
+    "body": "Child of **EPIC 13**.\n\n### Goal\nImplement L0-L4 action classification and policy engine.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 13",
+    "milestone": "M7",
+    "priority": "P0",
+    "title": "Implement approval-token flow for consequential actions",
+    "labels": [
+      "feature",
+      "p0",
+      "m7",
+      "epic-13"
+    ],
+    "body": "Child of **EPIC 13**.\n\n### Goal\nImplement approval-token flow for consequential actions.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 13",
+    "milestone": "M7",
+    "priority": "P0",
+    "title": "Implement AI context minimizer/redaction pipeline",
+    "labels": [
+      "feature",
+      "p0",
+      "m7",
+      "epic-13"
+    ],
+    "body": "Child of **EPIC 13**.\n\n### Goal\nImplement AI context minimizer/redaction pipeline.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 13",
+    "milestone": "M7",
+    "priority": "P0",
+    "title": "Implement model/provider policy by data classification",
+    "labels": [
+      "feature",
+      "p0",
+      "m7",
+      "epic-13"
+    ],
+    "body": "Child of **EPIC 13**.\n\n### Goal\nImplement model/provider policy by data classification.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 13",
+    "milestone": "M7",
+    "priority": "P0",
+    "title": "Implement immutable agent job/action audit trail",
+    "labels": [
+      "feature",
+      "p0",
+      "m7",
+      "epic-13"
+    ],
+    "body": "Child of **EPIC 13**.\n\n### Goal\nImplement immutable agent job/action audit trail.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 14",
+    "milestone": "M8",
+    "priority": "P1",
+    "title": "Implement Operations Inbox exception model and prioritization",
+    "labels": [
+      "feature",
+      "p1",
+      "m8",
+      "epic-14"
+    ],
+    "body": "Child of **EPIC 14**.\n\n### Goal\nImplement Operations Inbox exception model and prioritization.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 14",
+    "milestone": "M8",
+    "priority": "P1",
+    "title": "Implement closing-risk, missing-document, untouched-lead and compliance alerts",
+    "labels": [
+      "feature",
+      "p1",
+      "m8",
+      "epic-14"
+    ],
+    "body": "Child of **EPIC 14**.\n\n### Goal\nImplement closing-risk, missing-document, untouched-lead and compliance alerts.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 14",
+    "milestone": "M8",
+    "priority": "P1",
+    "title": "Implement role-specific inbox filtering and resolution workflow",
+    "labels": [
+      "feature",
+      "p1",
+      "m8",
+      "epic-14"
+    ],
+    "body": "Child of **EPIC 14**.\n\n### Goal\nImplement role-specific inbox filtering and resolution workflow.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 15",
+    "milestone": "M8",
+    "priority": "P0",
+    "title": "Implement domain event outbox and event consumers",
+    "labels": [
+      "feature",
+      "p0",
+      "m8",
+      "epic-15"
+    ],
+    "body": "Child of **EPIC 15**.\n\n### Goal\nImplement domain event outbox and event consumers.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 15",
+    "milestone": "M8",
+    "priority": "P0",
+    "title": "Implement deterministic trigger-condition-action rules",
+    "labels": [
+      "feature",
+      "p0",
+      "m8",
+      "epic-15"
+    ],
+    "body": "Child of **EPIC 15**.\n\n### Goal\nImplement deterministic trigger-condition-action rules.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 15",
+    "milestone": "M8",
+    "priority": "P1",
+    "title": "Implement idempotent external action executor and retries",
+    "labels": [
+      "feature",
+      "p1",
+      "m8",
+      "epic-15"
+    ],
+    "body": "Child of **EPIC 15**.\n\n### Goal\nImplement idempotent external action executor and retries.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 15",
+    "milestone": "M8",
+    "priority": "P1",
+    "title": "Implement automation simulation/dry-run mode",
+    "labels": [
+      "feature",
+      "p1",
+      "m8",
+      "epic-15"
+    ],
+    "body": "Child of **EPIC 15**.\n\n### Goal\nImplement automation simulation/dry-run mode.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 16",
+    "milestone": "M9",
+    "priority": "P1",
+    "title": "Implement commission estimate and split model",
+    "labels": [
+      "feature",
+      "p1",
+      "m9",
+      "epic-16"
+    ],
+    "body": "Child of **EPIC 16**.\n\n### Goal\nImplement commission estimate and split model.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 16",
+    "milestone": "M9",
+    "priority": "P1",
+    "title": "Implement referral fees, expenses and payment-status references",
+    "labels": [
+      "feature",
+      "p1",
+      "m9",
+      "epic-16"
+    ],
+    "body": "Child of **EPIC 16**.\n\n### Goal\nImplement referral fees, expenses and payment-status references.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 16",
+    "milestone": "M9",
+    "priority": "P0",
+    "title": "Define accounting-system boundary and reconciliation strategy",
+    "labels": [
+      "feature",
+      "p0",
+      "m9",
+      "epic-16"
+    ],
+    "body": "Child of **EPIC 16**.\n\n### Goal\nDefine accounting-system boundary and reconciliation strategy.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 17",
+    "milestone": "M9",
+    "priority": "P1",
+    "title": "Build owner executive dashboard",
+    "labels": [
+      "feature",
+      "p1",
+      "m9",
+      "epic-17"
+    ],
+    "body": "Child of **EPIC 17**.\n\n### Goal\nBuild owner executive dashboard.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 17",
+    "milestone": "M9",
+    "priority": "P1",
+    "title": "Build BOR compliance dashboard",
+    "labels": [
+      "feature",
+      "p1",
+      "m9",
+      "epic-17"
+    ],
+    "body": "Child of **EPIC 17**.\n\n### Goal\nBuild BOR compliance dashboard.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 17",
+    "milestone": "M9",
+    "priority": "P1",
+    "title": "Build manager workload/pipeline dashboard",
+    "labels": [
+      "feature",
+      "p1",
+      "m9",
+      "epic-17"
+    ],
+    "body": "Child of **EPIC 17**.\n\n### Goal\nBuild manager workload/pipeline dashboard.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 17",
+    "milestone": "M9",
+    "priority": "P1",
+    "title": "Build agent home, pipeline and commission forecast",
+    "labels": [
+      "feature",
+      "p1",
+      "m9",
+      "epic-17"
+    ],
+    "body": "Child of **EPIC 17**.\n\n### Goal\nBuild agent home, pipeline and commission forecast.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 18",
+    "milestone": "M1",
+    "priority": "P0",
+    "title": "Initialize pnpm/Turborepo monorepo and CI",
+    "labels": [
+      "feature",
+      "p0",
+      "m1",
+      "epic-18"
+    ],
+    "body": "Child of **EPIC 18**.\n\n### Goal\nInitialize pnpm/Turborepo monorepo and CI.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 18",
+    "milestone": "M1",
+    "priority": "P0",
+    "title": "Implement organization/tenant boundary and auth foundation",
+    "labels": [
+      "feature",
+      "p0",
+      "m1",
+      "epic-18"
+    ],
+    "body": "Child of **EPIC 18**.\n\n### Goal\nImplement organization/tenant boundary and auth foundation.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 18",
+    "milestone": "M1",
+    "priority": "P0",
+    "title": "Implement RBAC/record authorization middleware",
+    "labels": [
+      "feature",
+      "p0",
+      "m1",
+      "epic-18"
+    ],
+    "body": "Child of **EPIC 18**.\n\n### Goal\nImplement RBAC/record authorization middleware.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 18",
+    "milestone": "M1",
+    "priority": "P0",
+    "title": "Implement audit event service and sensitive-field redaction",
+    "labels": [
+      "feature",
+      "p0",
+      "m1",
+      "epic-18"
+    ],
+    "body": "Child of **EPIC 18**.\n\n### Goal\nImplement audit event service and sensitive-field redaction.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 18",
+    "milestone": "M1",
+    "priority": "P0",
+    "title": "Implement encrypted object storage and malware/file validation",
+    "labels": [
+      "feature",
+      "p0",
+      "m1",
+      "epic-18"
+    ],
+    "body": "Child of **EPIC 18**.\n\n### Goal\nImplement encrypted object storage and malware/file validation.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 18",
+    "milestone": "M1",
+    "priority": "P0",
+    "title": "Implement secrets management, dependency scanning and security CI",
+    "labels": [
+      "feature",
+      "p0",
+      "m1",
+      "epic-18"
+    ],
+    "body": "Child of **EPIC 18**.\n\n### Goal\nImplement secrets management, dependency scanning and security CI.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 18",
+    "milestone": "M1",
+    "priority": "P0",
+    "title": "Implement backup/restore procedure and test",
+    "labels": [
+      "feature",
+      "p0",
+      "m1",
+      "epic-18"
+    ],
+    "body": "Child of **EPIC 18**.\n\n### Goal\nImplement backup/restore procedure and test.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 18",
+    "milestone": "M1",
+    "priority": "P1",
+    "title": "Implement observability, structured logging and alerting",
+    "labels": [
+      "feature",
+      "p1",
+      "m1",
+      "epic-18"
+    ],
+    "body": "Child of **EPIC 18**.\n\n### Goal\nImplement observability, structured logging and alerting.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 19",
+    "milestone": "M0",
+    "priority": "P0",
+    "title": "Create Figma foundations, tokens and reusable component library",
+    "labels": [
+      "feature",
+      "p0",
+      "m0",
+      "epic-19"
+    ],
+    "body": "Child of **EPIC 19**.\n\n### Goal\nCreate Figma foundations, tokens and reusable component library.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 19",
+    "milestone": "M0",
+    "priority": "P0",
+    "title": "Design Command Centre and Operations Inbox",
+    "labels": [
+      "feature",
+      "p0",
+      "m0",
+      "epic-19"
+    ],
+    "body": "Child of **EPIC 19**.\n\n### Goal\nDesign Command Centre and Operations Inbox.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 19",
+    "milestone": "M0",
+    "priority": "P0",
+    "title": "Design Contact 360, Property 360 and Transaction Workspace",
+    "labels": [
+      "feature",
+      "p0",
+      "m0",
+      "epic-19"
+    ],
+    "body": "Child of **EPIC 19**.\n\n### Goal\nDesign Contact 360, Property 360 and Transaction Workspace.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 19",
+    "milestone": "M0",
+    "priority": "P0",
+    "title": "Design Compliance Centre and agent work queue",
+    "labels": [
+      "feature",
+      "p0",
+      "m0",
+      "epic-19"
+    ],
+    "body": "Child of **EPIC 19**.\n\n### Goal\nDesign Compliance Centre and agent work queue.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 19",
+    "milestone": "M0",
+    "priority": "P0",
+    "title": "Define responsive/accessibility acceptance criteria",
+    "labels": [
+      "feature",
+      "p0",
+      "m0",
+      "epic-19"
+    ],
+    "body": "Child of **EPIC 19**.\n\n### Goal\nDefine responsive/accessibility acceptance criteria.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 20",
+    "milestone": "M10",
+    "priority": "P0",
+    "title": "Create synthetic/demo brokerage dataset",
+    "labels": [
+      "feature",
+      "p0",
+      "m10",
+      "epic-20"
+    ],
+    "body": "Child of **EPIC 20**.\n\n### Goal\nCreate synthetic/demo brokerage dataset.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 20",
+    "milestone": "M10",
+    "priority": "P0",
+    "title": "Build migration importers and dry-run report",
+    "labels": [
+      "feature",
+      "p0",
+      "m10",
+      "epic-20"
+    ],
+    "body": "Child of **EPIC 20**.\n\n### Goal\nBuild migration importers and dry-run report.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 20",
+    "milestone": "M10",
+    "priority": "P0",
+    "title": "Execute permission, integration, webhook and agent abuse tests",
+    "labels": [
+      "feature",
+      "p0",
+      "m10",
+      "epic-20"
+    ],
+    "body": "Child of **EPIC 20**.\n\n### Goal\nExecute permission, integration, webhook and agent abuse tests.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 20",
+    "milestone": "M10",
+    "priority": "P0",
+    "title": "Run backup restore and disaster-recovery rehearsal",
+    "labels": [
+      "feature",
+      "p0",
+      "m10",
+      "epic-20"
+    ],
+    "body": "Child of **EPIC 20**.\n\n### Goal\nRun backup restore and disaster-recovery rehearsal.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 20",
+    "milestone": "M10",
+    "priority": "P0",
+    "title": "Run limited live-transaction pilot with rollback criteria",
+    "labels": [
+      "feature",
+      "p0",
+      "m10",
+      "epic-20"
+    ],
+    "body": "Child of **EPIC 20**.\n\n### Goal\nRun limited live-transaction pilot with rollback criteria.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  },
+  {
+    "epic": "EPIC 20",
+    "milestone": "M11",
+    "priority": "P0",
+    "title": "Prepare production launch, training, incident and rollback runbooks",
+    "labels": [
+      "feature",
+      "p0",
+      "m11",
+      "epic-20"
+    ],
+    "body": "Child of **EPIC 20**.\n\n### Goal\nPrepare production launch, training, incident and rollback runbooks.\n\n### Acceptance criteria\n- Requirements and ownership are explicit.\n- Permissions/privacy implications are handled.\n- Audit/observability is added where relevant.\n- Happy path and key failure states are tested.\n- Documentation is updated.\n"
+  }
+]

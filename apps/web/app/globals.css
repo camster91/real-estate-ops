@@ -1,0 +1,51 @@
+:root {
+	font-family: system-ui, sans-serif;
+	color: #162e35;
+	background: #f3f6f4;
+}
+* {
+	box-sizing: border-box;
+}
+body {
+	margin: 0;
+}
+main {
+	max-width: 960px;
+	margin: auto;
+	padding: clamp(24px, 6vw, 80px);
+}
+h1 {
+	font-size: clamp(2rem, 5vw, 3.5rem);
+	line-height: 1.1;
+	max-width: 760px;
+}
+p {
+	font-size: 1.125rem;
+	line-height: 1.6;
+	max-width: 660px;
+}
+.eyebrow {
+	font-weight: 700;
+}
+aside {
+	margin-top: 40px;
+	padding: 24px;
+	background: white;
+	border: 1px solid #bdcdc5;
+	border-radius: 12px;
+}
+.skip {
+	position: absolute;
+	left: 16px;
+	top: -80px;
+	background: white;
+	padding: 12px;
+	color: #162e35;
+}
+.skip:focus {
+	top: 16px;
+}
+:focus-visible {
+	outline: 3px solid #146451;
+	outline-offset: 5px;
+}
