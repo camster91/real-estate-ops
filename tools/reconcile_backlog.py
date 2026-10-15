@@ -10,9 +10,20 @@ def build_plan(seed, issues, decisions):
     if len(set(numbers)) != len(numbers):
         raise ValueError('Duplicate issue numbers in export')
     by_number = {x['number']: x for x in issues}
-    seed_ids = {x['seed_id'] for x in seed}
+    seed_list = [x['seed_id'] for x in seed]
+    if len(set(seed_list)) != len(seed_list):
+        raise ValueError('Duplicate seed IDs in seed index')
+    seed_ids = set(seed_list)
     if set(decisions) - seed_ids:
         raise ValueError('Decision references unknown seed ID')
+    matched = {}
+    for key, decision in decisions.items():
+        if decision.get('action') == 'match':
+            matched.setdefault(decision.get('issue_number'), []).append(key)
+    for number, keys in matched.items():
+        for key in keys:
+            if len(keys) > 1 and not str(decisions[key].get('shared_scope_rationale', '')).strip():
+                raise ValueError(f'{key}: issue #{number} also matched by other seeds; shared_scope_rationale required')
     plan = []
     for item in seed:
         key = item['seed_id']

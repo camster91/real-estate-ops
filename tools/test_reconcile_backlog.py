@@ -31,5 +31,16 @@ class ReconciliationTests(unittest.TestCase):
         with self.assertRaises(ValueError): build_plan(self.seed, issues, d)
         d['REO-SEED-001']['intent_reviewed'] = True
         self.assertEqual(build_plan(self.seed, issues, d)['items'][0]['issue_number'],2)
+    def test_duplicate_seed_ids_rejected(self):
+        seed = self.seed + [{'seed_id': 'REO-SEED-001', 'title': 'Copy'}]
+        d = {'REO-SEED-001': {'action': 'create', 'intent_reviewed': True, 'rationale': 'New', 'all_existing_intents_reviewed': True}}
+        with self.assertRaises(ValueError): build_plan(seed, [], d)
+    def test_shared_issue_match_requires_explicit_shared_scope(self):
+        seed = self.seed + [{'seed_id': 'REO-SEED-002', 'title': 'Audit tenant access'}]
+        issues = [{'number': 3, 'title': 'Tenant security', 'state': 'open'}]
+        d = {k: {'action': 'match', 'issue_number': 3, 'intent_reviewed': True, 'rationale': 'Same'} for k in ('REO-SEED-001', 'REO-SEED-002')}
+        with self.assertRaises(ValueError): build_plan(seed, issues, d)
+        for v in d.values(): v['shared_scope_rationale'] = 'One issue covers isolation and its audit'
+        self.assertTrue(build_plan(seed, issues, d)['ready_for_manual_import_review'])
 
 if __name__ == '__main__': unittest.main()

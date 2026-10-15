@@ -1,6 +1,6 @@
 # Read-only backlog reconciliation
 
-No network access or GitHub writes. Supports exported open AND closed issues, proposed seed index and explicit reviewed decisions. A title match is a candidate, not permission to import; semantic matches require a human/agent-reviewed rationale. An issue may satisfy several seed intents only with explicit scope rationale. Full repository pagination is the caller’s responsibility; never treat an empty/incomplete export as authoritative.
+No network access or GitHub writes. Supports exported open AND closed issues, proposed seed index and explicit reviewed decisions. A title match is a candidate, not permission to import; semantic matches require a human/agent-reviewed rationale. An issue may satisfy several seed intents only when every matching decision has a non-empty shared_scope_rationale; duplicate seed IDs are rejected. Full repository pagination is the caller’s responsibility; never treat an empty/incomplete export as authoritative.
 
 Run:
 
