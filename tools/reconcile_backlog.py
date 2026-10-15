@@ -5,14 +5,29 @@ import re
 from pathlib import Path
 
 
+def _has_text(value):
+    return isinstance(value, str) and bool(value.strip())
+
+
 def build_plan(seed, issues, decisions):
     numbers = [x['number'] for x in issues]
     if len(set(numbers)) != len(numbers):
         raise ValueError('Duplicate issue numbers in export')
     by_number = {x['number']: x for x in issues}
-    seed_ids = {x['seed_id'] for x in seed}
+    seed_list = [x['seed_id'] for x in seed]
+    if len(set(seed_list)) != len(seed_list):
+        raise ValueError('Duplicate seed IDs in seed index')
+    seed_ids = set(seed_list)
     if set(decisions) - seed_ids:
         raise ValueError('Decision references unknown seed ID')
+    matched = {}
+    for key, decision in decisions.items():
+        if decision.get('action') == 'match':
+            matched.setdefault(decision.get('issue_number'), []).append(key)
+    for number, keys in matched.items():
+        for key in keys:
+            if len(keys) > 1 and not _has_text(decisions[key].get('shared_scope_rationale')):
+                raise ValueError(f'{key}: issue #{number} also matched by other seeds; shared_scope_rationale required')
     plan = []
     for item in seed:
         key = item['seed_id']
@@ -31,7 +46,7 @@ def build_plan(seed, issues, decisions):
         decision = decisions.get(key)
         result = {'seed_id': key, 'title': item['title'], 'candidates': candidates, 'action': 'review_required'}
         if decision:
-            if decision.get('intent_reviewed') is not True or not str(decision.get('rationale', '')).strip():
+            if decision.get('intent_reviewed') is not True or not _has_text(decision.get('rationale')):
                 raise ValueError(f'{key}: intent review and rationale required')
             action = decision.get('action')
             if action == 'match':

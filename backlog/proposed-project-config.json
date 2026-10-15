@@ -64,7 +64,7 @@
     "M10 Pilot",
     "M11 Production"
   ],
-  "status": "proposed; not created on GitHub",
+  "status": "proposed; Project and fields not created on GitHub (the 12 milestones exist)",
   "requested_additional_fields": {
     "Milestone": {
       "preferred": "native milestone"
@@ -79,11 +79,6 @@
       "Required",
       "Optional",
       "Not applicable"
-    ],
-    "Security review": [
-      "No",
-      "Required",
-      "Complete"
     ]
   }
 }

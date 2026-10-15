@@ -1,5 +1,7 @@
 # Core data model
 
+Earlier seed outline. Where it differs, CORE_MODEL.md and ADRs 0001/0002 take precedence (for example brokerage registration and effective-dated broker of record).
+
 ## Organization
 - Organization
 - Branch

@@ -1,4 +1,4 @@
-import Fastify from "fastify";
+import Fastify, { type FastifyError } from "fastify";
 export function createServer() {
 	const app = Fastify({
 		logger: {
@@ -23,8 +23,18 @@ export function createServer() {
 	app.setNotFoundHandler((_request, reply) =>
 		reply.code(404).send({ error: "not_found" }),
 	);
-	app.setErrorHandler((_error, _request, reply) =>
-		reply.code(500).send({ error: "internal_error" }),
-	);
+	app.setErrorHandler<FastifyError>((error, request, reply) => {
+		const status = error.statusCode ?? 500;
+		if (status >= 400 && status < 500) {
+			// Client errors log only the code; messages can echo request content.
+			request.log.info(
+				{ code: error.code, statusCode: status },
+				"request rejected",
+			);
+			return reply.code(status).send({ error: "bad_request" });
+		}
+		request.log.error({ err: error }, "request failed");
+		return reply.code(500).send({ error: "internal_error" });
+	});
 	return app;
 }

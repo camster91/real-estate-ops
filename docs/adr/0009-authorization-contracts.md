@@ -1,6 +1,6 @@
 # ADR 0009: Explicit authorization contracts before runtime activation
 
-Status: Implemented on a review branch; merge approval pending. Supports #24, #26, #75 and #97 without closing them.
+Status: Implemented on a review branch; merge approval pending. Supports #24, #26, #76 and #97 without closing them.
 
 ## Decision
 
