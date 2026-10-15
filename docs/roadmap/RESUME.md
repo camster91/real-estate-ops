@@ -7,7 +7,7 @@ GitHub is the implementation record: https://github.com/camster91/real-estate-op
 - PR #114: seed and proposed M0 planning; base main. Open, not merged.
 - PR #116: tooling and fail-closed app scaffold; base codex/m0-seed-and-planning. Open; foundation CI passed at 1a5248cc65540a3c9c093111d1a768ab40e69e7c (run 37677484535).
 - PR #117: shared authorization contracts and reconciled planning; base codex/m1-tooling-foundation. Open; foundation CI passed at 3a1a24749b73a953e877902b1f27b170d4ad7ea0 (run 37775948687), including version-matched browser checks. GitGuardian passed; neutral automated reviewer statuses do not establish human approval.
-- All 12 milestones created; all 113 stable seed markers/intents and milestone assignments read back; no duplicate imports or feature closures. The outbox is #84 and belongs in M1; the GitHub milestones of #83/#84 still need correcting (see RECONCILIATION_2026-10-07.md).
+- All 12 milestones created; all 113 stable seed markers/intents and milestone assignments read back; no duplicate imports or feature closures. The outbox is #84 in M1; #83 inbox filtering is M8 (corrected 15 October 2026, see RECONCILIATION_2026-10-07.md).
 - Shared @reo/auth has 50 new boundary tests; 64 total Vitest tests and six package/app typechecks/builds pass. Formatting, limited source scan and five reconciliation tests pass. Initial local web build hit ENOSPC; retry passed after clearing only generated local cache.
 - Decisions, issue map, ADR 0009 and verification limits are saved on codex/m1-authorization-contracts. M0 and M1 remain incomplete. No main merge, production deployment, live auth, financial/compliance submission, permission change or external communication occurred.
 
