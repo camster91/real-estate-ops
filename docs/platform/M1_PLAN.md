@@ -1,6 +1,6 @@
 # M1 implementation and acceptance plan
 
-In progress. Tooling scaffold is in PR #116 with passing CI; this does not complete M1-A or M1. Shared authorization contracts are implemented in PR #117 (ADR 0009); the next slice is #96 tenant/membership persistence. Operational authentication/persistence remain gated. Package/tool/provider choices require current official documentation during implementation.
+In progress. Tooling scaffold is in PR #116 with passing CI; this does not complete M1-A or M1. Shared authorization contracts are implemented in PR #117 (ADR 0009); #96 part 1 (tenant/membership schema, forced RLS, migration runner, transaction-local context; ADR 0010) is implemented for synthetic data, and #96 part 2 (OIDC/session) waits on the provider choice. Operational authentication/persistence remain gated. Package/tool/provider choices require current official documentation during implementation.
 
 | Slice | Concrete deliverable | Verification |
 |---|---|---|

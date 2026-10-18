@@ -1,0 +1,19 @@
+# Local development database for synthetic data only. Never load real client data.
+# Same image as CI (PostgreSQL 16.15). Bound to loopback; trust auth is for this
+# throwaway local container only.
+services:
+  postgres:
+    image: postgres:16@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - reo-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+volumes:
+  reo-postgres:

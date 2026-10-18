@@ -10,9 +10,10 @@
 		"build": "turbo run build",
 		"typecheck": "turbo run typecheck",
 		"test": "vitest run",
+		"test:db": "vitest run --config vitest.db.config.ts",
 		"test:e2e": "playwright test",
 		"check": "pnpm typecheck && pnpm test && pnpm build",
-		"lint": "biome check apps packages e2e scripts package.json tsconfig.base.json turbo.json vitest.config.ts playwright.config.ts",
+		"lint": "biome check apps packages e2e scripts package.json tsconfig.base.json turbo.json vitest.config.ts vitest.db.config.ts playwright.config.ts",
 		"security:source": "node scripts/check-secrets.mjs"
 	},
 	"devDependencies": {
