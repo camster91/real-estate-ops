@@ -6,6 +6,7 @@ import { createTestDatabase, type TestDatabase } from "./testing/harness.js";
 const context = {
 	organizationId: "0b6c2f4e-1d2a-4c55-9e1f-3a7b8c9d0e1f",
 	principalId: "5f0e9d8c-7b6a-4954-8a3b-2c1d0e9f8a7b",
+	purpose: "client_service",
 };
 
 let db: TestDatabase;
@@ -27,16 +28,17 @@ afterAll(async () => {
 });
 
 describe("withTenant", () => {
-	it("sets both ids for the transaction", async () => {
+	it("sets ids and purpose for the transaction", async () => {
 		const seen = await withTenant(pool, context, async (client) => {
 			const { rows } = await client.query(
-				"SELECT current_setting('app.organization_id') AS org, current_setting('app.principal_id') AS principal",
+				"SELECT current_setting('app.organization_id', true) AS org, current_setting('app.principal_id', true) AS principal, current_setting('app.purpose', true) AS purpose",
 			);
 			return rows[0];
 		});
 		expect(seen).toEqual({
 			org: context.organizationId,
 			principal: context.principalId,
+			purpose: "client_service",
 		});
 	});
 
@@ -44,6 +46,7 @@ describe("withTenant", () => {
 		await withTenant(pool, context, async () => undefined);
 		expect(await setting("app.organization_id")).toBeOneOf(["", null]);
 		expect(await setting("app.principal_id")).toBeOneOf(["", null]);
+		expect(await setting("app.purpose")).toBeOneOf(["", null]);
 	});
 
 	it("clears context and rolls back after work throws", async () => {
@@ -79,4 +82,19 @@ describe("withTenant", () => {
 			connect.mockRestore();
 		}
 	});
+
+	it.each(["", "Client", "1abc", "a b", "x".repeat(65), "client_service; --"])(
+		"rejects malformed purpose %j before touching the database",
+		async (bad) => {
+			const connect = vi.spyOn(pool, "connect");
+			try {
+				await expect(
+					withTenant(pool, { ...context, purpose: bad }, async () => undefined),
+				).rejects.toBeInstanceOf(InvalidTenantContextError);
+				expect(connect).not.toHaveBeenCalled();
+			} finally {
+				connect.mockRestore();
+			}
+		},
+	);
 });

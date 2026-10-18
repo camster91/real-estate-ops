@@ -28,6 +28,7 @@ const code = (promise: Promise<unknown>) =>
 const memberA = (): TenantContext => ({
 	organizationId: ids.orgA as string,
 	principalId: ids.pa as string,
+	purpose: "client_service",
 });
 
 beforeAll(async () => {
@@ -111,6 +112,7 @@ describe("tenancy schema", () => {
 		const forged = {
 			organizationId: ids.orgB as string,
 			principalId: ids.pa as string,
+			purpose: "client_service",
 		};
 		for (const table of ["branch", "organization", "membership"])
 			expect((await as(forged, `SELECT 1 FROM ${table}`)).rowCount).toBe(0);
