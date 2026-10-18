@@ -9,7 +9,8 @@ This branch is a local development scaffold, not a functioning brokerage system 
 3. Run `pnpm lint`, `pnpm security:source` and `pnpm check`.
 4. Run `pnpm turbo run dev --filter=@reo/web` for the pending-workspace page at http://127.0.0.1:3000. It sends no X-Powered-By header and sets nosniff, DENY framing and no-referrer headers; a full script CSP is still pending.
 5. Run `pnpm turbo run dev --filter=@reo/api` for the API (Turbo builds shared packages first; restart after editing them) at http://127.0.0.1:4000. PORT is configurable; HOST only accepts loopback. Liveness is `/health/live`; `/health/ready` returns 503 until foundation dependencies exist. Every `/v1/*` request returns 401 regardless of supplied credentials or tenant headers.
-6. Run `pnpm exec playwright install chromium --only-shell`, then `pnpm test:e2e`. Tests cover 390/768/1440px, basic keyboard focus/skip link, language and horizontal overflow. This is not a full accessibility audit.
+6. Database tests need PostgreSQL 16. Run `docker compose up -d --wait postgres` (loopback only, synthetic data only), then `REO_TEST_DATABASE_URL=postgres://postgres@127.0.0.1:5432/postgres pnpm test:db`. Each test file creates and drops its own `reo_test_*` database and login role. `pnpm test` stays database-free. Stop with `docker compose down -v`. See ADR 0010.
+7. Run `pnpm exec playwright install chromium --only-shell`, then `pnpm test:e2e`. Tests cover 390/768/1440px, basic keyboard focus/skip link, language and horizontal overflow. This is not a full accessibility audit.
 
 Worker and gateway entry points only report disabled diagnostics and terminate. They expose no job executor, polling connection, model adapter or filesystem capability. API/worker/gateway configuration rejects NODE_ENV=production. No secret files belong in git; `.env.example` contains non-sensitive defaults. Next.js production compilation is tested, but that is not permission or readiness to deploy.
 

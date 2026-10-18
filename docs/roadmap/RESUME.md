@@ -15,7 +15,7 @@ GitHub is the implementation record: https://github.com/camster91/real-estate-op
 
 1. Fetch GitHub state and inspect branches, open PRs, checks, applicable AGENTS and local changes. Resume from codex/m1-authorization-contracts, preserving unrelated work. Do not assume this handoff is current approval.
 2. Read docs/product/DECISION_REGISTER.md, docs/product/AUTHORIZATION.md, docs/adr/0009-authorization-contracts.md, docs/platform/M1_PLAN.md and docs/platform/AUTHORIZATION_VERIFICATION.md.
-3. Next engineering slice: #96 synthetic PostgreSQL membership/tenant foundation and non-owner RLS tests, with tenant-scoped foreign keys and transaction-local context. Validate official supported dependencies, migration/recovery conventions and boundaries before introducing schema. Do not enable API access merely because pure policy tests pass. #97 runtime middleware remains dependent on #96.
+3. #96 part 1 (synthetic PostgreSQL tenant/membership schema, forced RLS, non-owner tests, migration runner; ADR 0010) is implemented. Next: #96 part 2 (OIDC/session) once the provider is chosen, or #97 middleware on top of this schema. Do not enable API access merely because database tests pass.
 4. Keep work on small review branches with issue-linked tests/evidence. Stacked PRs require deliberate rebase/retarget after separately approved upstream merges; do not auto-merge or deploy.
 
 ## Blockers and owners
