@@ -1,12 +1,13 @@
 -- Tenant boundary (ADR 0001, ADR 0010). Synthetic-only until OIDC and admin paths exist.
 
 -- Runtime group role. Roles are cluster-wide while migration locks are per
--- database, so two databases migrating at once can race on CREATE ROLE.
+-- database, so two databases migrating at once can race on CREATE ROLE: the
+-- loser sees duplicate_object, or unique_violation if the winner is uncommitted.
 DO $$
 BEGIN
 	CREATE ROLE reo_app NOLOGIN NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE;
 EXCEPTION
-	WHEN duplicate_object THEN NULL;
+	WHEN duplicate_object OR unique_violation THEN NULL;
 END
 $$;
 
@@ -68,10 +69,6 @@ CREATE FUNCTION app.has_active_membership() RETURNS boolean
 		)
 	$$;
 
-CREATE FUNCTION app.tenant_visible(org uuid) RETURNS boolean
-	LANGUAGE sql STABLE SECURITY INVOKER SET search_path = pg_catalog, public
-	AS $$ SELECT org = app.current_organization_id() AND app.has_active_membership() $$;
-
 CREATE TABLE branch (
 	organization_id uuid NOT NULL REFERENCES organization,
 	id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -104,21 +101,39 @@ ALTER TABLE branch FORCE ROW LEVEL SECURITY;
 ALTER TABLE team ENABLE ROW LEVEL SECURITY;
 ALTER TABLE team FORCE ROW LEVEL SECURITY;
 
+-- Policies wrap the context functions in scalar subqueries so PostgreSQL runs
+-- them once per query (InitPlan) instead of once per row. Copy this shape for
+-- every new tenant table.
 CREATE POLICY organization_member_read ON organization
-	FOR SELECT USING (app.tenant_visible(id));
+	FOR SELECT USING (
+		id = (SELECT app.current_organization_id())
+		AND (SELECT app.has_active_membership())
+	);
 CREATE POLICY principal_self_read ON principal
-	FOR SELECT USING (id = app.current_principal_id());
+	FOR SELECT USING (id = (SELECT app.current_principal_id()));
 CREATE POLICY membership_self_read ON membership
 	FOR SELECT USING (
-		organization_id = app.current_organization_id()
-		AND principal_id = app.current_principal_id()
+		organization_id = (SELECT app.current_organization_id())
+		AND principal_id = (SELECT app.current_principal_id())
 	);
 CREATE POLICY branch_tenant ON branch
-	FOR ALL USING (app.tenant_visible(organization_id))
-	WITH CHECK (app.tenant_visible(organization_id));
+	FOR ALL USING (
+		organization_id = (SELECT app.current_organization_id())
+		AND (SELECT app.has_active_membership())
+	)
+	WITH CHECK (
+		organization_id = (SELECT app.current_organization_id())
+		AND (SELECT app.has_active_membership())
+	);
 CREATE POLICY team_tenant ON team
-	FOR ALL USING (app.tenant_visible(organization_id))
-	WITH CHECK (app.tenant_visible(organization_id));
+	FOR ALL USING (
+		organization_id = (SELECT app.current_organization_id())
+		AND (SELECT app.has_active_membership())
+	)
+	WITH CHECK (
+		organization_id = (SELECT app.current_organization_id())
+		AND (SELECT app.has_active_membership())
+	);
 
 REVOKE ALL ON SCHEMA app FROM PUBLIC;
 REVOKE EXECUTE ON ALL FUNCTIONS IN SCHEMA app FROM PUBLIC;

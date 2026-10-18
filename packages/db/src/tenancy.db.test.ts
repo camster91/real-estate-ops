@@ -1,5 +1,8 @@
-import type pg from "pg";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
+import pg from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { migrationsDirectory } from "./migrate.js";
 import { type TenantContext, withTenant } from "./tenant.js";
 import { createTestDatabase, type TestDatabase } from "./testing/harness.js";
 
@@ -230,5 +233,46 @@ describe("tenancy schema", () => {
 		]);
 		await Promise.all(created.map((other) => other.drop()));
 		expect(created).toHaveLength(2);
+	});
+
+	it("evaluates tenant checks once per query, not per row", async () => {
+		const plan = (
+			await as(memberA(), "EXPLAIN SELECT count(*) FROM team WHERE name <> ''")
+		).rows
+			.map((row) => row["QUERY PLAN"] as string)
+			.join("\n");
+		expect(plan).toContain("InitPlan");
+		expect(plan).not.toMatch(/Filter:.*app\.\w+\(/);
+	});
+
+	it("tolerates a concurrent CREATE ROLE race between databases", async () => {
+		const sql = await readFile(
+			join(migrationsDirectory, "0001_tenancy.sql"),
+			"utf8",
+		);
+		const block = sql.match(/DO \$\$[\s\S]*?END\s*\$\$;/)?.[0];
+		expect(block).toBeDefined();
+		const role = `reo_race_${Date.now().toString(36)}`;
+		const raced = (block as string).replaceAll("reo_app", role);
+		const other = await createTestDatabase({ migrate: false });
+		const first = new pg.Client({ connectionString: db.url });
+		const second = new pg.Client({ connectionString: other.url });
+		await Promise.all([first.connect(), second.connect()]);
+		try {
+			await first.query("BEGIN");
+			await first.query(raced);
+			// The second CREATE ROLE blocks on the first's uncommitted row.
+			const pending = second.query(raced).then(
+				() => "ok",
+				(error: { code?: string }) => error.code,
+			);
+			await new Promise((resolve) => setTimeout(resolve, 300));
+			await first.query("COMMIT");
+			expect(await pending).toBe("ok");
+		} finally {
+			await Promise.all([first.end(), second.end()]);
+			await db.admin.query(`DROP ROLE IF EXISTS ${role}`);
+			await other.drop();
+		}
 	});
 });

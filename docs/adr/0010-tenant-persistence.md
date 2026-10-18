@@ -21,6 +21,7 @@ Status: Implemented for synthetic data. Supports #96 (part 1) without closing it
 - **RLS:** every table has `ENABLE` and `FORCE ROW LEVEL SECURITY`.
 - **Tenant context:** `withTenant()` sets `app.organization_id` and `app.principal_id` with `set_config(..., true)`, so the context ends with the transaction and never leaks on a pooled connection. IDs must be UUIDs before any query runs.
 - **Tenant-table policy:** a row is visible and writable only when its `organization_id` equals the current tenant AND the current principal has an active membership there. Active means `status = 'active'`, `effective_from <= now()` and `effective_to` not reached. Missing or forged context matches nothing.
+- **Policy shape:** policies wrap the context functions in scalar subqueries, e.g. `organization_id = (SELECT app.current_organization_id()) AND (SELECT app.has_active_membership())`. PostgreSQL then evaluates them once per query instead of once per row; a review measured 11.4 s against 26 ms on 200,000 rows. New tenant tables must copy this shape, and a test asserts it.
 - **Membership policy:** it checks only the row's own tenant and principal. It must not call `has_active_membership()`, or the policy would recurse.
 - **Child tables:** they reference parents with composite `(organization_id, id)` foreign keys, so a cross-tenant link fails at the database (23503).
 - **Membership constraints:**
@@ -29,7 +30,7 @@ Status: Implemented for synthetic data. Supports #96 (part 1) without closing it
 
 ## Evidence
 
-- `packages/db/src/*.db.test.ts` (26 tests) run against PostgreSQL 16.15, both locally and in the pinned container. They cover:
+- `packages/db/src/*.db.test.ts` (28 tests) run against PostgreSQL 16.15, both locally and in the pinned container. They cover:
   - forged tenants
   - invited, suspended, revoked, expired and not-yet-effective memberships
   - missing context
@@ -37,7 +38,8 @@ Status: Implemented for synthetic data. Supports #96 (part 1) without closing it
   - counts
   - escalation attempts: activating a membership, editing the organization, DELETE, disabling RLS, `SET ROLE`
   - constraints
-  - concurrent and changed migrations
+  - concurrent and changed migrations, and a concurrent `CREATE ROLE` race between databases
+  - the once-per-query policy plan
   - context clean-up on pooled connections
 - A mutation check confirmed the tests fail if any of these is weakened:
   - the membership status check
