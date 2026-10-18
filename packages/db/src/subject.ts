@@ -48,20 +48,21 @@ async function readContext(client: pg.ClientBase): Promise<ContextRow> {
  * database, fresh on every call (nothing is cached, so revocation applies to
  * the next decision). Call inside withTenant(). RLS limits the rows to the
  * current principal's own membership and grants. Each grant row becomes one
- * complete Grant, so rows never combine. Pass resourceType to keep only grants
- * for that kind of record.
+ * complete Grant, so rows never combine. Only grants for `resourceType` are
+ * returned: @reo/auth grants carry no type, so mixing types would let a grant
+ * on one kind of record authorize another with the same id.
  */
 export async function loadSubject(
 	client: pg.ClientBase,
-	resourceType?: string,
+	resourceType: string,
 ): Promise<Subject> {
 	const context = await readContext(client);
 	const { rows } = await client.query<GrantRow>(
 		`SELECT organization_id, principal_id, action, resource_id, classification,
 			purpose, valid_from, expires_at, revoked_at
 		FROM access_grant
-		WHERE $1::text IS NULL OR resource_type = $1`,
-		[resourceType ?? null],
+		WHERE resource_type = $1`,
+		[resourceType],
 	);
 	const grants: Grant[] = rows.map((row) => ({
 		tenantId: row.organization_id,

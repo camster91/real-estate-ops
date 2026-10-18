@@ -6,15 +6,16 @@ Status: Implemented for synthetic data. Supports #97 (part 1) without closing it
 
 1. **One row per grant.** Each `access_grant` row is one principal, one action, one exact resource (`resource_type` plus `resource_id`), one classification and one purpose. There are no arrays and no wildcard resources. A row is always a complete grant, so fragments never combine; this matches `@reo/auth`.
 2. **Grants always expire and need a second person.**
-   - `expires_at` is required.
+   - `expires_at` is required and must be finite. `infinity` and `-infinity` are rejected.
    - The grantor must be a different principal.
    - The grantee must be a member of the same tenant (composite FK to `membership`).
    - The runtime role `reo_app` can only SELECT its own grants. It can never insert, update or delete them. Issuing or changing a grant is a permission change (L3); that admin path is not built yet.
 3. **Purpose joins the tenant context.** `withTenant()` requires a `purpose` such as `client_service`, set transaction-locally as `app.purpose`. Grants only match their own purpose.
 4. **Record visibility is filtered in SQL.** `app.readable_record` lists what the current principal may read in the current tenant, for the current purpose, right now.
    - List, count, search, export and page queries filter with `EXISTS (SELECT 1 FROM app.readable_record rr WHERE rr.resource_type = '<type>' AND rr.resource_id = t.id AND rr.classification = t.classification)`, so hidden records never reach an aggregate.
-   - Future client-record tables must put the same `EXISTS` in their SELECT RLS policy.
-5. **Actions are checked fresh each time.** `authorizeInTenant()` loads the subject's grants for the requested resource type from the database on every call, uses the database clock, and runs the shared `@reo/auth` `authorize()`. Nothing is cached, so a revocation applies to the next decision. L3 actions still deny with `human_approval_required`, and L4 never unlocks.
+   - The `EXISTS` must be in the query's own `WHERE` clause. There, PostgreSQL turns it into a join on `access_grant_lookup`: a review measured 8 ms for 200,000 records.
+   - Future client-record tables may also put the same `EXISTS` in their SELECT RLS policy as a safety net. Inside a policy, though, PostgreSQL does not turn it into a join. It becomes a hashed subplan checked against every row in the tenant: 3.3 s for `count(*)` and 0.4 s for one page at 200,000 records. List queries must therefore keep the `WHERE`-clause `EXISTS` even when the policy has it, and the first real table must add a plan-shape test.
+5. **Actions are checked fresh each time.** `authorizeInTenant()` loads the subject's grants for the requested resource type (`loadSubject()` requires one, because `@reo/auth` grants carry no type) from the database on every call, uses the database clock, and runs the shared `@reo/auth` `authorize()`. Nothing is cached, so a revocation applies to the next decision. Keep each decision in its own short `withTenant` transaction, because `now()` is the transaction start time. L3 actions still deny with `human_approval_required`, and L4 never unlocks.
 
 ## Why a view, not a function
 

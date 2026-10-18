@@ -250,6 +250,19 @@ describe("access grants", () => {
 				),
 			),
 		).toBe("23502");
+		for (const [validFrom, expiresAt] of [
+			["now()", "'infinity'"],
+			["'-infinity'", "now() + interval '1 day'"],
+		])
+			expect(
+				await code(
+					db.admin.query(
+						`INSERT INTO access_grant (organization_id, principal_id, action, resource_type, resource_id, classification, purpose, valid_from, expires_at, granted_by_principal_id) VALUES ($1, $2, 'record.read', 'fixture_record', $3, 'operational', 'client_service', ${validFrom}, ${expiresAt}, $4)`,
+						[ids.orgA, ids.pa, recordA[1], ids.approver],
+					),
+				),
+				`${validFrom} .. ${expiresAt}`,
+			).toBe("23514");
 	});
 
 	it("read filter becomes a join, not a per-row subquery", async () => {

@@ -31,6 +31,8 @@ CREATE TABLE access_grant (
 	-- Only a member of this tenant can hold a grant in it.
 	FOREIGN KEY (organization_id, principal_id) REFERENCES membership (organization_id, principal_id),
 	CHECK (expires_at > valid_from),
+	-- "Always expires": reject infinity / -infinity, which pass NOT NULL.
+	CHECK (isfinite(valid_from) AND isfinite(expires_at)),
 	CHECK (granted_by_principal_id <> principal_id)
 );
 

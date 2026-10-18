@@ -150,7 +150,7 @@ describe("authorizeInTenant", () => {
 		});
 		try {
 			const subject = await withTenant(app, ctx(), (client) =>
-				loadSubject(client),
+				loadSubject(client, "contact"),
 			);
 			expect(subject).toMatchObject({
 				id: ids.pa,
@@ -167,5 +167,12 @@ describe("authorizeInTenant", () => {
 				[ids.orgA, ids.pb],
 			);
 		}
+	});
+
+	it("loadSubject without a resource type returns no grants", async () => {
+		const subject = await withTenant(app, ctx(), (client) =>
+			loadSubject(client, undefined as unknown as string),
+		);
+		expect(subject.grants).toEqual([]);
 	});
 });
