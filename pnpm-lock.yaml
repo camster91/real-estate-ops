@@ -76,6 +76,9 @@ importers:
 
   packages/db:
     dependencies:
+      '@reo/auth':
+        specifier: workspace:*
+        version: link:../auth
       pg:
         specifier: 8.23.1
         version: 8.23.1

@@ -5,6 +5,7 @@ export {
 	migrate,
 	migrationsDirectory,
 } from "./migrate.js";
+export { authorizeInTenant, loadSubject } from "./subject.js";
 export {
 	InvalidTenantContextError,
 	type TenantContext,

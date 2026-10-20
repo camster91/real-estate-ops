@@ -18,3 +18,13 @@ No changed UI journey; this slice does not claim new rendered product behavior. 
 Policies/grants/rules and clock must be freshly loaded by trusted authenticated server code. Never accept them from browser inputs. Do not expose denial reasons revealing hidden records to an untrusted user. L3 remains denied even with caller approval fields; L4 is denied. Next safe slice is synthetic PostgreSQL membership/RLS and transaction tests under #96 before exposing routes or claiming #97 middleware complete.
 
 Rollback: remove additive @reo/auth package and importer entry; documentation/map changes are versioned. No database migration, account permission, production deployment, external send or money movement occurred. M0 policy review and M1 completion remain open.
+
+## Update — 18 October 2026 (#97 part 1, ADR 0011)
+
+Now enforced and tested on PostgreSQL 16.15 (55 database tests):
+- Record grants are stored in `access_grant`: one complete, expiring row per grant, issued by someone else, to a member only, and read-only for the runtime role.
+- `app.readable_record` filters list, count and page queries before aggregation.
+- `authorizeInTenant()` runs `@reo/auth` with grants read fresh from the database, so revocation applies to the next call.
+
+Still not enforced: API and worker middleware (needs OIDC), role grants (#24), the grant admin path, service identities, storage and audit.
+

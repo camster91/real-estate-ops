@@ -4,6 +4,7 @@ import pg from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { migrationsDirectory } from "./migrate.js";
 import { type TenantContext, withTenant } from "./tenant.js";
+import { seedTwoTenants } from "./testing/fixtures.js";
 import { createTestDatabase, type TestDatabase } from "./testing/harness.js";
 
 const tables = ["organization", "principal", "membership", "branch", "team"];
@@ -12,9 +13,6 @@ let db: TestDatabase;
 let app: pg.Pool;
 let adminUser: string;
 const ids: Record<string, string> = {};
-
-const insert = async (sql: string, params: unknown[] = []) =>
-	(await db.admin.query(sql, params)).rows[0].id as string;
 
 const as = (ctx: TenantContext, sql: string, params: unknown[] = []) =>
 	withTenant(app, ctx, (client) => client.query(sql, params));
@@ -28,44 +26,14 @@ const code = (promise: Promise<unknown>) =>
 const memberA = (): TenantContext => ({
 	organizationId: ids.orgA as string,
 	principalId: ids.pa as string,
+	purpose: "client_service",
 });
 
 beforeAll(async () => {
 	db = await createTestDatabase();
 	app = db.app as pg.Pool;
 	adminUser = (await db.admin.query("SELECT current_user AS u")).rows[0].u;
-	ids.orgA = await insert(
-		"INSERT INTO organization (name) VALUES ('Synthetic Org A') RETURNING id",
-	);
-	ids.orgB = await insert(
-		"INSERT INTO organization (name) VALUES ('Synthetic Org B') RETURNING id",
-	);
-	for (const [key, subject] of [
-		["pa", "synthetic-a"],
-		["pb", "synthetic-b"],
-		["approver", "synthetic-approver"],
-		["pc", "synthetic-c"],
-	])
-		ids[key as string] = await insert(
-			"INSERT INTO principal (oidc_issuer, oidc_subject) VALUES ('https://issuer.invalid', $1) RETURNING id",
-			[subject],
-		);
-	for (const [org, principal] of [
-		[ids.orgA, ids.pa],
-		[ids.orgB, ids.pb],
-	])
-		await db.admin.query(
-			"INSERT INTO membership (organization_id, principal_id, status, approved_by_principal_id, approved_at, effective_from) VALUES ($1, $2, 'active', $3, now(), now() - interval '7 days')",
-			[org, principal, ids.approver],
-		);
-	ids.branchA = await insert(
-		"INSERT INTO branch (organization_id, name) VALUES ($1, 'Synthetic Branch A') RETURNING id",
-		[ids.orgA],
-	);
-	ids.branchB = await insert(
-		"INSERT INTO branch (organization_id, name) VALUES ($1, 'Synthetic Branch B') RETURNING id",
-		[ids.orgB],
-	);
+	Object.assign(ids, await seedTwoTenants(db.admin));
 });
 
 afterAll(async () => {
@@ -111,6 +79,7 @@ describe("tenancy schema", () => {
 		const forged = {
 			organizationId: ids.orgB as string,
 			principalId: ids.pa as string,
+			purpose: "client_service",
 		};
 		for (const table of ["branch", "organization", "membership"])
 			expect((await as(forged, `SELECT 1 FROM ${table}`)).rowCount).toBe(0);
