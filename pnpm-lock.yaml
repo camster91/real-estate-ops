@@ -44,7 +44,16 @@ importers:
       openid-client:
         specifier: 6.8.8
         version: 6.8.8
+      pg:
+        specifier: 8.23.1
+        version: 8.23.1
     devDependencies:
+      '@reo/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@types/pg':
+        specifier: 8.23.1
+        version: 8.23.1
       jose:
         specifier: 6.2.12
         version: 6.2.12

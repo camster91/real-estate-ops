@@ -1,5 +1,8 @@
+import cookie from "@fastify/cookie";
 import Fastify, { type FastifyError } from "fastify";
-export function createServer() {
+import { type AuthOptions, registerAuthRoutes } from "./auth/routes.js";
+
+export function createServer(options: { auth?: AuthOptions } = {}) {
 	const app = Fastify({
 		logger: {
 			redact: [
@@ -13,6 +16,12 @@ export function createServer() {
 			},
 		},
 	});
+	const { auth } = options;
+	if (auth) {
+		// Signs the short-lived login cookie with REO_LOGIN_COOKIE_SECRET.
+		app.register(cookie, { secret: auth.config.cookieSecret });
+		app.register(registerAuthRoutes, auth);
+	}
 	app.get("/health/live", async () => ({ status: "alive" }));
 	app.get("/health/ready", async (_request, reply) =>
 		reply.code(503).send({ status: "not_ready" }),
