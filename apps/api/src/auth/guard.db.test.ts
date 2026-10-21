@@ -41,6 +41,12 @@ beforeAll(async () => {
 		{ preHandler: requireSession(pool) },
 		async (request) => ({ principalId: request.principalId }),
 	);
+	app.post("/v1/test/write", async () => ({ wrote: true }));
+	app.post(
+		"/test/webhook",
+		{ config: { allowCrossOrigin: true } },
+		async () => ({ received: true }),
+	);
 });
 
 afterAll(async () => {
@@ -66,6 +72,42 @@ describe("origin guard", () => {
 		expect(response.statusCode).toBe(403);
 		expect(response.json()).toEqual({ error: "forbidden_origin" });
 		expect((await session(token)).statusCode).toBe(200);
+	});
+
+	it.each([
+		"/auth/%6Cogout",
+		"/auth/logou%74",
+		"/auth/logout#x",
+		"/auth/logout?x=1",
+		"http://127.0.0.1/auth/logout",
+	])("logout spelled %s is still origin-checked", async (url) => {
+		const token = await signInAs(app, fake, "synthetic-a");
+		const response = await app.inject({
+			method: "POST",
+			url,
+			cookies: { [SESSION_COOKIE]: token },
+		});
+		expect(response.statusCode).toBe(403);
+		expect((await session(token)).statusCode).toBe(200);
+	});
+
+	it("an encoded /v1 write route is still origin-checked", async () => {
+		const token = await signInAs(app, fake, "synthetic-a");
+		const response = await app.inject({
+			method: "POST",
+			url: `/%761/test/write`,
+			cookies: { [SESSION_COOKIE]: token },
+		});
+		expect(response.statusCode).toBe(403);
+		expect(response.json()).toEqual({ error: "forbidden_origin" });
+	});
+
+	it("only an explicit route opt-out skips the check", async () => {
+		expect(
+			(await app.inject({ method: "POST", url: "/test/webhook" })).statusCode,
+		).toBe(200);
+		const unknown = await app.inject({ method: "POST", url: "/anything" });
+		expect(unknown.statusCode).toBe(403);
 	});
 
 	it("same-origin logout works", async () => {

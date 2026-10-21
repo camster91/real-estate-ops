@@ -12,6 +12,10 @@ declare module "fastify" {
 		/** The verified principal; set only by requireSession. */
 		principalId?: string;
 	}
+	interface FastifyContextConfig {
+		/** Opt a route out of the Origin check (e.g. a signed provider webhook). */
+		allowCrossOrigin?: boolean;
+	}
 }
 
 export const SESSION_COOKIE = "__Host-reo_session";
@@ -60,15 +64,16 @@ export function requireSession(pool: pg.Pool): preHandlerAsyncHookHandler {
 }
 
 /**
- * CSRF defence for cookie-authenticated writes: any method other than GET,
- * HEAD and OPTIONS on /v1/* or /auth/logout must carry an Origin equal to
- * the public URL. Browsers send Origin on cross-site and same-site POSTs.
+ * CSRF defence for cookie-authenticated writes: every method other than GET,
+ * HEAD and OPTIONS must carry an Origin equal to the public URL, whatever the
+ * path. Matching on the raw path would miss encoded spellings such as
+ * /auth/%6Cogout, which the router decodes. A route can opt out only through
+ * its own `config.allowCrossOrigin`. Browsers send Origin on every POST.
  */
 export function originGuard(publicUrl: string): onRequestAsyncHookHandler {
 	return async (request, reply) => {
 		if (SAFE_METHODS.has(request.method)) return;
-		const path = request.url.split("?")[0] ?? "";
-		if (!path.startsWith("/v1/") && path !== "/auth/logout") return;
+		if (request.routeOptions.config?.allowCrossOrigin === true) return;
 		if (request.headers.origin === publicUrl) return;
 		request.log.info({ outcome: "forbidden_origin" }, "request refused");
 		return reply

@@ -7,7 +7,7 @@ Status: Implemented for synthetic data. Supports #96 (part 3). The owner approve
 1. **The organisation is in the URL.** Tenant routes live under `/v1/organizations/:organizationId/...`. Every request checks the id against the session's active memberships (`app.session_memberships`). There is no stored "current organisation", so two tabs can work in two organisations safely and nothing can go stale.
 2. **Outsiders get 404.** A malformed id, an id that is not lower-case, an unknown organisation, or one where the person has no active membership all return 404 `not_found`. The response never says whether the organisation exists.
 3. **Purposes are code constants.** Branch listing runs with the purpose `operations`. A purpose is never read from the request.
-4. **Same-origin writes only.** Any method other than GET, HEAD and OPTIONS on `/v1/*` or `/auth/logout` must carry `Origin` exactly equal to `REO_PUBLIC_URL`, or it gets 403 `forbidden_origin`. This is the CSRF defence for cookie-authenticated writes, on top of `SameSite=Lax`. It relies on browsers sending `Origin`, which they do on every POST. A non-browser client cannot borrow someone's cookie across sites anyway. The hook is registered at the root, so it also covers routes added later.
+4. **Same-origin writes only.** Every request with a method other than GET, HEAD and OPTIONS must carry `Origin` exactly equal to `REO_PUBLIC_URL`, or it gets 403 `forbidden_origin`. This applies whatever the path: a path-based check would miss encoded spellings such as `/auth/%6Cogout`, which the router decodes (found in review). A route can opt out only through its own `config.allowCrossOrigin`, meant for a future signed provider webhook. This is the CSRF defence for cookie-authenticated writes, on top of `SameSite=Lax`. It relies on browsers sending `Origin`, which they do on every POST. A non-browser client cannot borrow someone's cookie across sites anyway. The hook is registered at the root, so it also covers routes added later.
 
 ## Request flow
 
@@ -29,6 +29,7 @@ The first route is `GET /v1/organizations/:organizationId/branches`. It returns 
   - no session, and login switched off, give 401
   - granted, ungranted, revoked and wrong-purpose records are decided correctly through the real session
   - logs contain no organisation ids or tokens
+- Encoded and absolute-form spellings (`/auth/%6Cogout`, `/auth/logou%74`, `/%761/...`, a fragment, `http://host/auth/logout`) are still origin-checked.
 - Mutation checks: removing the membership check, matching Origin by prefix, or accepting upper-case ids each fails a named test.
 
 ## Not done

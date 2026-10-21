@@ -1,9 +1,10 @@
 // Test-only helpers for HTTP login tests. Excluded from the build.
 import type { FastifyInstance } from "fastify";
 import type { FakeIssuer } from "./fake-issuer.js";
+import { SESSION_COOKIE } from "./guard.js";
 
 export const PUBLIC_URL = "http://127.0.0.1:4000";
-export const SESSION_COOKIE = "__Host-reo_session";
+export { SESSION_COOKIE } from "./guard.js";
 
 /** Full login through the fake issuer; returns the session token. */
 export async function signInAs(
