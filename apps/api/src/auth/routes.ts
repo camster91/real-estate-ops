@@ -158,7 +158,15 @@ export async function registerAuthRoutes(
 				);
 			} catch (error) {
 				if (!(error instanceof LoginRejectedError)) throw error;
-				request.log.info({ outcome: error.reason }, "login");
+				request.log.info(
+					{ outcome: error.reason, code: error.detail },
+					"login",
+				);
+				if (error.reason === "provider_unavailable")
+					return reply
+						.code(502)
+						.header("cache-control", "no-store")
+						.send({ error: "login_unavailable" });
 				return loginFailed(reply);
 			}
 			const { rows } = await pool.query<{ id: string | null }>(

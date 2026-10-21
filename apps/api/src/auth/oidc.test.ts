@@ -167,3 +167,62 @@ describe("OIDC login", () => {
 		expect(Object.keys(result).sort()).toEqual(["issuer", "subject"]);
 	});
 });
+
+describe("rejection details", () => {
+	const rejection = async (attempt: Promise<unknown>) => {
+		try {
+			await attempt;
+		} catch (error) {
+			if (error instanceof LoginRejectedError) return error;
+			throw error;
+		}
+		throw new Error("expected a rejection");
+	};
+
+	it("a failed check carries the library's safe error code", async () => {
+		fake.mint({ nonce: "another-nonce" });
+		const error = await rejection(login(provider()));
+		expect(error.reason).toBe("invalid_response");
+		expect(error.detail).toMatch(/^[A-Z][A-Z0-9_]{2,63}$/);
+	});
+
+	it("a provider error such as a cancelled sign-in is its own reason", async () => {
+		const client = await createOidcLogin(provider(), { allowInsecure: true });
+		const start = await client.start();
+		const callback = new URL(REDIRECT);
+		callback.searchParams.set("error", "access_denied");
+		callback.searchParams.set("error_description", "someone@example.invalid");
+		callback.searchParams.set("state", start.state);
+		const error = await rejection(client.finish(callback, start));
+		expect(error.reason).toBe("provider_error");
+		expect(error.detail).toBe("access_denied");
+	});
+
+	it("an unreachable provider is provider_unavailable", async () => {
+		const gone = await startFakeIssuer();
+		const client = await createOidcLogin(
+			provider({
+				issuer: gone.issuer,
+				clientId: gone.clientId,
+				clientSecret: gone.clientSecret,
+				allowedIssuers: [gone.issuer],
+			}),
+			{ allowInsecure: true },
+		);
+		const start = await client.start();
+		const callback = await authorize(start);
+		await gone.close();
+		const error = await rejection(client.finish(callback, start));
+		expect(error.reason).toBe("provider_unavailable");
+	});
+
+	it("details never echo provider text", async () => {
+		const client = await createOidcLogin(provider(), { allowInsecure: true });
+		const start = await client.start();
+		const callback = new URL(REDIRECT);
+		callback.searchParams.set("error", "Bad Thing <script>");
+		callback.searchParams.set("state", start.state);
+		const error = await rejection(client.finish(callback, start));
+		expect(error.detail).toBe("other");
+	});
+});

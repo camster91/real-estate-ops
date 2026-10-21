@@ -36,19 +36,42 @@ export interface VerifiedIdentity {
 
 export type LoginRejection =
 	| "invalid_response"
+	| "provider_error"
+	| "provider_unavailable"
 	| "issuer_not_allowed"
 	| "hosted_domain_not_allowed"
 	| "missing_subject";
 
-/** A login that failed verification. `reason` is safe to log; the cause is not. */
+/**
+ * A login that failed verification. `reason` and `detail` are safe to log;
+ * the cause is not.
+ */
 export class LoginRejectedError extends Error {
 	constructor(
 		readonly reason: LoginRejection,
-		options?: { cause?: unknown },
+		options?: { cause?: unknown; detail?: string },
 	) {
 		super(`Login rejected: ${reason}`, options);
 		this.name = "LoginRejectedError";
+		this.detail = options?.detail;
 	}
+	readonly detail: string | undefined;
+}
+
+const LIBRARY_CODE = /^[A-Z][A-Z0-9_]{2,63}$/;
+const OAUTH_ERROR = /^[a-z][a-z_]{2,63}$/;
+
+/** Maps a library failure to a reason and a fixed-format code; never free text. */
+function rejectionFor(cause: unknown): LoginRejectedError {
+	if (cause instanceof client.AuthorizationResponseError) {
+		const detail = OAUTH_ERROR.test(cause.error) ? cause.error : "other";
+		return new LoginRejectedError("provider_error", { cause, detail });
+	}
+	const code = (cause as { code?: unknown } | null)?.code;
+	if (typeof code === "string" && LIBRARY_CODE.test(code))
+		return new LoginRejectedError("invalid_response", { cause, detail: code });
+	// No library code: the provider could not be reached (fetch failure, timeout).
+	return new LoginRejectedError("provider_unavailable", { cause });
 }
 
 export interface OidcLogin {
@@ -114,7 +137,7 @@ export async function createOidcLogin(
 				);
 				claims = tokens.claims();
 			} catch (cause) {
-				throw new LoginRejectedError("invalid_response", { cause });
+				throw rejectionFor(cause);
 			}
 			if (!claims) throw new LoginRejectedError("invalid_response");
 			if (!provider.allowedIssuers.includes(claims.iss))
