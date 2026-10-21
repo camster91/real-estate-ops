@@ -1,5 +1,6 @@
 import { readAuthConfig, readConfig } from "@reo/config";
-import pg from "pg";
+import type pg from "pg";
+import { createPool } from "./db.js";
 import { createServer } from "./server.js";
 
 const config = readConfig(process.env);
@@ -10,7 +11,9 @@ if (authConfig) {
 	const databaseUrl = process.env.REO_DATABASE_URL;
 	if (!databaseUrl)
 		throw new Error("REO_DATABASE_URL is required when login is configured");
-	pool = new pg.Pool({ connectionString: databaseUrl });
+	pool = createPool(databaseUrl, (code) =>
+		app.log.error({ code }, "database pool error"),
+	);
 }
 const app = createServer(
 	authConfig && pool ? { auth: { pool, config: authConfig } } : {},

@@ -160,6 +160,24 @@ describe("login and sessions", () => {
 		expect(await sessionCount()).toBe(before);
 	});
 
+	it("replay is refused even when the provider would redeem the code again", async () => {
+		fake.allowCodeReuse(true);
+		try {
+			fake.mint({});
+			const { path, login } = await beginLogin();
+			expect((await callback(path, login.value)).statusCode).toBe(302);
+			const before = await sessionCount();
+			fake.mint({});
+			const replay = await callback(path, login.value);
+			expect(replay.statusCode).toBe(400);
+			expect(replay.json()).toEqual({ error: "login_failed" });
+			expect(cookieOf(replay, SESSION)).toBeUndefined();
+			expect(await sessionCount()).toBe(before);
+		} finally {
+			fake.allowCodeReuse(false);
+		}
+	});
+
 	it.each<[string, (login: Cookie) => string | undefined, string?]>([
 		["a changed signature", (login) => `${login.value.slice(0, -2)}xx`],
 		["no cookie", () => undefined],
@@ -189,6 +207,44 @@ describe("login and sessions", () => {
 		expect(response.json()).toEqual({ error: "login_failed" });
 		expect(cookieOf(response, SESSION)).toBeUndefined();
 		expect(await sessionCount()).toBe(before);
+	});
+
+	it("a provider outage is 502 and opens no session", async () => {
+		const gone = await startFakeIssuer();
+		const outage = createServer({
+			auth: {
+				pool: db.app as pg.Pool,
+				config: readAuthConfig({
+					NODE_ENV: "test",
+					REO_PUBLIC_URL: "http://127.0.0.1:4000",
+					REO_LOGIN_COOKIE_SECRET: "synthetic-cookie-secret-0123456789abcdef",
+					REO_GOOGLE_CLIENT_ID: gone.clientId,
+					REO_GOOGLE_CLIENT_SECRET: gone.clientSecret,
+					REO_TEST_OIDC_ISSUER: gone.issuer,
+				}) as AuthConfig,
+				allowInsecureIssuer: true,
+			},
+		});
+		try {
+			const start = await outage.inject("/auth/google/login");
+			const login = cookieOf(start, LOGIN) as Cookie;
+			const authorize = await fetch(start.headers.location as string, {
+				redirect: "manual",
+			});
+			const back = new URL(authorize.headers.get("location") as string);
+			await gone.close();
+			const before = await sessionCount();
+			const response = await outage.inject({
+				url: `${back.pathname}${back.search}`,
+				cookies: { [LOGIN]: login.value },
+			});
+			expect(response.statusCode).toBe(502);
+			expect(response.json()).toEqual({ error: "login_unavailable" });
+			expect(cookieOf(response, SESSION)).toBeUndefined();
+			expect(await sessionCount()).toBe(before);
+		} finally {
+			await outage.close();
+		}
 	});
 
 	it("logout revokes", async () => {
@@ -280,6 +336,9 @@ describe("login and sessions", () => {
 			token = (cookieOf(response, SESSION) as Cookie).value;
 			await session(token);
 			await signIn("synthetic-c");
+			fake.mint({ nonce: "another-nonce" });
+			const failed = await beginLogin();
+			await callback(failed.path, failed.login.value);
 		} finally {
 			write.mockRestore();
 			await app.close();
@@ -288,6 +347,7 @@ describe("login and sessions", () => {
 		const log = lines.join("");
 		expect(log).toContain('"outcome":"signed_in"');
 		expect(log).toContain('"outcome":"no_access"');
+		expect(log).toMatch(/"outcome":"invalid_response","code":"[A-Z0-9_]+"/);
 		const code = new URLSearchParams(path.split("?")[1]).get("code") as string;
 		for (const secret of [token, code, "synthetic-a", "@", fake.clientSecret])
 			expect(log).not.toContain(secret);

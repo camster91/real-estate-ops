@@ -16,7 +16,7 @@ Status: Implemented for synthetic identities against a local test issuer. Suppor
    - Lifetimes: 12 hours absolute (a table CHECK) and 30 minutes idle (checked and refreshed on every request).
    - Logout (`POST /auth/logout`) revokes the session. Losing the last active membership revokes it on the next request; reinstating the membership does not revive it.
    - A new token is issued on every login, so a session ID cannot be fixed in advance.
-   - The temporary login values (`state`, `nonce`, PKCE verifier, provider, issue time) live in `__Host-reo_login`, signed with `REO_LOGIN_COOKIE_SECRET`, `Max-Age` 600, also refused server-side after 600 seconds, and cleared on the callback whatever the outcome.
+   - The temporary login values (`state`, `nonce`, PKCE verifier, provider, issue time) live in `__Host-reo_login`, signed with `REO_LOGIN_COOKIE_SECRET`, `Max-Age` 600, also refused server-side after 600 seconds, and cleared on the callback whatever the outcome. The callback also claims a SHA-256 hash of the `state` through `app.claim_login_state` (migration `0004`) before redeeming the code, so a replayed callback is refused by us even if a provider would redeem a code twice. Claims older than an hour are deleted.
 5. **`reo_auth` role.** A NOLOGIN, NOBYPASSRLS role owns six `SECURITY DEFINER` functions in migration `0003`: `resolve_principal`, `open_session`, `session_principal`, `session_memberships`, `close_session` and the internal `principal_is_active`. It is the only role with policies on `principal`, `membership` and `auth_session` outside a tenant context. `reo_app` has no table access to `auth_session` and may EXECUTE only the five public functions. `open_session` refuses principals without an active membership.
 
 ## Routes
@@ -24,11 +24,11 @@ Status: Implemented for synthetic identities against a local test issuer. Suppor
 | Route | Result |
 |---|---|
 | `GET /auth/{google,microsoft}/login` | 302 to the provider; sets the login cookie. 404 if that provider is not configured. |
-| `GET /auth/{provider}/callback` | 302 to `/` with a session cookie; 400 `login_failed` for any verification failure; 403 `no_access` for a non-member. |
+| `GET /auth/{provider}/callback` | 302 to `/` with a session cookie; 400 `login_failed` for any verification failure; 502 `login_unavailable` when the provider cannot be reached; 403 `no_access` for a non-member. |
 | `POST /auth/logout` | 204; revokes the session and clears the cookie. |
 | `GET /v1/session` | `{principalId, memberships: [{organizationId}]}` or 401. |
 
-All other `/v1/*` routes stay 401. All of these responses send `Cache-Control: no-store`. Login is off unless a provider is fully configured; a partly configured provider stops the API from starting. Logs carry only an outcome code (`signed_in`, `no_access`, `login_cookie_invalid`, a rejection reason); never tokens, codes, cookies, claims or email addresses.
+All other `/v1/*` routes stay 401. All of these responses send `Cache-Control: no-store`. Login is off unless a provider is fully configured; a partly configured provider stops the API from starting. Logs carry only an outcome (`signed_in`, `no_access`, `login_cookie_invalid`, `login_state_reused`, or a rejection reason: `invalid_response`, `provider_error`, `provider_unavailable`, `issuer_not_allowed`, `hosted_domain_not_allowed`, `missing_subject`) and a fixed-format `code` (the library's error code, or the provider's OAuth error such as `access_denied`); never tokens, codes, cookies, claims, free text or email addresses. A database pool error is logged by its code only and does not stop the API.
 
 ## Multi-factor authentication
 

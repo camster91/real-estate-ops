@@ -19,6 +19,8 @@ export interface FakeIssuer {
 	clientSecret: string;
 	/** Sets claims (and optionally a wrong signing key) for the next ID token. */
 	mint(claims: Partial<IdClaims>, options?: { key?: "other" }): void;
+	/** When on, codes can be redeemed more than once (a misbehaving provider). */
+	allowCodeReuse(on: boolean): void;
 	close(): Promise<void>;
 }
 
@@ -60,6 +62,7 @@ export async function startFakeIssuer(): Promise<FakeIssuer> {
 	const codes = new Map<string, PendingCode>();
 	let next: { claims: Partial<IdClaims>; key?: "other" } = { claims: {} };
 	let issuer = "";
+	let reuseCodes = false;
 
 	const server = createServer(async (request, response) => {
 		const url = new URL(request.url ?? "/", issuer);
@@ -107,7 +110,7 @@ export async function startFakeIssuer(): Promise<FakeIssuer> {
 				return json(401, { error: "invalid_client" });
 			const code = body.get("code") ?? "";
 			const pending = codes.get(code);
-			codes.delete(code);
+			if (!reuseCodes) codes.delete(code);
 			const verifier = body.get("code_verifier") ?? "";
 			const challenge = createHash("sha256")
 				.update(verifier)
@@ -151,6 +154,9 @@ export async function startFakeIssuer(): Promise<FakeIssuer> {
 		clientSecret,
 		mint(claims, options) {
 			next = options?.key ? { claims, key: options.key } : { claims };
+		},
+		allowCodeReuse(on) {
+			reuseCodes = on;
 		},
 		close: () =>
 			new Promise<void>((resolve, reject) =>
