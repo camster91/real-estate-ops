@@ -1,5 +1,6 @@
 import type pg from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { MissingTenantContextError, recordChange } from "./audit.js";
 import { type TenantContext, withTenant } from "./tenant.js";
 import { type SeedIds, seedTwoTenants } from "./testing/fixtures.js";
 import { createTestDatabase, type TestDatabase } from "./testing/harness.js";
@@ -152,5 +153,125 @@ describe("audit and outbox tables", () => {
 			});
 			expect(rows[0].owner).not.toBe(appUser);
 		}
+	});
+});
+
+describe("recordChange", () => {
+	const branchChange = (resourceId: string) => ({
+		action: "branch.create",
+		resourceType: "branch",
+		resourceId,
+		details: { name: "Synthetic", status: "new" },
+		event: {
+			type: "branch.created",
+			schemaVersion: 1,
+			aggregateVersion: 1,
+			payload: { branchId: resourceId },
+		},
+	});
+
+	const createBranch = async (client: pg.PoolClient) =>
+		(
+			await client.query(
+				"INSERT INTO branch (organization_id, name) VALUES (app.current_organization_id(), 'Synthetic Audited') RETURNING id",
+			)
+		).rows[0].id as string;
+
+	it("change, audit and event commit together", async () => {
+		const { branchId, result } = await withTenant(
+			app,
+			memberA(),
+			async (client) => {
+				const branchId = await createBranch(client);
+				return {
+					branchId,
+					result: await recordChange(client, branchChange(branchId)),
+				};
+			},
+		);
+		const audit = (
+			await db.admin.query("SELECT * FROM audit_event WHERE id = $1", [
+				result.auditId,
+			])
+		).rows[0];
+		expect(audit).toMatchObject({
+			organization_id: ids.orgA,
+			actor_principal_id: ids.pa,
+			action: "branch.create",
+			resource_type: "branch",
+			resource_id: branchId,
+			purpose: "operations",
+			correlation_id: result.correlationId,
+			details: { name: "[redacted]", status: "new" },
+		});
+		const event = (
+			await db.admin.query("SELECT * FROM outbox_event WHERE id = $1", [
+				result.eventId,
+			])
+		).rows[0];
+		expect(event).toMatchObject({
+			organization_id: ids.orgA,
+			actor_principal_id: ids.pa,
+			event_type: "branch.created",
+			schema_version: 1,
+			aggregate_type: "branch",
+			aggregate_id: branchId,
+			aggregate_version: 1,
+			correlation_id: result.correlationId,
+			causation_id: null,
+			payload: { branchId },
+			published_at: null,
+		});
+	});
+
+	it("rollback leaves nothing", async () => {
+		const before = await Promise.all(
+			["branch", "audit_event", "outbox_event"].map(count),
+		);
+		await expect(
+			withTenant(app, memberA(), async (client) => {
+				const branchId = await createBranch(client);
+				await recordChange(client, branchChange(branchId));
+				throw new Error("synthetic failure");
+			}),
+		).rejects.toThrow("synthetic failure");
+		const after = await Promise.all(
+			["branch", "audit_event", "outbox_event"].map(count),
+		);
+		expect(after).toEqual(before);
+	});
+
+	it("outside a tenant context fails", async () => {
+		const before = await count("audit_event");
+		const client = await app.connect();
+		try {
+			await client.query("BEGIN");
+			await expect(
+				recordChange(
+					client,
+					branchChange("00000000-0000-4000-8000-000000000009"),
+				),
+			).rejects.toBeInstanceOf(MissingTenantContextError);
+			await client.query("ROLLBACK");
+		} finally {
+			client.release();
+		}
+		expect(await count("audit_event")).toBe(before);
+	});
+
+	it("given correlation id is kept", async () => {
+		const correlationId = "00000000-0000-4000-8000-0000000000aa";
+		const result = await withTenant(app, memberA(), async (client) =>
+			recordChange(client, {
+				...branchChange(await createBranch(client)),
+				correlationId,
+			}),
+		);
+		expect(result.correlationId).toBe(correlationId);
+		const { rows } = await db.admin.query(
+			"SELECT count(*)::int AS n FROM outbox_event WHERE correlation_id = $1",
+			[correlationId],
+		);
+		expect(rows[0].n).toBe(1);
 	});
 });

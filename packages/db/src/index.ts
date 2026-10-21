@@ -1,4 +1,11 @@
 export {
+	type Change,
+	type DetailValue,
+	MissingTenantContextError,
+	minimiseDetails,
+	recordChange,
+} from "./audit.js";
+export {
 	MigrationChecksumError,
 	MigrationNameError,
 	type MigrationResult,
