@@ -46,6 +46,34 @@ describe("API scaffold refuses premature operation", () => {
 			await app.close();
 		}
 	});
+	it("never logs database error detail, which can hold row values", async () => {
+		const lines: string[] = [];
+		const write = vi
+			.spyOn(process.stdout, "write")
+			.mockImplementation((chunk) => {
+				lines.push(String(chunk));
+				return true;
+			});
+		const app = createServer();
+		try {
+			app.get("/pgboom", async () => {
+				throw Object.assign(new Error("new row violates check constraint"), {
+					code: "23514",
+					detail: "Failing row contains (secret title)",
+					where: "SQL statement with secret title",
+					constraint: "task_title_check",
+				});
+			});
+			expect((await app.inject("/pgboom")).statusCode).toBe(500);
+		} finally {
+			write.mockRestore();
+			await app.close();
+		}
+		const log = lines.join("");
+		expect(log).toContain("task_title_check");
+		expect(log).not.toContain("secret title");
+	});
+
 	it("logs unexpected failures but returns a safe envelope", async () => {
 		const lines: string[] = [];
 		const write = vi

@@ -47,7 +47,15 @@ export function createServer(options: { auth?: AuthOptions } = {}) {
 			);
 			return reply.code(status).send({ error: "bad_request" });
 		}
-		request.log.error({ err: error }, "request failed");
+		// Database errors carry `detail`/`where` text that can hold row values
+		// (titles, names); log only fields that cannot.
+		const { name, message, stack, code, constraint } = error as FastifyError & {
+			constraint?: string;
+		};
+		request.log.error(
+			{ err: { name, message, stack, code, constraint } },
+			"request failed",
+		);
 		return reply.code(500).send({ error: "internal_error" });
 	});
 	return app;

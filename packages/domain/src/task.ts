@@ -23,7 +23,9 @@ export type NewTaskResult =
 	| { ok: false; field: "id" | "title" | "dueAt" | "body" };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const CONTROL = /\p{Cc}/u;
+// Control characters, line/paragraph separators, and lone surrogates (half an
+// emoji, which PostgreSQL would silently replace). Mirrors the database CHECK.
+const FORBIDDEN = /[\p{Cc}\u2028\u2029]|\p{Cs}/u;
 // ISO 8601 date-time with an explicit offset or Z; seconds and fractions optional.
 const DATE_TIME =
 	/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.\d{1,9})?)?(?:Z|[+-]\d{2}:\d{2})$/;
@@ -62,7 +64,7 @@ export function parseNewTask(input: unknown): NewTaskResult {
 	if (typeof body.title !== "string") return { ok: false, field: "title" };
 	const title = body.title.trim();
 	const length = [...title].length;
-	if (length < 1 || length > TITLE_MAX || CONTROL.test(title))
+	if (length < 1 || length > TITLE_MAX || FORBIDDEN.test(title))
 		return { ok: false, field: "title" };
 	const dueAt = parseDueAt(body.dueAt);
 	if (dueAt === undefined) return { ok: false, field: "dueAt" };

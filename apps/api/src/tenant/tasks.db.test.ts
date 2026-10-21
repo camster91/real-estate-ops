@@ -246,6 +246,44 @@ describe("task routes", () => {
 		expect(await countWhere("task", "id = $1", [id])).toBe(0);
 	});
 
+	it("membership lost between the check and the insert is 404, not 500", async () => {
+		const real = db.app as pg.Pool;
+		const where = "organization_id = $1 AND principal_id = $2";
+		// Suspends the membership after inTenant's check, as the transaction opens.
+		const racing = {
+			query: real.query.bind(real),
+			connect: async () => {
+				await db.admin.query(
+					`UPDATE membership SET status = 'suspended' WHERE ${where}`,
+					[ids.orgA, ids.pa],
+				);
+				return real.connect();
+			},
+		} as unknown as pg.Pool;
+		const racingApp = createServer({
+			auth: { pool: racing, config, allowInsecureIssuer: true },
+		});
+		const id = randomUUID();
+		try {
+			const response = await racingApp.inject({
+				method: "POST",
+				url: tasksUrl(ids.orgA),
+				cookies: { [SESSION_COOKIE]: tokenA },
+				headers: { origin: PUBLIC_URL },
+				payload: { id, title: "Raced" },
+			});
+			expect(response.statusCode).toBe(404);
+			expect(response.json()).toEqual({ error: "not_found" });
+		} finally {
+			await racingApp.close();
+			await db.admin.query(
+				`UPDATE membership SET status = 'active' WHERE ${where}`,
+				[ids.orgA, ids.pa],
+			);
+		}
+		expect(await countWhere("task", "id = $1", [id])).toBe(0);
+	});
+
 	it("other organisation is 404 and a POST without Origin is 403", async () => {
 		expect((await list(tokenA, ids.orgB)).statusCode).toBe(404);
 		expect(

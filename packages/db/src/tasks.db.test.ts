@@ -131,6 +131,9 @@ describe("task table", () => {
 		["leading space", " x"],
 		["too long", "x".repeat(201)],
 		["tab", "a\tb"],
+		["line separator", "a\u2028b"],
+		["DEL", "a\u007fb"],
+		["C1 control", "a\u0085b"],
 	])("title constraint: %s", async (_label, title) => {
 		expect(await code(create(ctx(ids.orgA, ids.pa), { title }))).toBe("23514");
 	});

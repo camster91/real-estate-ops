@@ -12,7 +12,9 @@ CREATE TABLE task (
 	id uuid NOT NULL,
 	title text NOT NULL CHECK (
 		char_length(title) BETWEEN 1 AND 200
-		AND title !~ '[[:cntrl:]]'
+		-- Explicit ranges, not [[:cntrl:]], so the rule does not depend on the
+		-- database locale: C0 and C1 controls, DEL, line/paragraph separators.
+		AND title !~ '[\x01-\x1f\x7f-\x9f\u2028\u2029]'
 		AND btrim(title) = title
 	),
 	status text NOT NULL DEFAULT 'ready'
