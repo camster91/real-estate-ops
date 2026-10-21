@@ -10,7 +10,12 @@
 		"start": "node dist/index.js"
 	},
 	"dependencies": {
+		"@fastify/cookie": "11.1.2",
 		"@reo/config": "workspace:*",
-		"fastify": "5.12.5"
+		"fastify": "5.12.5",
+		"openid-client": "6.8.8"
+	},
+	"devDependencies": {
+		"jose": "6.2.12"
 	}
 }
