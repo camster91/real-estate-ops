@@ -47,7 +47,7 @@ A mutation check confirmed the tests fail if any of these is weakened:
 
 ## Not done
 
-- API and worker middleware wiring. It needs a verified principal from OIDC (#96 part 2).
+- Worker wiring. API wiring is done through `inTenant` and its `decide` helper (ADR 0013).
 - Role grants from the authorization matrix (#24, needs brokerage approval).
 - The admin path for issuing and revoking grants, which requires an L3 approval.
 - Service identities and requester intersection in the database.
