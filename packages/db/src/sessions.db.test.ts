@@ -165,6 +165,13 @@ describe("sessions", () => {
 	it("session ends when membership is lost", async () => {
 		await open("t-member");
 		expect(await suspendA(() => principalOf("t-member"))).toBeNull();
+		// Reinstating the membership does not revive the old session.
+		expect(await principalOf("t-member")).toBeNull();
+		const { rows } = await db.admin.query(
+			`SELECT revoked_at IS NOT NULL AS revoked FROM auth_session WHERE ${sessionWhere}`,
+			["t-member"],
+		);
+		expect(rows[0].revoked).toBe(true);
 	});
 
 	it("lists only active memberships", async () => {

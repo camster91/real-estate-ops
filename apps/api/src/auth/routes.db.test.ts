@@ -223,6 +223,8 @@ describe("login and sessions", () => {
 				[ids.orgA, ids.pa],
 			);
 		}
+		// Reinstating the membership does not revive the old session.
+		expect((await session(token)).statusCode).toBe(401);
 	});
 
 	it.each([undefined, "not-a-token", "A".repeat(43)])(

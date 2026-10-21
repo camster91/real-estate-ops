@@ -14,7 +14,7 @@ Status: Implemented for synthetic identities against a local test issuer. Suppor
 4. **Sessions.**
    - A random 32-byte token (base64url) goes in the `__Host-reo_session` cookie: `HttpOnly`, `Secure`, `SameSite=Lax`, `Path=/`, no `Domain`. The database stores only its SHA-256 hash.
    - Lifetimes: 12 hours absolute (a table CHECK) and 30 minutes idle (checked and refreshed on every request).
-   - Logout (`POST /auth/logout`) revokes the session. Losing the last active membership ends it on the next request.
+   - Logout (`POST /auth/logout`) revokes the session. Losing the last active membership revokes it on the next request; reinstating the membership does not revive it.
    - A new token is issued on every login, so a session ID cannot be fixed in advance.
    - The temporary login values (`state`, `nonce`, PKCE verifier, provider, issue time) live in `__Host-reo_login`, signed with `REO_LOGIN_COOKIE_SECRET`, `Max-Age` 600, also refused server-side after 600 seconds, and cleared on the callback whatever the outcome.
 5. **`reo_auth` role.** A NOLOGIN, NOBYPASSRLS role owns six `SECURITY DEFINER` functions in migration `0003`: `resolve_principal`, `open_session`, `session_principal`, `session_memberships`, `close_session` and the internal `principal_is_active`. It is the only role with policies on `principal`, `membership` and `auth_session` outside a tenant context. `reo_app` has no table access to `auth_session` and may EXECUTE only the five public functions. `open_session` refuses principals without an active membership.

@@ -80,17 +80,29 @@ CREATE FUNCTION app.open_session(p_principal uuid, p_token_hash bytea) RETURNS t
 
 -- The principal for a live session, refreshing its idle timer. A session is
 -- live when it is not revoked, is inside its 12-hour lifetime, was used in the
--- last 30 minutes, and its principal still has an active membership.
+-- last 30 minutes, and its principal still has an active membership. A session
+-- whose principal has lost every active membership is revoked here, so
+-- reinstating the membership later does not revive it.
 CREATE FUNCTION app.session_principal(p_token_hash bytea) RETURNS uuid
 	LANGUAGE sql VOLATILE SECURITY DEFINER SET search_path = pg_catalog, public
 	AS $$
-		UPDATE public.auth_session s SET last_seen_at = now()
-		WHERE s.token_hash = p_token_hash
-			AND s.revoked_at IS NULL
-			AND now() < s.expires_at
-			AND now() < s.last_seen_at + interval '30 minutes'
-			AND app.principal_is_active(s.principal_id)
-		RETURNING s.principal_id
+		WITH live AS (
+			SELECT s.token_hash, app.principal_is_active(s.principal_id) AS active
+			FROM public.auth_session s
+			WHERE s.token_hash = p_token_hash
+				AND s.revoked_at IS NULL
+				AND now() < s.expires_at
+				AND now() < s.last_seen_at + interval '30 minutes'
+			FOR UPDATE
+		), touched AS (
+			UPDATE public.auth_session s
+			SET last_seen_at = CASE WHEN live.active THEN now() ELSE s.last_seen_at END,
+				revoked_at = CASE WHEN live.active THEN NULL ELSE now() END
+			FROM live
+			WHERE s.token_hash = live.token_hash
+			RETURNING s.principal_id, live.active
+		)
+		SELECT principal_id FROM touched WHERE active
 	$$;
 
 -- Organisations where a live session's principal is an active member. Does not
