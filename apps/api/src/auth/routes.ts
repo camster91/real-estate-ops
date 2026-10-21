@@ -1,7 +1,14 @@
-import { createHash, randomBytes } from "node:crypto";
+import { randomBytes } from "node:crypto";
 import type { AuthConfig } from "@reo/config";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import type pg from "pg";
+import {
+	hashToken,
+	requireSession,
+	SESSION_COOKIE,
+	sessionHash,
+	sessionToken,
+} from "./guard.js";
 import {
 	createOidcLogin,
 	LoginRejectedError,
@@ -18,9 +25,7 @@ export interface AuthOptions {
 }
 
 const LOGIN_COOKIE = "__Host-reo_login";
-const SESSION_COOKIE = "__Host-reo_session";
 const LOGIN_TTL_SECONDS = 600;
-const TOKEN = /^[A-Za-z0-9_-]{43}$/;
 
 // __Host- cookies must be Secure, Path=/ and have no Domain.
 const cookieBase = {
@@ -37,9 +42,6 @@ interface PendingLogin {
 	codeVerifier: string;
 	issuedAt: number;
 }
-
-const hashToken = (token: string) =>
-	createHash("sha256").update(token).digest();
 
 function readPendingLogin(
 	request: FastifyRequest,
@@ -67,11 +69,6 @@ function readPendingLogin(
 	)
 		return undefined;
 	return data as PendingLogin;
-}
-
-function sessionToken(request: FastifyRequest): string | undefined {
-	const token = request.cookies[SESSION_COOKIE];
-	return token && TOKEN.test(token) ? token : undefined;
 }
 
 const loginFailed = (reply: FastifyReply) =>
@@ -205,27 +202,21 @@ export async function registerAuthRoutes(
 		return reply.clearCookie(SESSION_COOKIE, cookieBase).code(204).send();
 	});
 
-	app.get("/v1/session", async (request, reply) => {
-		reply.header("cache-control", "no-store");
-		const token = sessionToken(request);
-		const hash = token ? hashToken(token) : undefined;
-		const principal = hash
-			? (
-					await pool.query<{ id: string | null }>(
-						"SELECT app.session_principal($1) AS id",
-						[hash],
-					)
-				).rows[0]?.id
-			: null;
-		if (!hash || !principal)
-			return reply.code(401).send({ error: "authentication_required" });
-		const memberships = await pool.query<{ id: string }>(
-			"SELECT app.session_memberships($1) AS id ORDER BY 1",
-			[hash],
-		);
-		return {
-			principalId: principal,
-			memberships: memberships.rows.map((row) => ({ organizationId: row.id })),
-		};
-	});
+	app.get(
+		"/v1/session",
+		{ preHandler: requireSession(pool) },
+		async (request, reply) => {
+			reply.header("cache-control", "no-store");
+			const memberships = await pool.query<{ id: string }>(
+				"SELECT app.session_memberships($1) AS id ORDER BY 1",
+				[sessionHash(request)],
+			);
+			return {
+				principalId: request.principalId,
+				memberships: memberships.rows.map((row) => ({
+					organizationId: row.id,
+				})),
+			};
+		},
+	);
 }
