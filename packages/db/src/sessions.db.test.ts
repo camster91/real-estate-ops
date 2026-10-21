@@ -236,3 +236,42 @@ describe("sessions", () => {
 		});
 	});
 });
+
+describe("login state", () => {
+	const claim = async (state: string) =>
+		(
+			await one(
+				"SELECT app.claim_login_state(sha256(convert_to($1, 'UTF8'))) AS claimed",
+				[state],
+			)
+		).claimed as boolean | null;
+
+	it("a state can be claimed only once", async () => {
+		expect(await claim("state-1")).toBe(true);
+		expect(await claim("state-1")).toBeNull();
+		expect(await claim("state-2")).toBe(true);
+	});
+
+	it("old claims are cleaned up", async () => {
+		await claim("state-old");
+		await db.admin.query(
+			"UPDATE login_state_use SET used_at = now() - interval '2 hours' WHERE state_hash = sha256(convert_to('state-old', 'UTF8'))",
+		);
+		await claim("state-new");
+		const { rows } = await db.admin.query(
+			"SELECT count(*)::int AS n FROM login_state_use WHERE state_hash = sha256(convert_to('state-old', 'UTF8'))",
+		);
+		expect(rows[0].n).toBe(0);
+	});
+
+	it("runtime role cannot touch login state directly", async () => {
+		for (const sql of [
+			"SELECT * FROM login_state_use",
+			"DELETE FROM login_state_use",
+		])
+			expect(await code(app.query(sql)), sql).toBe("42501");
+		expect(await code(app.query("SELECT app.claim_login_state('\\x01')"))).toBe(
+			"23514",
+		);
+	});
+});

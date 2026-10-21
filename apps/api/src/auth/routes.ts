@@ -140,6 +140,16 @@ export async function registerAuthRoutes(
 				request.log.info({ outcome: "login_cookie_invalid" }, "login");
 				return loginFailed(reply);
 			}
+			// Claimed before the code is redeemed, so a replay fails here even if
+			// the provider would accept the same code again.
+			const claimed = await pool.query<{ claimed: boolean | null }>(
+				"SELECT app.claim_login_state($1) AS claimed",
+				[hashToken(pending.state)],
+			);
+			if (claimed.rows[0]?.claimed !== true) {
+				request.log.info({ outcome: "login_state_reused" }, "login");
+				return loginFailed(reply);
+			}
 			let identity: { issuer: string; subject: string };
 			try {
 				identity = await (await loginFor(name)).finish(

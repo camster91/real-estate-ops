@@ -160,6 +160,24 @@ describe("login and sessions", () => {
 		expect(await sessionCount()).toBe(before);
 	});
 
+	it("replay is refused even when the provider would redeem the code again", async () => {
+		fake.allowCodeReuse(true);
+		try {
+			fake.mint({});
+			const { path, login } = await beginLogin();
+			expect((await callback(path, login.value)).statusCode).toBe(302);
+			const before = await sessionCount();
+			fake.mint({});
+			const replay = await callback(path, login.value);
+			expect(replay.statusCode).toBe(400);
+			expect(replay.json()).toEqual({ error: "login_failed" });
+			expect(cookieOf(replay, SESSION)).toBeUndefined();
+			expect(await sessionCount()).toBe(before);
+		} finally {
+			fake.allowCodeReuse(false);
+		}
+	});
+
 	it.each<[string, (login: Cookie) => string | undefined, string?]>([
 		["a changed signature", (login) => `${login.value.slice(0, -2)}xx`],
 		["no cookie", () => undefined],
