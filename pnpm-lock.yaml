@@ -35,9 +35,15 @@ importers:
       '@fastify/cookie':
         specifier: 11.1.2
         version: 11.1.2
+      '@reo/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
       '@reo/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@reo/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       fastify:
         specifier: 5.12.5
         version: 5.12.5
@@ -48,9 +54,6 @@ importers:
         specifier: 8.23.1
         version: 8.23.1
     devDependencies:
-      '@reo/db':
-        specifier: workspace:*
-        version: link:../../packages/db
       '@types/pg':
         specifier: 8.23.1
         version: 8.23.1

@@ -253,6 +253,7 @@ describe("login and sessions", () => {
 		const logout = await app.inject({
 			method: "POST",
 			url: "/auth/logout",
+			headers: { origin: "http://127.0.0.1:4000" },
 			cookies: { [SESSION]: token },
 		});
 		expect(logout.statusCode).toBe(204);

@@ -1,6 +1,8 @@
 import cookie from "@fastify/cookie";
 import Fastify, { type FastifyError } from "fastify";
+import { originGuard } from "./auth/guard.js";
 import { type AuthOptions, registerAuthRoutes } from "./auth/routes.js";
+import { registerTenantRoutes } from "./tenant/routes.js";
 
 export function createServer(options: { auth?: AuthOptions } = {}) {
 	const app = Fastify({
@@ -20,7 +22,10 @@ export function createServer(options: { auth?: AuthOptions } = {}) {
 	if (auth) {
 		// Signs the short-lived login cookie with REO_LOGIN_COOKIE_SECRET.
 		app.register(cookie, { secret: auth.config.cookieSecret });
+		// Root-level so it covers every /v1 route, including the catch-all.
+		app.addHook("onRequest", originGuard(auth.config.publicUrl));
 		app.register(registerAuthRoutes, auth);
+		app.register(registerTenantRoutes, { pool: auth.pool });
 	}
 	app.get("/health/live", async () => ({ status: "alive" }));
 	app.get("/health/ready", async (_request, reply) =>
