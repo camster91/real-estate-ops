@@ -109,6 +109,8 @@ importers:
         specifier: 8.23.1
         version: 8.23.1
 
+  packages/domain: {}
+
 packages:
 
   '@biomejs/biome@2.5.15':
