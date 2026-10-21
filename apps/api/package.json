@@ -11,13 +11,14 @@
 	},
 	"dependencies": {
 		"@fastify/cookie": "11.1.2",
+		"@reo/auth": "workspace:*",
 		"@reo/config": "workspace:*",
+		"@reo/db": "workspace:*",
 		"fastify": "5.12.5",
 		"openid-client": "6.8.8",
 		"pg": "8.23.1"
 	},
 	"devDependencies": {
-		"@reo/db": "workspace:*",
 		"@types/pg": "8.23.1",
 		"jose": "6.2.12"
 	}
