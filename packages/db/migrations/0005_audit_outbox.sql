@@ -2,10 +2,11 @@
 --
 -- A state change, its minimised audit event and its outbox event are written in
 -- one transaction (app code: recordChange in packages/db/src/audit.ts). The
--- runtime role may only INSERT, and only for its own tenant and principal while
--- it has an active membership. audit_event is append-only for every role: a
--- trigger refuses UPDATE, DELETE and TRUNCATE, including for the owner, so a
--- change to history needs a reviewed migration. Reading audit events and
+-- runtime role may only INSERT, only for its own tenant, principal and purpose
+-- while it has an active membership, and never sets the timestamps. A trigger
+-- refuses UPDATE, DELETE and TRUNCATE on audit_event for ordinary use by any
+-- role. A superuser or the table owner can still disable it; real tamper
+-- evidence waits for the hash chain and external checkpoints (ADR 0005). Reading audit events and
 -- publishing outbox events are later work (BOR/admin view, #84 publisher).
 
 CREATE TABLE audit_event (
@@ -39,7 +40,8 @@ CREATE TABLE outbox_event (
 		CHECK (jsonb_typeof(payload) = 'object' AND octet_length(payload::text) <= 4096),
 	published_at timestamptz,
 	PRIMARY KEY (organization_id, id),
-	UNIQUE (organization_id, aggregate_type, aggregate_id, aggregate_version, event_type)
+	CONSTRAINT outbox_event_version_unique
+		UNIQUE (organization_id, aggregate_type, aggregate_id, aggregate_version, event_type)
 );
 
 -- The future publisher scans unpublished events in creation order.
@@ -55,6 +57,7 @@ CREATE POLICY audit_event_insert ON audit_event
 	FOR INSERT TO reo_app WITH CHECK (
 		organization_id = (SELECT app.current_organization_id())
 		AND actor_principal_id = (SELECT app.current_principal_id())
+		AND purpose = (SELECT app.current_purpose())
 		AND (SELECT app.has_active_membership())
 	);
 CREATE POLICY outbox_event_insert ON outbox_event
@@ -80,4 +83,10 @@ CREATE TRIGGER audit_event_no_truncate
 	FOR EACH STATEMENT EXECUTE FUNCTION app.audit_event_immutable();
 
 REVOKE EXECUTE ON FUNCTION app.audit_event_immutable() FROM PUBLIC;
-GRANT INSERT ON audit_event, outbox_event TO reo_app;
+-- Column-level grants: the runtime role cannot set occurred_at, created_at or
+-- published_at, so it cannot backdate history or mark an event as published.
+GRANT INSERT (organization_id, id, actor_principal_id, action, resource_type,
+	resource_id, purpose, correlation_id, details) ON audit_event TO reo_app;
+GRANT INSERT (organization_id, id, event_type, schema_version, aggregate_type,
+	aggregate_id, aggregate_version, actor_principal_id, correlation_id,
+	causation_id, payload) ON outbox_event TO reo_app;

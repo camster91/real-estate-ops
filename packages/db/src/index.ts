@@ -1,6 +1,8 @@
 export {
 	type Change,
 	type DetailValue,
+	DuplicateEventError,
+	InvalidChangeError,
 	MissingTenantContextError,
 	minimiseDetails,
 	recordChange,

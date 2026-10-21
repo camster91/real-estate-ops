@@ -1,6 +1,11 @@
 import type pg from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { MissingTenantContextError, recordChange } from "./audit.js";
+import {
+	DuplicateEventError,
+	InvalidChangeError,
+	MissingTenantContextError,
+	recordChange,
+} from "./audit.js";
 import { type TenantContext, withTenant } from "./tenant.js";
 import { type SeedIds, seedTwoTenants } from "./testing/fixtures.js";
 import { createTestDatabase, type TestDatabase } from "./testing/harness.js";
@@ -114,6 +119,27 @@ describe("audit and outbox tables", () => {
 		])
 			expect(await code(db.admin.query(sql)), sql).toBe("42501");
 		expect(await count("audit_event")).toBeGreaterThan(0);
+	});
+
+	it.each([
+		[
+			"a forged purpose",
+			"INSERT INTO audit_event (organization_id, actor_principal_id, action, resource_type, resource_id, purpose, correlation_id) VALUES ($1, $2, 'branch.create', 'branch', gen_random_uuid(), 'client_service', gen_random_uuid())",
+		],
+		[
+			"a backdated occurred_at",
+			"INSERT INTO audit_event (organization_id, actor_principal_id, action, resource_type, resource_id, purpose, correlation_id, occurred_at) VALUES ($1, $2, 'branch.create', 'branch', gen_random_uuid(), 'operations', gen_random_uuid(), '2001-01-01')",
+		],
+		[
+			"a pre-published outbox event",
+			"INSERT INTO outbox_event (organization_id, actor_principal_id, event_type, schema_version, aggregate_type, aggregate_id, aggregate_version, correlation_id, published_at) VALUES ($1, $2, 'branch.created', 1, 'branch', gen_random_uuid(), 1, gen_random_uuid(), now())",
+		],
+		[
+			"a forged outbox created_at",
+			"INSERT INTO outbox_event (organization_id, actor_principal_id, event_type, schema_version, aggregate_type, aggregate_id, aggregate_version, correlation_id, created_at) VALUES ($1, $2, 'branch.created', 1, 'branch', gen_random_uuid(), 1, gen_random_uuid(), '2099-01-01')",
+		],
+	])("%s is refused", async (_label, sql) => {
+		expect(await code(as(memberA(), sql, [ids.orgA, ids.pa]))).toBe("42501");
 	});
 
 	it("constraints hold", async () => {
@@ -257,6 +283,49 @@ describe("recordChange", () => {
 			client.release();
 		}
 		expect(await count("audit_event")).toBe(before);
+	});
+
+	it.each([
+		["a non-uuid correlation id", { correlationId: "not-a-uuid" }],
+		["a non-uuid resource id", { resourceId: "abc" }],
+		["a bad action", { action: "Branch.Create" }],
+		["a bad resource type", { resourceType: "Branch" }],
+	])("%s is an InvalidChangeError", async (_label, override) => {
+		const before = await count("audit_event");
+		await expect(
+			withTenant(app, memberA(), async (client) =>
+				recordChange(client, {
+					...branchChange("00000000-0000-4000-8000-0000000000b1"),
+					...override,
+				}),
+			),
+		).rejects.toBeInstanceOf(InvalidChangeError);
+		expect(await count("audit_event")).toBe(before);
+	});
+
+	it.each([
+		["schema version", { schemaVersion: 1.5 }],
+		["aggregate version", { aggregateVersion: 0 }],
+		["event type", { type: "Branch.Created" }],
+		["causation id", { causationId: "nope" }],
+	])("a bad event %s is an InvalidChangeError", async (_label, override) => {
+		const change = branchChange("00000000-0000-4000-8000-0000000000b2");
+		await expect(
+			withTenant(app, memberA(), async (client) =>
+				recordChange(client, {
+					...change,
+					event: { ...change.event, ...override },
+				}),
+			),
+		).rejects.toBeInstanceOf(InvalidChangeError);
+	});
+
+	it("the same event version twice is a DuplicateEventError", async () => {
+		const change = branchChange("00000000-0000-4000-8000-0000000000b3");
+		await withTenant(app, memberA(), (client) => recordChange(client, change));
+		await expect(
+			withTenant(app, memberA(), (client) => recordChange(client, change)),
+		).rejects.toBeInstanceOf(DuplicateEventError);
 	});
 
 	it("given correlation id is kept", async () => {
