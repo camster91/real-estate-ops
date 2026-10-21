@@ -10,3 +10,4 @@ test-results/
 __pycache__/
 *.tsbuildinfo
 next-env.d.ts
+.superpowers/
