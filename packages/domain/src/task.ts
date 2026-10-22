@@ -70,3 +70,62 @@ export function parseNewTask(input: unknown): NewTaskResult {
 	if (dueAt === undefined) return { ok: false, field: "dueAt" };
 	return { ok: true, task: { id: body.id.toLowerCase(), title, dueAt } };
 }
+
+/** Statuses of work still to do. */
+export const OPEN_STATUSES = Object.freeze([
+	"ready",
+	"in_progress",
+	"waiting",
+	"blocked",
+] as const satisfies readonly TaskStatus[]);
+
+/** Finished statuses; a finished task can only be reopened (to ready). */
+export const DONE_STATUSES = Object.freeze([
+	"completed",
+	"cancelled",
+] as const satisfies readonly TaskStatus[]);
+
+const isOpen = (status: TaskStatus) =>
+	(OPEN_STATUSES as readonly TaskStatus[]).includes(status);
+
+/**
+ * Whether a task may move from one status to another (ADR 0017). Open
+ * statuses move to any other status; finished ones only back to ready.
+ * The same status is not a transition. The database trigger in
+ * migrations/0008_task_status.sql repeats these rules.
+ */
+export function canTransition(from: TaskStatus, to: TaskStatus): boolean {
+	if (from === to) return false;
+	return isOpen(from) || to === "ready";
+}
+
+const VERSION_MAX = 2147483647;
+const STATUS_KEYS = new Set(["status", "version"]);
+
+/** Validates a status change request: `{ status, version }` and nothing else. */
+export function parseStatusChange(
+	input: unknown,
+):
+	| { ok: true; status: TaskStatus; version: number }
+	| { ok: false; field: "status" | "version" | "body" } {
+	if (typeof input !== "object" || input === null || Array.isArray(input))
+		return { ok: false, field: "body" };
+	const body = input as Record<string, unknown>;
+	if (Object.keys(body).some((key) => !STATUS_KEYS.has(key)))
+		return { ok: false, field: "body" };
+	const status = body.status;
+	if (
+		typeof status !== "string" ||
+		!(TASK_STATUSES as readonly string[]).includes(status)
+	)
+		return { ok: false, field: "status" };
+	const version = body.version;
+	if (
+		typeof version !== "number" ||
+		!Number.isInteger(version) ||
+		version < 1 ||
+		version > VERSION_MAX
+	)
+		return { ok: false, field: "version" };
+	return { ok: true, status: status as TaskStatus, version };
+}
