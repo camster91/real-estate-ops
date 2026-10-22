@@ -44,6 +44,9 @@ importers:
       '@reo/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@reo/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
       fastify:
         specifier: 5.12.5
         version: 5.12.5
@@ -108,6 +111,8 @@ importers:
       '@types/pg':
         specifier: 8.23.1
         version: 8.23.1
+
+  packages/domain: {}
 
 packages:
 

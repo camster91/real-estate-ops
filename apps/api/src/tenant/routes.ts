@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 import type pg from "pg";
 import { requireSession } from "../auth/guard.js";
 import { inTenant, NOT_MEMBER } from "./context.js";
+import { registerTaskRoutes } from "./tasks.js";
 
 interface BranchRow {
 	id: string;
@@ -15,6 +16,7 @@ export async function registerTenantRoutes(
 	options: { pool: pg.Pool },
 ): Promise<void> {
 	const { pool } = options;
+	registerTaskRoutes(app, { pool });
 
 	app.get(
 		"/v1/organizations/:organizationId/branches",
