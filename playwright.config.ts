@@ -10,7 +10,8 @@ export default defineConfig({
 		launchOptions: testBrowser ? { executablePath: testBrowser } : {},
 	},
 	webServer: {
-		command: "pnpm --filter @reo/web dev",
+		// The website imports @reo/domain from its build output.
+		command: "pnpm --filter @reo/domain build && pnpm --filter @reo/web dev",
 		url: "http://127.0.0.1:3000",
 		reuseExistingServer: false,
 		timeout: 60000,
