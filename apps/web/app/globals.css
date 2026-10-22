@@ -49,3 +49,123 @@ aside {
 	outline: 3px solid #146451;
 	outline-offset: 5px;
 }
+h2 {
+	font-size: 1.375rem;
+	margin-top: 40px;
+}
+ul.actions,
+ul.choices,
+ul.tasks {
+	list-style: none;
+	padding: 0;
+	margin: 24px 0;
+	display: grid;
+	gap: 12px;
+	max-width: 660px;
+}
+.button {
+	display: inline-block;
+	min-height: 44px;
+	padding: 10px 20px;
+	font: inherit;
+	font-weight: 600;
+	color: white;
+	background: #146451;
+	border: 0;
+	border-radius: 8px;
+	text-decoration: none;
+	cursor: pointer;
+}
+.button:disabled {
+	opacity: 0.6;
+	cursor: wait;
+}
+ul.choices .button {
+	width: 100%;
+	text-align: left;
+}
+.link {
+	font: inherit;
+	color: #146451;
+	background: none;
+	border: 0;
+	padding: 0;
+	text-decoration: underline;
+	cursor: pointer;
+}
+a {
+	color: #146451;
+}
+.bar {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px 24px;
+	align-items: center;
+	justify-content: space-between;
+	max-width: 960px;
+	margin: auto;
+	padding: 16px clamp(24px, 6vw, 80px) 0;
+}
+.bar nav {
+	display: flex;
+	gap: 20px;
+	align-items: center;
+}
+ul.tasks li {
+	padding: 16px;
+	background: white;
+	border: 1px solid #bdcdc5;
+	border-radius: 8px;
+	overflow-wrap: anywhere;
+}
+ul.tasks .title {
+	display: block;
+	font-weight: 600;
+}
+ul.tasks .meta {
+	display: block;
+	margin-top: 4px;
+	color: #44605a;
+}
+form.add {
+	display: grid;
+	gap: 8px;
+	max-width: 480px;
+}
+form.add label {
+	font-weight: 600;
+	margin-top: 8px;
+}
+form.add input {
+	font: inherit;
+	min-height: 44px;
+	padding: 8px 12px;
+	border: 1px solid #6b847b;
+	border-radius: 6px;
+	width: 100%;
+}
+form.add input[aria-invalid="true"] {
+	border-color: #a1260d;
+}
+form.add .button {
+	justify-self: start;
+	margin-top: 16px;
+}
+.error {
+	color: #a1260d;
+	margin: 0;
+	font-size: 1rem;
+}
+.notice {
+	padding: 16px;
+	background: white;
+	border-left: 4px solid #a1260d;
+}
+.visually-hidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}

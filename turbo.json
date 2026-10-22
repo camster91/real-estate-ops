@@ -18,5 +18,5 @@
 		}
 	},
 	"globalDependencies": ["tsconfig.base.json"],
-	"globalEnv": ["NODE_ENV", "REO_TEST_BROWSER_EXECUTABLE"]
+	"globalEnv": ["NODE_ENV", "REO_TEST_BROWSER_EXECUTABLE", "REO_API_ORIGIN"]
 }
