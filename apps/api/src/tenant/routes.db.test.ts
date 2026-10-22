@@ -180,7 +180,9 @@ describe("tenant routes", () => {
 				expect((await branches(ids.orgB)).statusCode).toBe(200);
 				const me = await get("/v1/session");
 				expect(me.statusCode).toBe(200);
-				expect(me.json().memberships).toEqual([{ organizationId: ids.orgB }]);
+				expect(me.json().memberships).toEqual([
+					{ organizationId: ids.orgB, name: "Synthetic Org B" },
+				]);
 			} finally {
 				await db.admin.query(
 					`UPDATE membership SET status = 'active' WHERE ${where}`,

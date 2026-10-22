@@ -71,10 +71,15 @@ function readPendingLogin(
 	return data as PendingLogin;
 }
 
-const loginFailed = (reply: FastifyReply) =>
-	reply.code(400).header("cache-control", "no-store").send({
-		error: "login_failed",
-	});
+/**
+ * Sends a failed sign-in back to the website's sign-in page with a fixed
+ * reason code. No session is set and nothing else is shown (ADR 0016).
+ */
+const signInFailed = (
+	reply: FastifyReply,
+	reason: "failed" | "no_access" | "unavailable",
+) =>
+	reply.header("cache-control", "no-store").redirect(`/?signin=${reason}`, 302);
 
 /**
  * Login, callback, logout and /v1/session. Routes exist only for configured
@@ -135,7 +140,7 @@ export async function registerAuthRoutes(
 			reply.clearCookie(LOGIN_COOKIE, cookieBase);
 			if (!pending) {
 				request.log.info({ outcome: "login_cookie_invalid" }, "login");
-				return loginFailed(reply);
+				return signInFailed(reply, "failed");
 			}
 			// Claimed before the code is redeemed, so a replay fails here even if
 			// the provider would accept the same code again.
@@ -145,7 +150,7 @@ export async function registerAuthRoutes(
 			);
 			if (claimed.rows[0]?.claimed !== true) {
 				request.log.info({ outcome: "login_state_reused" }, "login");
-				return loginFailed(reply);
+				return signInFailed(reply, "failed");
 			}
 			let identity: { issuer: string; subject: string };
 			try {
@@ -160,11 +165,8 @@ export async function registerAuthRoutes(
 					"login",
 				);
 				if (error.reason === "provider_unavailable")
-					return reply
-						.code(502)
-						.header("cache-control", "no-store")
-						.send({ error: "login_unavailable" });
-				return loginFailed(reply);
+					return signInFailed(reply, "unavailable");
+				return signInFailed(reply, "failed");
 			}
 			const { rows } = await pool.query<{ id: string | null }>(
 				"SELECT app.resolve_principal($1, $2) AS id",
@@ -181,10 +183,7 @@ export async function registerAuthRoutes(
 			const expiresAt = opened?.rows[0]?.expires_at ?? null;
 			if (!expiresAt) {
 				request.log.info({ outcome: "no_access" }, "login");
-				return reply
-					.code(403)
-					.header("cache-control", "no-store")
-					.send({ error: "no_access" });
+				return signInFailed(reply, "no_access");
 			}
 			// A session cookie already in the browser is replaced, so an earlier
 			// token that may have leaked stops working at the next sign-in.
@@ -212,14 +211,17 @@ export async function registerAuthRoutes(
 		{ preHandler: requireSession(pool) },
 		async (request, reply) => {
 			reply.header("cache-control", "no-store");
-			const memberships = await pool.query<{ id: string }>(
-				"SELECT app.session_memberships($1) AS id ORDER BY 1",
-				[sessionHash(request)],
-			);
+			const memberships = await pool.query<{
+				organization_id: string;
+				name: string;
+			}>("SELECT organization_id, name FROM app.session_organizations($1)", [
+				sessionHash(request),
+			]);
 			return {
 				principalId: request.principalId,
 				memberships: memberships.rows.map((row) => ({
-					organizationId: row.id,
+					organizationId: row.organization_id,
+					name: row.name,
 				})),
 			};
 		},

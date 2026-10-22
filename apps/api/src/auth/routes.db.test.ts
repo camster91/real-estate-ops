@@ -36,6 +36,16 @@ const cookieOf = (
 ): Cookie | undefined =>
 	response.cookies.find((cookie) => cookie.name === name && cookie.value);
 
+/** A sign-in failure: back to the website with a reason, no-store. */
+const expectSignInFailure = (
+	response: { statusCode: number; headers: Record<string, unknown> },
+	reason: "failed" | "no_access" | "unavailable",
+) => {
+	expect(response.statusCode).toBe(302);
+	expect(response.headers.location).toBe(`/?signin=${reason}`);
+	expect(response.headers["cache-control"]).toBe("no-store");
+};
+
 const sessionCount = async () =>
 	(await db.admin.query("SELECT count(*)::int AS n FROM auth_session")).rows[0]
 		.n as number;
@@ -129,7 +139,7 @@ describe("login and sessions", () => {
 		expect(me.headers["cache-control"]).toBe("no-store");
 		expect(me.json()).toEqual({
 			principalId: ids.pa,
-			memberships: [{ organizationId: ids.orgA }],
+			memberships: [{ organizationId: ids.orgA, name: "Synthetic Org A" }],
 		});
 		// Only the hash is stored.
 		const stored = await db.admin.query(
@@ -142,8 +152,7 @@ describe("login and sessions", () => {
 	it("non-member is refused", async () => {
 		const before = await sessionCount();
 		const response = await signIn("synthetic-c");
-		expect(response.statusCode).toBe(403);
-		expect(response.json()).toEqual({ error: "no_access" });
+		expectSignInFailure(response, "no_access");
 		expect(cookieOf(response, SESSION)).toBeUndefined();
 		expect(await sessionCount()).toBe(before);
 	});
@@ -154,8 +163,7 @@ describe("login and sessions", () => {
 		expect((await callback(path, login.value)).statusCode).toBe(302);
 		const before = await sessionCount();
 		const replay = await callback(path, login.value);
-		expect(replay.statusCode).toBe(400);
-		expect(replay.json()).toEqual({ error: "login_failed" });
+		expectSignInFailure(replay, "failed");
 		expect(cookieOf(replay, SESSION)).toBeUndefined();
 		expect(await sessionCount()).toBe(before);
 	});
@@ -169,8 +177,7 @@ describe("login and sessions", () => {
 			const before = await sessionCount();
 			fake.mint({});
 			const replay = await callback(path, login.value);
-			expect(replay.statusCode).toBe(400);
-			expect(replay.json()).toEqual({ error: "login_failed" });
+			expectSignInFailure(replay, "failed");
 			expect(cookieOf(replay, SESSION)).toBeUndefined();
 			expect(await sessionCount()).toBe(before);
 		} finally {
@@ -203,13 +210,12 @@ describe("login and sessions", () => {
 			? path.replace("/auth/google/", `/auth/${provider}/`)
 			: path;
 		const response = await callback(target, change(login));
-		expect(response.statusCode).toBe(400);
-		expect(response.json()).toEqual({ error: "login_failed" });
+		expectSignInFailure(response, "failed");
 		expect(cookieOf(response, SESSION)).toBeUndefined();
 		expect(await sessionCount()).toBe(before);
 	});
 
-	it("a provider outage is 502 and opens no session", async () => {
+	it("a provider outage redirects as unavailable and opens no session", async () => {
 		const gone = await startFakeIssuer();
 		const outage = createServer({
 			auth: {
@@ -238,8 +244,7 @@ describe("login and sessions", () => {
 				url: `${back.pathname}${back.search}`,
 				cookies: { [LOGIN]: login.value },
 			});
-			expect(response.statusCode).toBe(502);
-			expect(response.json()).toEqual({ error: "login_unavailable" });
+			expectSignInFailure(response, "unavailable");
 			expect(cookieOf(response, SESSION)).toBeUndefined();
 			expect(await sessionCount()).toBe(before);
 		} finally {
