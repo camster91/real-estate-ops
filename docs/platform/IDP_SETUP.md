@@ -2,7 +2,7 @@
 
 Owner steps for ADR 0012. Nothing here goes live until production is approved. Never put a client secret in git, a chat, a ticket or a screenshot: keep it in the organisation's secret manager.
 
-`<public>` below is the API's public address (for local testing, `http://127.0.0.1:4000`).
+`<public>` below is the website's public address, which is also `REO_PUBLIC_URL` (for local testing, `http://127.0.0.1:3000`). The website passes `/auth/*` and `/v1/*` through to the API (ADR 0016), so the redirect URIs point at the website, not the API.
 
 ## Google (Google Cloud and Google Workspace)
 

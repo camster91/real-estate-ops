@@ -6,3 +6,4 @@ export {
 	type TaskStatus,
 	TITLE_MAX,
 } from "./task.js";
+export { formatInZone, TORONTO, toOffsetIso, zonedLocalToUtc } from "./time.js";

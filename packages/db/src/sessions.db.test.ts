@@ -191,6 +191,38 @@ describe("sessions", () => {
 		}
 	});
 
+	it("session organizations lists names of active memberships only", async () => {
+		const namesOf = async (token: string) =>
+			(
+				await app.query(
+					"SELECT organization_id, name FROM app.session_organizations(sha256(convert_to($1, 'UTF8')))",
+					[token],
+				)
+			).rows;
+		await db.admin.query(
+			"INSERT INTO membership (organization_id, principal_id, status, effective_from) VALUES ($1, $2, 'suspended', now() - interval '1 day')",
+			[ids.orgB, ids.pa],
+		);
+		try {
+			await open("t-names");
+			expect(await namesOf("t-names")).toEqual([
+				{ organization_id: ids.orgA, name: "Synthetic Org A" },
+			]);
+			await close("t-names");
+			expect(await namesOf("t-names")).toEqual([]);
+			expect(await namesOf("t-unknown")).toEqual([]);
+		} finally {
+			await db.admin.query(
+				"DELETE FROM membership WHERE organization_id = $1 AND principal_id = $2",
+				[ids.orgB, ids.pa],
+			);
+		}
+		const direct = await app.query(
+			"SELECT count(*)::int AS n FROM organization",
+		);
+		expect(direct.rows[0].n).toBe(0);
+	});
+
 	it("runtime role cannot touch sessions directly", async () => {
 		for (const sql of [
 			"SELECT * FROM auth_session",
@@ -223,7 +255,7 @@ describe("sessions", () => {
 			relforcerowsecurity: true,
 		});
 		const owners = await db.admin.query(
-			"SELECT DISTINCT pg_get_userbyid(proowner) AS owner, bool_and(prosecdef) AS definer FROM pg_proc WHERE proname IN ('resolve_principal', 'open_session', 'session_principal', 'close_session', 'session_memberships') GROUP BY 1",
+			"SELECT DISTINCT pg_get_userbyid(proowner) AS owner, bool_and(prosecdef) AS definer FROM pg_proc WHERE proname IN ('resolve_principal', 'open_session', 'session_principal', 'close_session', 'session_memberships', 'session_organizations') GROUP BY 1",
 		);
 		expect(owners.rows).toEqual([{ owner: "reo_auth", definer: true }]);
 		const login = await db.admin.query(
