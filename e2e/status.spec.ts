@@ -140,8 +140,47 @@ test("a change made elsewhere to done moves the task", async ({ page }) => {
 	const select = await open(page, state);
 	await select.selectOption("waiting");
 	await expect(page.getByText("No open tasks.")).toBeVisible();
-	await expect(live(page)).toHaveText(
-		"This task changed in another window. It now shows the latest status.",
+	await expect(page.getByRole("main").locator(".page-notice")).toHaveText(
+		`${TITLE} changed in another window and is now Done.`,
+	);
+	await expectFocusRing(page.getByRole("button", { name: "Show done tasks" }));
+});
+
+test("marking done moves focus to the next task", async ({ page }) => {
+	const second = task({
+		id: "4b3c2d1e-6f50-4b4c-9d3e-2f1a0b9c8d7e",
+		title: "Synthetic second task",
+	});
+	const state = newState({ tasks: { [ORG_A]: [task(), second] } });
+	const select = await open(page, state);
+	await select.focus();
+	await select.selectOption("completed");
+	await expect(live(page)).toHaveText("Task marked done.");
+	await expectFocusRing(
+		page.getByRole("combobox", { name: "Status of Synthetic second task" }),
+	);
+});
+
+test("marking the only task done focuses Show done tasks", async ({ page }) => {
+	const state = newState({ tasks: { [ORG_A]: [task()] } });
+	const select = await open(page, state);
+	await select.focus();
+	await select.selectOption("cancelled");
+	await expect(live(page)).toHaveText("Task cancelled.");
+	await expectFocusRing(page.getByRole("button", { name: "Show done tasks" }));
+});
+
+test("reopen focuses the reopened task", async ({ page }) => {
+	const state = newState({
+		tasks: { [ORG_A]: [task({ status: "completed", version: 2 })] },
+	});
+	await mockApi(page, state);
+	await page.goto(TASKS);
+	await page.getByRole("button", { name: "Show done tasks" }).click();
+	await page.getByRole("button", { name: `Reopen ${TITLE}` }).click();
+	await expect(live(page)).toHaveText("Task reopened.");
+	await expectFocusRing(
+		page.getByRole("combobox", { name: `Status of ${TITLE}` }),
 	);
 });
 

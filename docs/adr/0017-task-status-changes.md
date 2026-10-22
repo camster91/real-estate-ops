@@ -47,6 +47,8 @@ Task JSON now includes `statusChangedAt`.
 - **Network error:** the menu goes back to the old value, with "The status could not be changed. Please try again.".
 - **Session ended:** the row shows "Your session has ended. Sign in again to change it." with a sign-in link.
 - **Empty open list:** "No open tasks. Add a task below.".
+- **A task moved to the other list by another window:** a visible notice says "<title> changed in another window and is now <status>.".
+- **Focus after a row moves lists:** it goes to the next open task's status menu. If there is no other open task, it goes to "Show done tasks". After a reopen, it goes to the reopened task's menu.
 
 ## Evidence
 
@@ -82,4 +84,5 @@ Task JSON now includes `statusChangedAt`.
 ## Rollback
 
 - Revert the code.
+- The guard trigger also applies to the table owner. A future migration that backfills `task` rows must disable `task_status_guard` for that statement and re-enable it in the same migration.
 - Migration 0008 can stay in place. A forward migration can drop the grant, the policy and the trigger; `status_changed_at` is harmless.

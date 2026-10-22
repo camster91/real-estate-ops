@@ -77,6 +77,11 @@ export default function MyTasks() {
 	const [busy, setBusy] = useState<ReadonlySet<string>>(new Set());
 	const [pending, setPending] = useState<Record<string, string>>({});
 	const [messages, setMessages] = useState<Record<string, RowMessage>>({});
+	// A page-level notice for a task that moved lists because of another window.
+	const [notice, setNotice] = useState<string>();
+	// The element to focus after a row moves between lists, so keyboard and
+	// screen-reader users are not dropped back at the top of the page.
+	const [focusTarget, setFocusTarget] = useState<string | null>(null);
 	// One id per submission: retries reuse it, so the API replays instead of
 	// creating a second task. A new id is made only after a success.
 	const pendingId = useRef<string | null>(null);
@@ -97,12 +102,19 @@ export default function MyTasks() {
 		refresh();
 	}, [refresh]);
 
+	useEffect(() => {
+		if (!focusTarget) return;
+		document.getElementById(focusTarget)?.focus();
+		setFocusTarget(null);
+	}, [focusTarget]);
+
 	const submit = async (event: FormEvent) => {
 		event.preventDefault();
 		if (saving) return;
 		setTitleError(undefined);
 		setDueError(undefined);
 		setFormError(undefined);
+		setNotice(undefined);
 		setSessionEnded(false);
 		setAnnouncement("");
 		let dueAt: string | undefined;
@@ -191,6 +203,7 @@ export default function MyTasks() {
 		setBusy((current) => new Set(current).add(task.id));
 		setPending((current) => ({ ...current, [task.id]: status }));
 		setMessages(({ [task.id]: _, ...rest }) => rest);
+		setNotice(undefined);
 		setAnnouncement("");
 		const result = await changeStatus(
 			organizationId,
@@ -210,12 +223,32 @@ export default function MyTasks() {
 		if (result === "signed_out")
 			return say({ text: STATUS_SIGNED_OUT, signIn: true });
 		if (result === "error") return say({ text: STATUS_ERROR });
-		if ("conflict" in result) {
-			place(result.conflict);
-			say({ text: STATUS_CONFLICT });
-			return setAnnouncement(STATUS_CONFLICT);
+		const latest = "conflict" in result ? result.conflict : result.task;
+		const moved = isDone(latest.status) !== isDone(task.status);
+		if (moved) {
+			// The row leaves its list: focus the next open task, the reopened
+			// task, or the done-tasks button.
+			const index = tasks.findIndex((t) => t.id === task.id);
+			const neighbour =
+				index < 0 ? undefined : (tasks[index + 1] ?? tasks[index - 1]);
+			setFocusTarget(
+				!isDone(latest.status)
+					? `status-${latest.id}`
+					: neighbour
+						? `status-${neighbour.id}`
+						: "toggle-done",
+			);
 		}
-		place(result.task);
+		place(latest);
+		if ("conflict" in result) {
+			if (!moved) {
+				say({ text: STATUS_CONFLICT });
+				return setAnnouncement(STATUS_CONFLICT);
+			}
+			const text = `${latest.title} changed in another window and is now ${STATUS_LABELS[latest.status] ?? latest.status}.`;
+			setNotice(text);
+			return setAnnouncement(text);
+		}
 		if (isDone(task.status)) return setAnnouncement("Task reopened.");
 		if (result.task.status === "completed")
 			return setAnnouncement("Task marked done.");
@@ -261,6 +294,7 @@ export default function MyTasks() {
 				)}
 				{load === "ready" && (
 					<>
+						{notice && <p className="notice page-notice">{notice}</p>}
 						<OpenTasks
 							tasks={tasks}
 							busy={busy}
@@ -317,6 +351,7 @@ export default function MyTasks() {
 						</form>
 						<h2>Done tasks</h2>
 						<button
+							id="toggle-done"
 							type="button"
 							className="link"
 							aria-expanded={showDone}

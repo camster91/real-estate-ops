@@ -62,6 +62,7 @@ export function OpenTasks(props: {
 							{task.dueAt ? formatInZone(task.dueAt, TORONTO) : "No due date"}
 						</span>
 						<select
+							id={`status-${task.id}`}
 							className="status"
 							aria-label={`Status of ${task.title}`}
 							value={pending[task.id] ?? task.status}
