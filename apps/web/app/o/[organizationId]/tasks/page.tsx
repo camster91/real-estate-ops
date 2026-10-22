@@ -38,12 +38,15 @@ const DATE_ERROR = "Enter a valid date and time.";
 const GAP_ERROR =
 	"That time does not exist in Toronto (clocks change). Pick another time.";
 const SAVE_ERROR = "That task could not be saved. Please try again.";
+const ALREADY_SAVED =
+	"Your earlier task was already saved. Press Add task again to add this one as well.";
 const SESSION_ENDED =
 	"Your session has ended. Sign in again, then add this task.";
 
 type Load = "loading" | "ready" | "error" | "not_found";
 
-// Undated tasks last, then by due date, as the API orders them.
+// Undated tasks last, then by due date. Open tasks only for now: the API also
+// puts completed and cancelled tasks last, which this slice cannot create.
 const byDue = (a: Task, b: Task) =>
 	(a.dueAt === null ? 1 : 0) - (b.dueAt === null ? 1 : 0) ||
 	(a.dueAt ?? "").localeCompare(b.dueAt ?? "");
@@ -87,6 +90,7 @@ export default function MyTasks() {
 		setTitleError(undefined);
 		setDueError(undefined);
 		setFormError(undefined);
+		setSessionEnded(false);
 		setAnnouncement("");
 		let dueAt: string | undefined;
 		if (due) {
@@ -108,7 +112,16 @@ export default function MyTasks() {
 		if (result === "not_found") return setLoad("not_found");
 		if (result === "error") return setFormError(SAVE_ERROR);
 		if (result === "conflict") {
+			// The same id with a different body: an earlier try may have been
+			// saved with its reply lost. Show the saved list, and use a new id.
+			const sent = pendingId.current;
 			pendingId.current = null;
+			const latest = await listTasks(organizationId);
+			if (Array.isArray(latest)) {
+				setTasks(latest);
+				if (latest.some((task) => task.id === sent))
+					return setFormError(ALREADY_SAVED);
+			}
 			return setFormError(SAVE_ERROR);
 		}
 		if ("invalid" in result) {

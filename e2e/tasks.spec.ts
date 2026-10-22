@@ -220,6 +220,45 @@ test("session expired on add keeps the typed task", async ({ page }) => {
 	);
 });
 
+test("a later success clears the session-ended message", async ({ page }) => {
+	const state = newState({
+		createReplies: [
+			{ status: 401, body: { error: "authentication_required" } },
+		],
+	});
+	await mockApi(page, state);
+	await page.goto(TASKS);
+	await page.getByLabel("Title").fill("Synthetic after sign-in");
+	await page.getByRole("button", { name: "Add task" }).click();
+	const ended = page.getByText("Your session has ended.");
+	await expect(ended).toBeVisible();
+	await page.getByRole("button", { name: "Add task" }).click();
+	await expect(page.getByText("Task added.")).toBeAttached();
+	await expect(ended).toHaveCount(0);
+});
+
+test("a saved task whose reply was lost shows up after a conflict", async ({
+	page,
+}) => {
+	const state = newState({ createReplies: ["commit_then_abort"] });
+	await mockApi(page, state);
+	await page.goto(TASKS);
+	const title = page.getByLabel("Title");
+	await title.fill("Synthetic first try");
+	await page.getByRole("button", { name: "Add task" }).click();
+	await expect(page.getByRole("main").getByRole("alert")).toHaveText(
+		"That task could not be saved. Please try again.",
+	);
+	await title.fill("Synthetic edited try");
+	await page.getByRole("button", { name: "Add task" }).click();
+	const list = page.getByRole("list", { name: "Tasks" });
+	await expect(list).toContainText("Synthetic first try");
+	await expect(page.getByRole("main").getByRole("alert")).toContainText(
+		"already saved",
+	);
+	await expect(title).toHaveValue("Synthetic edited try");
+});
+
 test("brokerage not available", async ({ page }) => {
 	await mockApi(page, newState({ tasks: { [ORG_A]: "not_found" } }));
 	await page.goto(TASKS);

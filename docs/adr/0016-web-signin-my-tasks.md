@@ -34,7 +34,7 @@ Status: Implemented for synthetic data. Completes the web half of the M1 "assign
   - Loading, empty and error ("Tasks could not be loaded." with "Try again") states are visible.
   - A 401 while loading goes to sign-in. A 401 while adding keeps the typed task and says "Your session has ended. Sign in again, then add this task."
   - A 404 shows "This brokerage is not available to you." with the switch link.
-  - **Safe retries:** one client UUID per submission. A retry after a network error reuses it, so the API replays instead of creating a second task. A new id is made only after a success, or after a 409.
+  - **Safe retries:** one client UUID per submission. A retry after a network error reuses it, so the API replays instead of creating a second task. A new id is made only after a success, or after a 409. On a 409 the list is reloaded; if the earlier try was in fact saved (its reply was lost), it appears and the page says so, so the person does not add a hidden duplicate by accident.
   - A server 400 for the title or due date is shown next to the field, with `aria-invalid`, `aria-describedby` and focus on the field. The typed text is kept.
 - The web app never reads or writes the session token, sends no tenant or principal headers, and never renders raw API bodies.
 

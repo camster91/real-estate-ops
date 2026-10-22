@@ -16,7 +16,8 @@ export interface MockTask {
 	version: number;
 }
 
-type Reply = { status: number; body?: unknown } | "abort";
+// "commit_then_abort": the task is saved, but the response is lost.
+type Reply = { status: number; body?: unknown } | "abort" | "commit_then_abort";
 
 export interface MockState {
 	/** Signed out, or the session's memberships. */
@@ -88,7 +89,8 @@ export async function mockApi(page: Page, state: MockState): Promise<void> {
 				if (method === "POST") {
 					const next = state.createReplies.shift();
 					if (next === "abort") return route.abort("failed");
-					if (next) return reply(next.status, next.body);
+					if (next && next !== "commit_then_abort")
+						return reply(next.status, next.body);
 					const input = body as { id: string; title: string; dueAt?: string };
 					const task: MockTask = {
 						id: input.id,
@@ -97,7 +99,17 @@ export async function mockApi(page: Page, state: MockState): Promise<void> {
 						dueAt: input.dueAt ? new Date(input.dueAt).toISOString() : null,
 						version: 1,
 					};
+					// Like the API: the same id replays, or conflicts if the body differs.
+					const existing = Array.isArray(list)
+						? list.find((t) => t.id === task.id)
+						: undefined;
+					if (existing)
+						return existing.title === task.title &&
+							existing.dueAt === task.dueAt
+							? reply(200, { task: existing })
+							: reply(409, { error: "conflict" });
 					if (Array.isArray(list)) list.push(task);
+					if (next === "commit_then_abort") return route.abort("failed");
 					return reply(201, { task });
 				}
 			}
