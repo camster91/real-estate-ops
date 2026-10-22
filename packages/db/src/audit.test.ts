@@ -66,6 +66,34 @@ describe("minimiseDetails", () => {
 		});
 	});
 
+	it("redacts personal numbers and postal codes under neutral keys", () => {
+		for (const value of [
+			"046454286",
+			"046-454-286",
+			"4165551234",
+			"+14165551234",
+			"416-555-0100",
+			"4111.1111.1111.1111",
+			"M5V2T6",
+			"m5v-2t6",
+		])
+			expect(minimiseDetails({ ref: value }).ref, value).toBe("[redacted]");
+		for (const key of ["postcode", "post_code", "insuranceNumber"])
+			expect(minimiseDetails({ [key]: "x1" })[key], key).toBe("[redacted]");
+	});
+
+	it("keeps dates, short numbers and versions", () => {
+		const input = {
+			closingDate: "2026-11-01",
+			at: "2026-11-01T10:00:00.000Z",
+			local: "2026-11-01T10:00-04:00",
+			version: "1.2.3",
+			step: "123456",
+			code: "A1B2C3D",
+		};
+		expect(minimiseDetails(input)).toEqual(input);
+	});
+
 	it("keeps uuid-valued id keys even when the name looks sensitive", () => {
 		const id = "0b9c2e1a-1d2f-4c3b-8a9e-1f2e3d4c5b6a";
 		expect(

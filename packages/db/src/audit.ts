@@ -37,8 +37,20 @@ const KEY = /^[a-zA-Z][a-zA-Z0-9_]{0,39}$/;
 // free text that might hold personal data, is stored as "[redacted]". With 20
 // keys of at most 40 characters this always fits the 4096-byte column check.
 const CODE_LIKE = /^[A-Za-z0-9_.:+-]{1,64}$/;
+// Code-like values that are still personal data whatever the key: a run of 7
+// or more digits with only separators between them (phone, SIN, card or
+// account number) and Canadian postal codes. ISO dates and times are kept.
+const NUMBER_LIKE = /^\+?[0-9][0-9.-]*$/;
+const ISO_DATE =
+	/^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:\d{2})?)?$/;
+const POSTAL_CODE = /^[A-Za-z]\d[A-Za-z]-?\d[A-Za-z]\d$/;
+const personalValue = (value: string) =>
+	POSTAL_CODE.test(value) ||
+	(NUMBER_LIKE.test(value) &&
+		!ISO_DATE.test(value) &&
+		value.replace(/\D/g, "").length >= 7);
 const SENSITIVE =
-	/(e-?mail|phone|mobile|cell|tel|fax|name|address|street|city|postal|zip|birth|dob|social|licen[cs]e|registration|passport|ohip|health|bank|transit|iban|card|account|occupation|employer|note|body|message|comment|description|subject|recipient|token|secret|password|key|auth|credential|cookie|session)/i;
+	/(e-?mail|phone|mobile|cell|tel|fax|name|address|street|city|postal|post_?code|zip|insurance|birth|dob|social|licen[cs]e|registration|passport|ohip|health|bank|transit|iban|card|account|occupation|employer|note|body|message|comment|description|subject|recipient|token|secret|password|key|auth|credential|cookie|session)/i;
 // SIN as a word: "sin", "SIN", "clientSin", "sinNumber", "client_sin" - but not
 // closingDate or business.
 const SIN = /(^|_|[a-z])(sin|SIN|Sin)($|_|[A-Z0-9])/;
@@ -52,7 +64,9 @@ const redact = (key: string, value: unknown): DetailValue | undefined => {
 	if (typeof value === "number")
 		return Number.isFinite(value) ? value : undefined;
 	if (typeof value === "string")
-		return CODE_LIKE.test(value) ? value : "[redacted]";
+		return CODE_LIKE.test(value) && !personalValue(value)
+			? value
+			: "[redacted]";
 	return undefined;
 };
 

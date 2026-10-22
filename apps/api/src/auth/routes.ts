@@ -186,6 +186,11 @@ export async function registerAuthRoutes(
 					.header("cache-control", "no-store")
 					.send({ error: "no_access" });
 			}
+			// A session cookie already in the browser is replaced, so an earlier
+			// token that may have leaked stops working at the next sign-in.
+			const previous = sessionHash(request);
+			if (previous)
+				await pool.query("SELECT app.close_session($1)", [previous]);
 			request.log.info({ outcome: "signed_in" }, "login");
 			return reply
 				.setCookie(SESSION_COOKIE, token, { ...cookieBase, expires: expiresAt })
