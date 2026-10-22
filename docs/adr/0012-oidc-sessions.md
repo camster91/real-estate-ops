@@ -10,7 +10,7 @@ Status: Implemented for synthetic identities against a local test issuer. Suppor
    - Microsoft: exactly one Entra tenant, `https://login.microsoftonline.com/<tenant>/v2.0`. `common`, `organizations`, `consumers` and the personal-account tenant are refused. The app registration is single-tenant.
    - After the library's checks (issuer, audience, signature, expiry, nonce, state, PKCE), the API also requires `iss` to be in the configured allow-list and `sub` to be present.
    - Only `scope=openid` is requested. A login yields `{issuer, subject}` and nothing else; email and name are never read or stored.
-3. **No sign-in without an approved membership.** Signing in never creates a principal or a membership. Email address and domain never grant access. A verified identity with no active membership gets 403 `no_access` and no session.
+3. **No sign-in without an approved membership.** Signing in never creates a principal or a membership. Email address and domain never grant access. A verified identity with no active membership gets no session (now a redirect to `/?signin=no_access`, ADR 0016).
 4. **Sessions.**
    - A random 32-byte token (base64url) goes in the `__Host-reo_session` cookie: `HttpOnly`, `Secure`, `SameSite=Lax`, `Path=/`, no `Domain`. The database stores only its SHA-256 hash.
    - Lifetimes: 12 hours absolute (a table CHECK) and 30 minutes idle (checked and refreshed on every request).
@@ -24,7 +24,7 @@ Status: Implemented for synthetic identities against a local test issuer. Suppor
 | Route | Result |
 |---|---|
 | `GET /auth/{google,microsoft}/login` | 302 to the provider; sets the login cookie. 404 if that provider is not configured. |
-| `GET /auth/{provider}/callback` | 302 to `/` with a session cookie; 400 `login_failed` for any verification failure; 502 `login_unavailable` when the provider cannot be reached; 403 `no_access` for a non-member. |
+| `GET /auth/{provider}/callback` | 302 to `/` with a session cookie. Failures are 302 redirects to `/?signin=failed` (any verification failure), `/?signin=unavailable` (provider unreachable) or `/?signin=no_access` (non-member), with no session (ADR 0016; before that, 400, 502 and 403 JSON). |
 | `POST /auth/logout` | 204; revokes the session and clears the cookie. |
 | `GET /v1/session` | `{principalId, memberships: [{organizationId}]}` or 401. |
 
