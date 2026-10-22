@@ -31,6 +31,7 @@ test("loading then list", async ({ page }, testInfo) => {
 					status: "ready",
 					dueAt: "2026-11-01T14:00:00.000Z",
 					version: 1,
+					statusChangedAt: "2026-10-20T14:00:00.000Z",
 				},
 				{
 					id: "2f2e3d4c-5b6a-4789-8abc-def012345678",
@@ -38,6 +39,7 @@ test("loading then list", async ({ page }, testInfo) => {
 					status: "waiting",
 					dueAt: null,
 					version: 1,
+					statusChangedAt: "2026-10-20T14:00:00.000Z",
 				},
 			],
 		},
@@ -51,11 +53,17 @@ test("loading then list", async ({ page }, testInfo) => {
 		"Call the synthetic lender",
 	);
 	await expect(list.getByRole("listitem").first()).toContainText(
-		/Ready · Sun, Nov 1, 9:00\sa\.m\./,
+		/Sun, Nov 1, 9:00\sa\.m\./,
 	);
-	await expect(list.getByRole("listitem").nth(1)).toContainText(
-		"Waiting · No due date",
-	);
+	await expect(
+		page.getByRole("combobox", { name: "Status of Call the synthetic lender" }),
+	).toHaveValue("ready");
+	await expect(list.getByRole("listitem").nth(1)).toContainText("No due date");
+	await expect(
+		page.getByRole("combobox", {
+			name: "Status of Order a synthetic status certificate",
+		}),
+	).toHaveValue("waiting");
 	await expect(page.getByText("Loading tasks…")).toHaveCount(0);
 	await expectNoHorizontalScroll(page);
 	await page.screenshot({
@@ -68,7 +76,7 @@ test("empty state", async ({ page }) => {
 	await mockApi(page, newState());
 	await page.goto(TASKS);
 	await expect(
-		page.getByText("No tasks yet. Add your first task below."),
+		page.getByText("No open tasks. Add a task below."),
 	).toBeVisible();
 	await expectNoHorizontalScroll(page);
 });
@@ -83,7 +91,7 @@ test("load error and try again", async ({ page }) => {
 	await expectNoHorizontalScroll(page);
 	state.tasks[ORG_A] = [];
 	await page.getByRole("button", { name: "Try again" }).click();
-	await expect(page.getByText("No tasks yet.")).toBeVisible();
+	await expect(page.getByText("No open tasks.")).toBeVisible();
 });
 
 test("add a task", async ({ page }) => {
@@ -273,7 +281,7 @@ test("sign out", async ({ page }) => {
 	const state = newState();
 	await mockApi(page, state);
 	await page.goto(TASKS);
-	await expect(page.getByText("No tasks yet.")).toBeVisible();
+	await expect(page.getByText("No open tasks.")).toBeVisible();
 	await page.getByRole("button", { name: "Sign out" }).click();
 	await expect(
 		page.getByRole("heading", { name: "Sign in to Real Estate Ops" }),
@@ -289,7 +297,7 @@ test("keyboard only", async ({ page }) => {
 	const state = newState();
 	await mockApi(page, state);
 	await page.goto(TASKS);
-	await expect(page.getByText("No tasks yet.")).toBeVisible();
+	await expect(page.getByText("No open tasks.")).toBeVisible();
 	const title = page.getByLabel("Title");
 	await tabTo(page, title);
 	await expectFocusRing(title);
