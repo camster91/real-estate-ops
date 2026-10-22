@@ -18,6 +18,7 @@ export interface Task {
 	status: string;
 	dueAt: string | null;
 	version: number;
+	statusChangedAt: string;
 }
 
 export interface NewTaskBody {
@@ -59,11 +60,21 @@ export async function getSession(): Promise<Session | "signed_out" | "error"> {
 	}
 }
 
+export type StatusResult =
+	| { task: Task }
+	| { conflict: Task }
+	| "signed_out"
+	| "not_found"
+	| "error";
+
+/** Open tasks, or finished ones with `show: "done"`. */
 export async function listTasks(
 	organizationId: string,
+	show?: "done",
 ): Promise<Task[] | "signed_out" | "not_found" | "error"> {
 	try {
-		const response = await fetch(tasksPath(organizationId), options);
+		const path = tasksPath(organizationId) + (show ? "?show=done" : "");
+		const response = await fetch(path, options);
 		if (response.status === 401) return "signed_out";
 		if (response.status === 404) return "not_found";
 		if (!response.ok) return "error";
@@ -93,6 +104,37 @@ export async function createTask(
 			| undefined;
 		if (response.status === 400 && body?.error === "invalid_task")
 			return { invalid: body.field ?? "body" };
+		if (response.ok && body?.task) return { task: body.task };
+		return "error";
+	} catch {
+		return "error";
+	}
+}
+
+/**
+ * Changes a task's status. A stale version or a refused transition comes back
+ * as `conflict` with the task as it is now, so the screen can show it.
+ */
+export async function changeStatus(
+	organizationId: string,
+	taskId: string,
+	status: string,
+	version: number,
+): Promise<StatusResult> {
+	try {
+		const response = await fetch(
+			`${tasksPath(organizationId)}/${encodeURIComponent(taskId)}`,
+			{
+				...options,
+				method: "PATCH",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ status, version }),
+			},
+		);
+		if (response.status === 401) return "signed_out";
+		if (response.status === 404) return "not_found";
+		const body = (await json(response)) as { task?: Task } | undefined;
+		if (response.status === 409 && body?.task) return { conflict: body.task };
 		if (response.ok && body?.task) return { task: body.task };
 		return "error";
 	} catch {

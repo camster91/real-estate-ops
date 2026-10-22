@@ -169,3 +169,28 @@ form.add .button {
 	clip-path: inset(50%);
 	white-space: nowrap;
 }
+ul.tasks select.status {
+	display: block;
+	margin-top: 10px;
+	min-height: 44px;
+	padding: 6px 10px;
+	font: inherit;
+	border: 1px solid #6b847b;
+	border-radius: 6px;
+	background: white;
+	max-width: 100%;
+}
+ul.tasks select.status:disabled {
+	opacity: 0.6;
+	cursor: wait;
+}
+ul.tasks .row-message {
+	margin-top: 8px;
+}
+ul.tasks.done li {
+	background: #eef2ef;
+}
+ul.tasks.done .link {
+	margin-top: 8px;
+	min-height: 44px;
+}
