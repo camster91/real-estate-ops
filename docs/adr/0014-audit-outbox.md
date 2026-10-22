@@ -11,7 +11,7 @@ Status: Implemented for synthetic data. Supports #98 (audit and redaction) and #
    - **Limit:** a superuser or the table owner can still disable the trigger (for example with `session_replication_role = replica` or `ALTER TABLE … DISABLE TRIGGER`) or drop it. The trigger prevents mistakes and ordinary misuse, not a privileged attack. Real tamper evidence needs the hash chain and externally retained checkpoints in ADR 0005, which are not built yet.
 2. **Fail-safe minimisation.** `minimiseDetails()` runs on every audit `details` object and every event `payload`.
    - It keeps at most 20 keys whose names look like code identifiers (up to 40 characters).
-   - **Strings are kept only if they look like a code, id, number or date:** ASCII letters, digits and `_ . : + -`, with no spaces or `@`, at most 64 characters. Anything else, including any free text, becomes `"[redacted]"`.
+   - **Strings are kept only if they look like a code, id, number or date:** ASCII letters, digits and `_ . : + -`, with no spaces or `@`, at most 64 characters. Anything else, including any free text, becomes `"[redacted]"`. Code-like values that are still personal data are also redacted under any key: 7 or more digits with only `.`, `-` or a leading `+` between them (phone, SIN, card or account numbers) and Canadian postal codes. ISO dates and times are kept. Numbers are not checked, so callers must never pass personal data as a number.
    - Keys whose names look sensitive are always redacted. They cover:
      - contact and address: email, phone, mobile, cell, tel, fax, address, street, city, postal, zip
      - identity: name, birth, dob, social, SIN as a word, licence or license, registration, passport, OHIP, health

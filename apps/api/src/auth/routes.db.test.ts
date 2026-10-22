@@ -265,6 +265,20 @@ describe("login and sessions", () => {
 		expect(after.json()).toEqual({ error: "authentication_required" });
 	});
 
+	it("signing in again ends the earlier session", async () => {
+		const old = (cookieOf(await signIn(), SESSION) as Cookie).value;
+		fake.mint({ sub: "synthetic-a" });
+		const { path, login } = await beginLogin();
+		const again = await app.inject({
+			url: path,
+			cookies: { [LOGIN]: login.value, [SESSION]: old },
+		});
+		const fresh = (cookieOf(again, SESSION) as Cookie).value;
+		expect(fresh).not.toBe(old);
+		expect((await session(old)).statusCode).toBe(401);
+		expect((await session(fresh)).statusCode).toBe(200);
+	});
+
 	it("membership loss ends the session", async () => {
 		const token = (cookieOf(await signIn(), SESSION) as Cookie).value;
 		const where = "organization_id = $1 AND principal_id = $2";
