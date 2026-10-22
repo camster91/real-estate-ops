@@ -1,7 +1,11 @@
 export {
+	canTransition,
+	DONE_STATUSES,
 	type NewTask,
 	type NewTaskResult,
+	OPEN_STATUSES,
 	parseNewTask,
+	parseStatusChange,
 	TASK_STATUSES,
 	type TaskStatus,
 	TITLE_MAX,

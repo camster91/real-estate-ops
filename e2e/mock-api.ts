@@ -14,7 +14,13 @@ export interface MockTask {
 	status: string;
 	dueAt: string | null;
 	version: number;
+	statusChangedAt: string;
 }
+
+const DONE = ["completed", "cancelled"];
+// Same rules as @reo/domain canTransition (ADR 0017).
+const allowed = (from: string, to: string) =>
+	from !== to && (!DONE.includes(from) || to === "ready");
 
 // "commit_then_abort": the task is saved, but the response is lost.
 type Reply = { status: number; body?: unknown } | "abort" | "commit_then_abort";
@@ -28,6 +34,10 @@ export interface MockState {
 	listDelay?: number;
 	/** Replies for the next create calls, in order; then a normal success. */
 	createReplies: Reply[];
+	/** Replies for the next status changes, in order; then the normal rules. */
+	patchReplies: Reply[];
+	/** Delay for status changes, in milliseconds. */
+	patchDelay?: number;
 	/** Every API request, for assertions. */
 	requests: { method: string; path: string; body: unknown }[];
 }
@@ -36,6 +46,7 @@ export const newState = (overrides: Partial<MockState> = {}): MockState => ({
 	session: [MEMBER_A],
 	tasks: { [ORG_A]: [], [ORG_B]: [] },
 	createReplies: [],
+	patchReplies: [],
 	requests: [],
 	...overrides,
 });
@@ -73,6 +84,33 @@ export async function mockApi(page: Page, state: MockState): Promise<void> {
 				state.session = "signed_out";
 				return reply(204);
 			}
+			const one = /^\/v1\/organizations\/([^/]+)\/tasks\/([^/]+)$/.exec(
+				url.pathname,
+			);
+			if (one && method === "PATCH") {
+				if (state.patchDelay)
+					await new Promise((done) => setTimeout(done, state.patchDelay));
+				const next = state.patchReplies.shift();
+				if (next === "abort") return route.abort("failed");
+				if (next && next !== "commit_then_abort")
+					return reply(next.status, next.body);
+				const list = state.tasks[decodeURIComponent(one[1] as string)];
+				const task = Array.isArray(list)
+					? list.find((t) => t.id === one[2])
+					: undefined;
+				if (!task) return reply(404, { error: "not_found" });
+				const change = body as { status: string; version: number };
+				if (task.status === change.status) return reply(200, { task });
+				if (task.version !== change.version)
+					return reply(409, { error: "conflict", task });
+				if (!allowed(task.status, change.status))
+					return reply(409, { error: "invalid_transition", task });
+				task.status = change.status;
+				task.version += 1;
+				task.statusChangedAt = new Date().toISOString();
+				if (next === "commit_then_abort") return route.abort("failed");
+				return reply(200, { task });
+			}
 			const tasks = /^\/v1\/organizations\/([^/]+)\/tasks$/.exec(url.pathname);
 			if (tasks) {
 				const org = decodeURIComponent(tasks[1] as string);
@@ -84,7 +122,14 @@ export async function mockApi(page: Page, state: MockState): Promise<void> {
 						const failure = LIST_FAILURES[list];
 						return reply(failure.status, failure.body);
 					}
-					return reply(200, { tasks: list });
+					const done = url.searchParams.get("show") === "done";
+					return reply(200, {
+						tasks: list
+							.filter((t) => DONE.includes(t.status) === done)
+							.sort((a, b) =>
+								done ? b.statusChangedAt.localeCompare(a.statusChangedAt) : 0,
+							),
+					});
 				}
 				if (method === "POST") {
 					const next = state.createReplies.shift();
@@ -98,6 +143,7 @@ export async function mockApi(page: Page, state: MockState): Promise<void> {
 						status: "ready",
 						dueAt: input.dueAt ? new Date(input.dueAt).toISOString() : null,
 						version: 1,
+						statusChangedAt: new Date().toISOString(),
 					};
 					// Like the API: the same id replays, or conflicts if the body differs.
 					const existing = Array.isArray(list)

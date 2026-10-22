@@ -1,7 +1,7 @@
 "use client";
 
 import {
-	formatInZone,
+	DONE_STATUSES,
 	TORONTO,
 	toOffsetIso,
 	zonedLocalToUtc,
@@ -16,6 +16,7 @@ import {
 	useState,
 } from "react";
 import {
+	changeStatus,
 	createTask,
 	listTasks,
 	type NewTaskBody,
@@ -23,15 +24,12 @@ import {
 	signOut,
 	type Task,
 } from "../../../lib/api";
-
-const STATUS_LABELS: Record<string, string> = {
-	ready: "Ready",
-	in_progress: "In progress",
-	waiting: "Waiting",
-	blocked: "Blocked",
-	completed: "Completed",
-	cancelled: "Cancelled",
-};
+import {
+	DoneTasks,
+	OpenTasks,
+	type RowMessage,
+	STATUS_LABELS,
+} from "./task-lists";
 
 const TITLE_ERROR = "Enter a title of 1 to 200 characters without line breaks.";
 const DATE_ERROR = "Enter a valid date and time.";
@@ -42,11 +40,19 @@ const ALREADY_SAVED =
 	"Your earlier task was already saved. Press Add task again to add this one as well.";
 const SESSION_ENDED =
 	"Your session has ended. Sign in again, then add this task.";
+const STATUS_CONFLICT =
+	"This task changed in another window. It now shows the latest status.";
+const STATUS_ERROR = "The status could not be changed. Please try again.";
+const STATUS_SIGNED_OUT = "Your session has ended. Sign in again to change it.";
+
+const isDone = (status: string) =>
+	(DONE_STATUSES as readonly string[]).includes(status);
+const without = (list: Task[], id: string) =>
+	list.filter((task) => task.id !== id);
 
 type Load = "loading" | "ready" | "error" | "not_found";
 
-// Undated tasks last, then by due date. Open tasks only for now: the API also
-// puts completed and cancelled tasks last, which this slice cannot create.
+// Open tasks: undated last, then by due date, as the API orders them.
 const byDue = (a: Task, b: Task) =>
 	(a.dueAt === null ? 1 : 0) - (b.dueAt === null ? 1 : 0) ||
 	(a.dueAt ?? "").localeCompare(b.dueAt ?? "");
@@ -64,6 +70,18 @@ export default function MyTasks() {
 	const [sessionEnded, setSessionEnded] = useState(false);
 	const [saving, setSaving] = useState(false);
 	const [announcement, setAnnouncement] = useState("");
+	// Finished tasks, loaded when first shown; null until then.
+	const [done, setDone] = useState<Task[] | "loading" | "error" | null>(null);
+	const [showDone, setShowDone] = useState(false);
+	// Rows with a status change in flight, the value being sent, and messages.
+	const [busy, setBusy] = useState<ReadonlySet<string>>(new Set());
+	const [pending, setPending] = useState<Record<string, string>>({});
+	const [messages, setMessages] = useState<Record<string, RowMessage>>({});
+	// A page-level notice for a task that moved lists because of another window.
+	const [notice, setNotice] = useState<string>();
+	// The element to focus after a row moves between lists, so keyboard and
+	// screen-reader users are not dropped back at the top of the page.
+	const [focusTarget, setFocusTarget] = useState<string | null>(null);
 	// One id per submission: retries reuse it, so the API replays instead of
 	// creating a second task. A new id is made only after a success.
 	const pendingId = useRef<string | null>(null);
@@ -84,12 +102,19 @@ export default function MyTasks() {
 		refresh();
 	}, [refresh]);
 
+	useEffect(() => {
+		if (!focusTarget) return;
+		document.getElementById(focusTarget)?.focus();
+		setFocusTarget(null);
+	}, [focusTarget]);
+
 	const submit = async (event: FormEvent) => {
 		event.preventDefault();
 		if (saving) return;
 		setTitleError(undefined);
 		setDueError(undefined);
 		setFormError(undefined);
+		setNotice(undefined);
 		setSessionEnded(false);
 		setAnnouncement("");
 		let dueAt: string | undefined;
@@ -147,6 +172,93 @@ export default function MyTasks() {
 		setAnnouncement("Task added.");
 	};
 
+	const loadDone = useCallback(async () => {
+		setDone("loading");
+		const result = await listTasks(organizationId, "done");
+		if (result === "signed_out") return router.replace("/");
+		setDone(Array.isArray(result) ? result : "error");
+	}, [organizationId, router]);
+
+	const toggleDone = () => {
+		const next = !showDone;
+		setShowDone(next);
+		if (next && done === null) loadDone();
+	};
+
+	/** Puts a task in the open or done list, according to its status. */
+	const place = (task: Task) => {
+		setTasks((current) => {
+			const rest = without(current, task.id);
+			return isDone(task.status) ? rest : [...rest, task].sort(byDue);
+		});
+		setDone((current) => {
+			if (!Array.isArray(current)) return current;
+			const rest = without(current, task.id);
+			return isDone(task.status) ? [task, ...rest] : rest;
+		});
+	};
+
+	const setStatus = async (task: Task, status: string) => {
+		if (busy.has(task.id)) return;
+		setBusy((current) => new Set(current).add(task.id));
+		setPending((current) => ({ ...current, [task.id]: status }));
+		setMessages(({ [task.id]: _, ...rest }) => rest);
+		setNotice(undefined);
+		setAnnouncement("");
+		const result = await changeStatus(
+			organizationId,
+			task.id,
+			status,
+			task.version,
+		);
+		setBusy((current) => {
+			const next = new Set(current);
+			next.delete(task.id);
+			return next;
+		});
+		setPending(({ [task.id]: _, ...rest }) => rest);
+		const say = (message: RowMessage) =>
+			setMessages((current) => ({ ...current, [task.id]: message }));
+		if (result === "not_found") return refresh();
+		if (result === "signed_out")
+			return say({ text: STATUS_SIGNED_OUT, signIn: true });
+		if (result === "error") return say({ text: STATUS_ERROR });
+		const latest = "conflict" in result ? result.conflict : result.task;
+		const moved = isDone(latest.status) !== isDone(task.status);
+		if (moved) {
+			// The row leaves its list: focus the next open task, the reopened
+			// task, or the done-tasks button.
+			const index = tasks.findIndex((t) => t.id === task.id);
+			const neighbour =
+				index < 0 ? undefined : (tasks[index + 1] ?? tasks[index - 1]);
+			setFocusTarget(
+				!isDone(latest.status)
+					? `status-${latest.id}`
+					: neighbour
+						? `status-${neighbour.id}`
+						: "toggle-done",
+			);
+		}
+		place(latest);
+		if ("conflict" in result) {
+			if (!moved) {
+				say({ text: STATUS_CONFLICT });
+				return setAnnouncement(STATUS_CONFLICT);
+			}
+			const text = `${latest.title} changed in another window and is now ${STATUS_LABELS[latest.status] ?? latest.status}.`;
+			setNotice(text);
+			return setAnnouncement(text);
+		}
+		if (isDone(task.status)) return setAnnouncement("Task reopened.");
+		if (result.task.status === "completed")
+			return setAnnouncement("Task marked done.");
+		if (result.task.status === "cancelled")
+			return setAnnouncement("Task cancelled.");
+		setAnnouncement(
+			`Status changed to ${STATUS_LABELS[result.task.status] ?? result.task.status}.`,
+		);
+	};
+
 	const leave = async () => {
 		await signOut();
 		router.replace("/");
@@ -182,24 +294,14 @@ export default function MyTasks() {
 				)}
 				{load === "ready" && (
 					<>
-						{tasks.length === 0 ? (
-							<p>No tasks yet. Add your first task below.</p>
-						) : (
-							<ul className="tasks" aria-label="Tasks">
-								{tasks.map((task) => (
-									<li key={task.id}>
-										<span className="title">{task.title}</span>
-										<span className="meta">
-											{STATUS_LABELS[task.status] ?? task.status}
-											{" · "}
-											{task.dueAt
-												? formatInZone(task.dueAt, TORONTO)
-												: "No due date"}
-										</span>
-									</li>
-								))}
-							</ul>
-						)}
+						{notice && <p className="notice page-notice">{notice}</p>}
+						<OpenTasks
+							tasks={tasks}
+							busy={busy}
+							pending={pending}
+							messages={messages}
+							onChange={setStatus}
+						/>
 						<form className="add" onSubmit={submit} noValidate>
 							<h2>Add a task</h2>
 							<label htmlFor="title">Title</label>
@@ -247,6 +349,28 @@ export default function MyTasks() {
 								Add task
 							</button>
 						</form>
+						<h2>Done tasks</h2>
+						<button
+							id="toggle-done"
+							type="button"
+							className="link"
+							aria-expanded={showDone}
+							aria-controls="done-tasks"
+							onClick={toggleDone}
+						>
+							{showDone ? "Hide done tasks" : "Show done tasks"}
+						</button>
+						<div id="done-tasks" hidden={!showDone}>
+							{showDone && done !== null && (
+								<DoneTasks
+									state={done}
+									busy={busy}
+									messages={messages}
+									onReopen={(task) => setStatus(task, "ready")}
+									onRetry={loadDone}
+								/>
+							)}
+						</div>
 					</>
 				)}
 				<p role="status" aria-live="polite" className="visually-hidden">

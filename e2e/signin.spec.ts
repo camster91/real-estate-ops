@@ -98,7 +98,7 @@ test("two brokerages show the picker; choice is remembered", async ({
 	});
 	await page.getByRole("button", { name: "Synthetic Org B" }).click();
 	await expect(page).toHaveURL(`/o/${ORG_B}/tasks`);
-	await expect(page.getByText("No tasks yet.")).toBeVisible();
+	await expect(page.getByText("No open tasks.")).toBeVisible();
 	await page.goto("/");
 	await expect(page).toHaveURL(`/o/${ORG_B}/tasks`);
 });
@@ -134,7 +134,7 @@ test("stale remembered brokerage with one membership goes to it", async ({
 test("switch brokerage always shows the picker", async ({ page }) => {
 	await mockApi(page, newState({ session: [MEMBER_A] }));
 	await page.goto(`/o/${ORG_A}/tasks`);
-	await expect(page.getByText("No tasks yet.")).toBeVisible();
+	await expect(page.getByText("No open tasks.")).toBeVisible();
 	await page.getByRole("link", { name: "Switch brokerage" }).click();
 	await expect(
 		page.getByRole("heading", { name: "Choose a brokerage" }),

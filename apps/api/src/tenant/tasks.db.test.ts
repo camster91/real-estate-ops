@@ -41,6 +41,28 @@ const post = (
 		payload: body as Record<string, unknown>,
 	});
 
+const patch = (
+	taskId: string,
+	body: unknown,
+	token = tokenA,
+	org = ids.orgA,
+	headers: Record<string, string> = { origin: PUBLIC_URL },
+) =>
+	app.inject({
+		method: "PATCH",
+		url: `${tasksUrl(org)}/${taskId}`,
+		cookies: { [SESSION_COOKIE]: token },
+		headers,
+		payload: body as Record<string, unknown>,
+	});
+
+/** Creates a task for pa and returns its id. */
+const newTask = async (title = "Synthetic status task") => {
+	const id = randomUUID();
+	expect((await post({ id, title })).statusCode).toBe(201);
+	return id;
+};
+
 const countWhere = async (table: string, where: string, params: unknown[]) =>
 	(
 		await db.admin.query(
@@ -100,6 +122,7 @@ describe("task routes", () => {
 				status: "ready",
 				dueAt: null,
 				version: 1,
+				statusChangedAt: expect.any(String),
 			},
 		});
 		const listed = await list();
@@ -296,6 +319,183 @@ describe("task routes", () => {
 		).toBe(403);
 	});
 
+	describe("status changes", () => {
+		const audits = (id: string) =>
+			db.admin.query(
+				"SELECT action, details, details::text AS raw FROM audit_event WHERE resource_id = $1 ORDER BY occurred_at",
+				[id],
+			);
+		const events = (id: string) =>
+			db.admin.query(
+				"SELECT event_type, aggregate_version, payload, payload::text AS raw FROM outbox_event WHERE aggregate_id = $1 ORDER BY aggregate_version",
+				[id],
+			);
+
+		it("changes status and audits", async () => {
+			const id = await newTask("Secret status title");
+			const response = await patch(id, { status: "in_progress", version: 1 });
+			expect(response.statusCode).toBe(200);
+			expect(response.headers["cache-control"]).toBe("no-store");
+			expect(response.json().task).toMatchObject({
+				id,
+				status: "in_progress",
+				version: 2,
+			});
+			const audit = (await audits(id)).rows;
+			expect(audit).toHaveLength(2);
+			expect(audit[1]).toMatchObject({
+				action: "task.status_change",
+				details: { from: "ready", to: "in_progress" },
+			});
+			const outbox = (await events(id)).rows;
+			expect(outbox).toHaveLength(2);
+			expect(outbox[1]).toMatchObject({
+				event_type: "task.status_changed",
+				aggregate_version: 2,
+				payload: { taskId: id, status: "in_progress" },
+			});
+			for (const row of [...audit, ...outbox])
+				expect(row.raw).not.toContain("Secret status title");
+		});
+
+		it("replay is harmless", async () => {
+			const id = await newTask();
+			const body = { status: "waiting", version: 1 };
+			const first = await patch(id, body);
+			const again = await patch(id, body);
+			expect(again.statusCode).toBe(200);
+			expect(again.json()).toEqual(first.json());
+			expect(await countWhere("audit_event", "resource_id = $1", [id])).toBe(2);
+			expect(await countWhere("outbox_event", "aggregate_id = $1", [id])).toBe(
+				2,
+			);
+		});
+
+		it("stale version is 409 with the current task", async () => {
+			const id = await newTask();
+			await patch(id, { status: "blocked", version: 1 });
+			const stale = await patch(id, { status: "waiting", version: 1 });
+			expect(stale.statusCode).toBe(409);
+			expect(stale.json()).toMatchObject({
+				error: "conflict",
+				task: { id, status: "blocked", version: 2 },
+			});
+		});
+
+		it("invalid transition is 409", async () => {
+			const id = await newTask();
+			await patch(id, { status: "completed", version: 1 });
+			const skip = await patch(id, { status: "in_progress", version: 2 });
+			expect(skip.statusCode).toBe(409);
+			expect(skip.json()).toMatchObject({
+				error: "invalid_transition",
+				task: { id, status: "completed", version: 2 },
+			});
+		});
+
+		it("reopen", async () => {
+			const id = await newTask();
+			await patch(id, { status: "completed", version: 1 });
+			const reopened = await patch(id, { status: "ready", version: 2 });
+			expect(reopened.statusCode).toBe(200);
+			expect(reopened.json().task).toMatchObject({
+				status: "ready",
+				version: 3,
+			});
+			const audit = (await audits(id)).rows;
+			expect(audit[2]?.details).toEqual({ from: "completed", to: "ready" });
+		});
+
+		it("done list", async () => {
+			const id = await newTask();
+			await patch(id, { status: "cancelled", version: 1 });
+			const open = (await list()).json().tasks.map((t: { id: string }) => t.id);
+			expect(open).not.toContain(id);
+			const done = await app.inject({
+				url: `${tasksUrl(ids.orgA)}?show=done`,
+				cookies: { [SESSION_COOKIE]: tokenA },
+			});
+			expect(done.statusCode).toBe(200);
+			const first = done.json().tasks[0];
+			expect(first).toMatchObject({ id, status: "cancelled" });
+			const odd = await app.inject({
+				url: `${tasksUrl(ids.orgA)}?show=x`,
+				cookies: { [SESSION_COOKIE]: tokenA },
+			});
+			expect(odd.statusCode).toBe(400);
+			expect(odd.json()).toEqual({ error: "invalid_query" });
+		});
+
+		it("not the assignee is 404", async () => {
+			const id = await newTask();
+			const response = await patch(
+				id,
+				{ status: "waiting", version: 1 },
+				tokenA2,
+			);
+			expect(response.statusCode).toBe(404);
+			expect(response.json()).toEqual({ error: "not_found" });
+			expect(await countWhere("task", "id = $1 AND version = 1", [id])).toBe(1);
+		});
+
+		it("other organisation is 404; no Origin is 403", async () => {
+			const id = await newTask();
+			const body = { status: "waiting", version: 1 };
+			expect((await patch(id, body, tokenA, ids.orgB)).statusCode).toBe(404);
+			expect((await patch(id, body, tokenA, ids.orgA, {})).statusCode).toBe(
+				403,
+			);
+		});
+
+		it.each<[string, unknown, string, string?]>([
+			["status", { status: "done", version: 1 }, "status"],
+			["version", { status: "waiting", version: 0 }, "version"],
+			["body", { status: "waiting", version: 1, title: "x" }, "body"],
+			["id", { status: "waiting", version: 1 }, "id", "not-a-uuid"],
+		])("bad %s is 400", async (_label, body, field, taskId) => {
+			const id = taskId ?? (await newTask());
+			const response = await patch(id, body);
+			expect(response.statusCode).toBe(400);
+			expect(response.json()).toEqual({ error: "invalid_status", field });
+		});
+
+		it("membership lost mid-request is 404", async () => {
+			const id = await newTask();
+			const real = db.app as pg.Pool;
+			const where = "organization_id = $1 AND principal_id = $2";
+			const racing = {
+				query: real.query.bind(real),
+				connect: async () => {
+					await db.admin.query(
+						`UPDATE membership SET status = 'suspended' WHERE ${where}`,
+						[ids.orgA, ids.pa],
+					);
+					return real.connect();
+				},
+			} as unknown as pg.Pool;
+			const racingApp = createServer({
+				auth: { pool: racing, config, allowInsecureIssuer: true },
+			});
+			try {
+				const response = await racingApp.inject({
+					method: "PATCH",
+					url: `${tasksUrl(ids.orgA)}/${id}`,
+					cookies: { [SESSION_COOKIE]: tokenA },
+					headers: { origin: PUBLIC_URL },
+					payload: { status: "waiting", version: 1 },
+				});
+				expect(response.statusCode).toBe(404);
+			} finally {
+				await racingApp.close();
+				await db.admin.query(
+					`UPDATE membership SET status = 'active' WHERE ${where}`,
+					[ids.orgA, ids.pa],
+				);
+			}
+			expect(await countWhere("task", "id = $1 AND version = 1", [id])).toBe(1);
+		});
+	});
+
 	it("logs carry no titles or ids", async () => {
 		const lines: string[] = [];
 		const write = vi
@@ -313,6 +513,7 @@ describe("task routes", () => {
 			).toBe(201);
 			await list();
 			await post({ id, title: "Different" });
+			await patch(id, { status: "waiting", version: 1 });
 		} finally {
 			write.mockRestore();
 			await app.close();

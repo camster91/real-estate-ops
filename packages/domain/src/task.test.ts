@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { parseNewTask, TASK_STATUSES } from "./task.js";
+import {
+	canTransition,
+	DONE_STATUSES,
+	OPEN_STATUSES,
+	parseNewTask,
+	parseStatusChange,
+	TASK_STATUSES,
+	type TaskStatus,
+} from "./task.js";
 
 const id = "0b9c2e1a-1d2f-4c3b-8a9e-1f2e3d4c5b6a";
 
@@ -79,5 +87,65 @@ describe("parseNewTask calendar", () => {
 		expect(
 			parseNewTask({ id, title: "x", dueAt: "2026-02-30T09:00:00Z" }),
 		).toEqual({ ok: false, field: "dueAt" });
+	});
+});
+
+describe("status transitions", () => {
+	const pairs = (from: readonly TaskStatus[], to: readonly TaskStatus[]) =>
+		from.flatMap((a) => to.filter((b) => b !== a).map((b) => [a, b] as const));
+
+	it("open statuses move freely", () => {
+		for (const [from, to] of pairs(OPEN_STATUSES, OPEN_STATUSES))
+			expect(canTransition(from, to), `${from}→${to}`).toBe(true);
+	});
+
+	it("open to done", () => {
+		for (const [from, to] of pairs(OPEN_STATUSES, DONE_STATUSES))
+			expect(canTransition(from, to), `${from}→${to}`).toBe(true);
+	});
+
+	it("done only reopens", () => {
+		expect(canTransition("completed", "ready")).toBe(true);
+		expect(canTransition("cancelled", "ready")).toBe(true);
+		expect(canTransition("completed", "cancelled")).toBe(false);
+		expect(canTransition("cancelled", "completed")).toBe(false);
+		expect(canTransition("completed", "in_progress")).toBe(false);
+		expect(canTransition("cancelled", "blocked")).toBe(false);
+	});
+
+	it("the same status is not a transition", () => {
+		for (const status of TASK_STATUSES)
+			expect(canTransition(status, status), status).toBe(false);
+	});
+
+	it("open and done statuses cover every status once", () => {
+		expect([...OPEN_STATUSES, ...DONE_STATUSES].sort()).toEqual(
+			[...TASK_STATUSES].sort(),
+		);
+	});
+});
+
+describe("parseStatusChange", () => {
+	it("accepts a status and version", () => {
+		expect(parseStatusChange({ status: "in_progress", version: 3 })).toEqual({
+			ok: true,
+			status: "in_progress",
+			version: 3,
+		});
+	});
+
+	it.each<[string, unknown, string]>([
+		["unknown status", { status: "done", version: 1 }, "status"],
+		["missing version", { status: "ready" }, "version"],
+		["zero version", { status: "ready", version: 0 }, "version"],
+		["fractional version", { status: "ready", version: 1.5 }, "version"],
+		["string version", { status: "ready", version: "1" }, "version"],
+		["huge version", { status: "ready", version: 2147483648 }, "version"],
+		["extra key", { status: "ready", version: 1, title: "x" }, "body"],
+		["array", [], "body"],
+		["null", null, "body"],
+		["inherited key", { status: "toString", version: 1 }, "status"],
+	])("rejects %s", (_label, input, field) => {
+		expect(parseStatusChange(input)).toEqual({ ok: false, field });
 	});
 });

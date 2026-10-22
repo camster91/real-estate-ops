@@ -118,12 +118,142 @@ describe("task table", () => {
 		).toBe("42501");
 	});
 
-	it("no update or delete", async () => {
-		for (const sql of [
-			"UPDATE task SET status = 'completed'",
-			"DELETE FROM task",
-		])
-			expect(await code(as(ctx(ids.orgA, ids.pa), sql)), sql).toBe("42501");
+	describe("status updates", () => {
+		const mine = async (status = "ready") => {
+			const id = randomUUID();
+			await as(
+				ctx(ids.orgA, ids.pa),
+				"INSERT INTO task (organization_id, id, title, assignee_principal_id, created_by_principal_id) VALUES ($1, $2, 'Mine', $3, $3)",
+				[ids.orgA, id, ids.pa],
+			);
+			// Start from another status by switching the guard off as the owner.
+			if (status !== "ready") {
+				await db.admin.query(
+					"ALTER TABLE task DISABLE TRIGGER task_status_guard",
+				);
+				await db.admin.query("UPDATE task SET status = $2 WHERE id = $1", [
+					id,
+					status,
+				]);
+				await db.admin.query(
+					"ALTER TABLE task ENABLE TRIGGER task_status_guard",
+				);
+			}
+			return id;
+		};
+		const setStatus = (
+			id: string,
+			status: string,
+			version = "version + 1",
+			context = ctx(ids.orgA, ids.pa),
+		) =>
+			as(
+				context,
+				`UPDATE task SET status = $2, version = ${version} WHERE id = $1`,
+				[id, status],
+			);
+
+		it("assignee changes status", async () => {
+			const id = await mine();
+			const result = await setStatus(id, "in_progress");
+			expect(result.rowCount).toBe(1);
+			const { rows } = await db.admin.query(
+				"SELECT status, version, status_changed_at > created_at AS moved FROM task WHERE id = $1",
+				[id],
+			);
+			expect(rows[0]).toEqual({
+				status: "in_progress",
+				version: 2,
+				moved: true,
+			});
+		});
+
+		it("reopen", async () => {
+			const id = await mine();
+			await setStatus(id, "completed");
+			expect((await setStatus(id, "ready")).rowCount).toBe(1);
+			const { rows } = await db.admin.query(
+				"SELECT status, version FROM task WHERE id = $1",
+				[id],
+			);
+			expect(rows[0]).toEqual({ status: "ready", version: 3 });
+		});
+
+		it.each<[string, string, string, string]>([
+			["a skipped transition", "completed", "in_progress", "version + 1"],
+			["a finished task cancelled", "completed", "cancelled", "version + 1"],
+			["the same status", "ready", "ready", "version + 1"],
+			["a version jump", "ready", "waiting", "version + 2"],
+			["an unchanged version", "ready", "waiting", "version"],
+		])("trigger refuses %s", async (_label, start, to, version) => {
+			const id = await mine(start);
+			expect(await code(setStatus(id, to, version))).toBe("23514");
+		});
+
+		it("the owner cannot bypass the trigger either", async () => {
+			const id = await mine();
+			expect(
+				await code(
+					db.admin.query(
+						"UPDATE task SET title = 'Changed', version = version + 1, status = 'waiting' WHERE id = $1",
+						[id],
+					),
+				),
+			).toBe("23514");
+		});
+
+		it.each([
+			["title", "'Changed'"],
+			["due_at", "now()"],
+			["assignee_principal_id", "assignee_principal_id"],
+			["created_at", "now()"],
+			["status_changed_at", "now()"],
+		])("cannot change %s", async (column, value) => {
+			const id = await mine();
+			expect(
+				await code(
+					as(
+						ctx(ids.orgA, ids.pa),
+						`UPDATE task SET ${column} = ${value} WHERE id = $1`,
+						[id],
+					),
+				),
+			).toBe("42501");
+		});
+
+		it("another member cannot update", async () => {
+			const id = await mine();
+			const result = await setStatus(
+				id,
+				"waiting",
+				"version + 1",
+				ctx(ids.orgA, pa2),
+			);
+			expect(result.rowCount).toBe(0);
+		});
+
+		it("suspended member cannot update", async () => {
+			const id = await mine();
+			const where = "organization_id = $1 AND principal_id = $2";
+			await db.admin.query(
+				`UPDATE membership SET status = 'suspended' WHERE ${where}`,
+				[ids.orgA, ids.pa],
+			);
+			try {
+				expect((await setStatus(id, "waiting")).rowCount).toBe(0);
+			} finally {
+				await db.admin.query(
+					`UPDATE membership SET status = 'active' WHERE ${where}`,
+					[ids.orgA, ids.pa],
+				);
+			}
+		});
+
+		it("still no delete", async () => {
+			expect(await code(as(ctx(ids.orgA, ids.pa), "DELETE FROM task"))).toBe(
+				"42501",
+			);
+		});
 	});
 
 	it.each([
