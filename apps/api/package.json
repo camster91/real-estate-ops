@@ -10,7 +10,7 @@
 		"start": "node dist/index.js"
 	},
 	"dependencies": {
-		"@fastify/cookie": "11.1.2",
+		"@fastify/cookie": "11.1.3",
 		"@reo/auth": "workspace:*",
 		"@reo/config": "workspace:*",
 		"@reo/db": "workspace:*",
