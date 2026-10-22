@@ -31,7 +31,7 @@ Both use `requireSession` and `inTenant` with the purpose `operations`. The task
   - another member's task is invisible
   - creating a task for another member, as another member, or in another organisation is refused
   - status, version, classification and `created_at` cannot be set
-  - there is no update or delete
+  - there is no update or delete (superseded: ADR 0017 adds status changes by the assignee)
   - the title constraints hold
   - a suspended member sees and creates nothing
   - forced RLS
