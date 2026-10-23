@@ -1,4 +1,11 @@
 export {
+	EMAIL_MAX,
+	NAME_MAX,
+	type NewClient,
+	type NewClientResult,
+	parseNewClient,
+} from "./client.js";
+export {
 	canTransition,
 	DONE_STATUSES,
 	type NewTask,
