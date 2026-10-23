@@ -49,6 +49,10 @@ const client = async (context: TenantContext, assignee?: string) => {
 const DEAL =
 	"INSERT INTO deal (organization_id, id, side, street, unit, city, postal_code, assigned_principal_id, created_by_principal_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)";
 
+/**
+ * Adds a deal and links its clients in one transaction, as the API does. With
+ * no client ids, a new client of the caller's is made and linked.
+ */
 const deal = (
 	context: TenantContext,
 	values: {
@@ -62,18 +66,36 @@ const deal = (
 		assignee?: string;
 		creator?: string;
 	} = {},
+	clientIds?: string[],
 ) =>
-	as(context, DEAL, [
-		values.org ?? context.organizationId,
-		values.id ?? randomUUID(),
-		values.side ?? "buyer",
-		values.street ?? "12 Main Street",
-		values.unit === undefined ? null : values.unit,
-		values.city ?? "Ottawa",
-		values.postal ?? "K1A 0B1",
-		values.assignee ?? context.principalId,
-		values.creator ?? context.principalId,
-	]);
+	withTenant(app, context, async (tx) => {
+		const id = values.id ?? randomUUID();
+		await tx.query(DEAL, [
+			values.org ?? context.organizationId,
+			id,
+			values.side ?? "buyer",
+			values.street ?? "12 Main Street",
+			values.unit === undefined ? null : values.unit,
+			values.city ?? "Ottawa",
+			values.postal ?? "K1A 0B1",
+			values.assignee ?? context.principalId,
+			values.creator ?? context.principalId,
+		]);
+		let links = clientIds;
+		if (!links) {
+			const partyId = randomUUID();
+			await tx.query(
+				"INSERT INTO party (organization_id, id, display_name, assigned_principal_id, created_by_principal_id) VALUES ($1, $2, 'Linked Client', $3, $3)",
+				[context.organizationId, partyId, context.principalId],
+			);
+			links = [partyId];
+		}
+		for (const partyId of links)
+			await tx.query(
+				"INSERT INTO deal_party (organization_id, deal_id, party_id) VALUES ($1, $2, $3)",
+				[context.organizationId, id, partyId],
+			);
+	});
 
 const link = (context: TenantContext, dealId: string, partyId: string) =>
 	as(
@@ -113,8 +135,8 @@ afterAll(async () => {
 describe("deal table", () => {
 	it("member adds a deal with defaults and links own client", async () => {
 		const context = ctx(ids.orgA, ids.pa);
-		const id = await mine();
-		await link(context, id, await client(context));
+		const id = randomUUID();
+		await deal(context, { id }, [await client(context)]);
 		const { rows } = await as(
 			context,
 			"SELECT stage, province, classification, version FROM deal WHERE id = $1",
@@ -136,10 +158,55 @@ describe("deal table", () => {
 		expect(links.rows[0].n).toBe(1);
 	});
 
-	it("another member and another organisation see nothing", async () => {
+	it("a deal needs at least one client", async () => {
+		expect(
+			await failure(
+				as(ctx(ids.orgA, ids.pa), DEAL, [
+					ids.orgA,
+					randomUUID(),
+					"buyer",
+					"1 Main St",
+					null,
+					"Ottawa",
+					"K1A 0B1",
+					ids.pa,
+					ids.pa,
+				]),
+			),
+		).toMatchObject({
+			code: "23514",
+			message: "a deal needs at least one client",
+		});
+	});
+
+	it("a deal has at most four clients", async () => {
+		const context = ctx(ids.orgA, ids.pa);
+		const four = await Promise.all([1, 2, 3, 4].map(() => client(context)));
+		expect(await code(deal(context, {}, four))).toBe("no error");
+		expect(
+			await failure(deal(context, {}, [...four, await client(context)])),
+		).toMatchObject({ code: "23514", message: "a deal has at most 4 clients" });
+	});
+
+	it("clients cannot be linked after the deal is created", async () => {
 		const context = ctx(ids.orgA, ids.pa);
 		const id = await mine();
-		await link(context, id, await client(context));
+		expect(
+			await failure(link(context, id, await client(context))),
+		).toMatchObject({ code: "23514", message: "deal clients are fixed" });
+		// The owner too.
+		expect(
+			await failure(
+				db.admin.query(
+					"INSERT INTO deal_party (organization_id, deal_id, party_id) VALUES ($1, $2, $3)",
+					[ids.orgA, id, await client(context)],
+				),
+			),
+		).toMatchObject({ code: "23514", message: "deal clients are fixed" });
+	});
+
+	it("another member and another organisation see nothing", async () => {
+		const id = await mine();
 		for (const other of [ctx(ids.orgA, pa2), ctx(ids.orgB, ids.pb)]) {
 			const deals = await as(
 				other,
@@ -166,11 +233,11 @@ describe("deal table", () => {
 	it("cannot link another member's client, or to another member's deal", async () => {
 		const me = ctx(ids.orgA, ids.pa);
 		const them = ctx(ids.orgA, pa2);
-		const myDeal = await mine();
-		expect(await code(link(me, myDeal, await client(them)))).toBe("42501");
+		expect(await code(deal(me, {}, [await client(them)]))).toBe("42501");
 		const theirDeal = randomUUID();
 		await deal(them, { id: theirDeal });
-		expect(await code(link(me, theirDeal, await client(me)))).toBe("42501");
+		// Invisible to me, so the link guard refuses it before RLS does.
+		expect(await code(link(me, theirDeal, await client(me)))).toBe("23514");
 	});
 
 	it("a suspended member sees and adds nothing", async () => {
@@ -232,6 +299,10 @@ describe("deal table", () => {
 		["a newline in the street", { street: "1\nMain" }],
 		["a line separator in the city", { city: "Ott\u2028awa" }],
 		["an empty unit", { unit: "" }],
+		["a padded unit", { unit: "4 " }],
+		["a tab in the unit", { unit: "4\t5" }],
+		["an empty city", { city: "" }],
+		["a padded city", { city: " Ottawa" }],
 		["a long unit", { unit: "x".repeat(21) }],
 		["a long city", { city: "x".repeat(101) }],
 		["a lower-case postal code", { postal: "k1a 0b1" }],
@@ -324,6 +395,7 @@ describe("deal stages", () => {
 		["postal_code", "'M5H 1A1'"],
 		["assigned_principal_id", "$3"],
 		["created_by_principal_id", "$3"],
+		["province", "'QC'"],
 		["classification", "'operational'"],
 		["created_at", "created_at - interval '1 day'"],
 	])("the owner cannot change %s either", async (column, value) => {

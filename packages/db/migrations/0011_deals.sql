@@ -11,7 +11,12 @@
 -- disable it, the owner included: an open deal (draft, active, conditional,
 -- firm) moves to any other stage except draft; fell_through only reopens as
 -- active; closed never moves. Each change adds one to version and stamps
--- stage_changed_at. Address and clients are fixed in this slice.
+-- stage_changed_at. Address and clients are fixed in this slice: a deal gets
+-- 1 to 4 client links in the transaction that creates it, and no more later.
+--
+-- A later migration that renames a stage code must disable deal_stage_guard
+-- inside its own transaction (ALTER TABLE deal DISABLE TRIGGER ...), update
+-- the rows, then enable it again; the guard refuses bulk changes by design.
 
 CREATE TABLE deal (
 	organization_id uuid NOT NULL REFERENCES organization,
@@ -127,6 +132,60 @@ CREATE POLICY deal_party_create ON deal_party
 				AND p.assigned_principal_id = (SELECT app.current_principal_id())
 		)
 	);
+
+-- Clients are fixed at creation: a link is accepted only in the transaction
+-- that created its deal (created_at is that transaction's start time), and a
+-- deal has at most 4 links. Earlier rows of the same INSERT are visible here,
+-- so a multi-row insert is counted too.
+CREATE FUNCTION app.deal_party_guard() RETURNS trigger
+	LANGUAGE plpgsql SET search_path = pg_catalog, public
+	AS $$
+	BEGIN
+		IF NOT EXISTS (
+			SELECT 1 FROM deal d
+			WHERE d.organization_id = NEW.organization_id
+				AND d.id = NEW.deal_id
+				AND d.created_at = now()
+		) THEN
+			RAISE EXCEPTION 'deal clients are fixed' USING ERRCODE = 'check_violation';
+		END IF;
+		IF (
+			SELECT count(*) FROM deal_party dp
+			WHERE dp.organization_id = NEW.organization_id
+				AND dp.deal_id = NEW.deal_id
+		) >= 4 THEN
+			RAISE EXCEPTION 'a deal has at most 4 clients' USING ERRCODE = 'check_violation';
+		END IF;
+		RETURN NEW;
+	END
+	$$;
+REVOKE EXECUTE ON FUNCTION app.deal_party_guard() FROM PUBLIC;
+
+CREATE TRIGGER deal_party_guard
+	BEFORE INSERT ON deal_party
+	FOR EACH ROW EXECUTE FUNCTION app.deal_party_guard();
+
+-- Every deal has at least one client, checked when its transaction commits.
+CREATE FUNCTION app.deal_has_client() RETURNS trigger
+	LANGUAGE plpgsql SET search_path = pg_catalog, public
+	AS $$
+	BEGIN
+		IF NOT EXISTS (
+			SELECT 1 FROM deal_party dp
+			WHERE dp.organization_id = NEW.organization_id
+				AND dp.deal_id = NEW.id
+		) THEN
+			RAISE EXCEPTION 'a deal needs at least one client' USING ERRCODE = 'check_violation';
+		END IF;
+		RETURN NULL;
+	END
+	$$;
+REVOKE EXECUTE ON FUNCTION app.deal_has_client() FROM PUBLIC;
+
+CREATE CONSTRAINT TRIGGER deal_has_client
+	AFTER INSERT ON deal
+	DEFERRABLE INITIALLY DEFERRED
+	FOR EACH ROW EXECUTE FUNCTION app.deal_has_client();
 
 CREATE FUNCTION app.deal_stage_guard() RETURNS trigger
 	LANGUAGE plpgsql SET search_path = pg_catalog, public

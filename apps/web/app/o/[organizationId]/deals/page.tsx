@@ -52,6 +52,7 @@ export default function Deals() {
 	const [deals, setDeals] = useState<Deal[]>([]);
 	const [more, setMore] = useState(false);
 	const [clients, setClients] = useState<Client[]>([]);
+	const [clientsMore, setClientsMore] = useState(false);
 	const [side, setSide] = useState<string>("buyer");
 	const [values, setValues] = useState<Record<Field, string>>(EMPTY);
 	const [chosen, setChosen] = useState<string[]>([]);
@@ -90,6 +91,7 @@ export default function Deals() {
 		setDeals(result.deals);
 		setMore(result.more);
 		setClients(mine.clients);
+		setClientsMore(mine.more);
 		setLoad("ready");
 	}, [organizationId, router]);
 
@@ -134,17 +136,19 @@ export default function Deals() {
 		if (result === "error") return setFormError(SAVE_ERROR);
 		if (result === "conflict") {
 			// The same id with different details: an earlier try may have been
-			// saved with its reply lost. Show the saved list, and use a new id.
+			// saved with its reply lost. Use a new id only once the list says
+			// which; until then a retry keeps the id, so it cannot duplicate.
 			const sent = pendingId.current;
-			pendingId.current = null;
 			const latest = await listDeals(organizationId);
-			if (typeof latest === "object") {
-				setDeals(latest.deals);
-				setMore(latest.more);
-				if (latest.deals.some((deal) => deal.id === sent))
-					return setFormError(ALREADY_SAVED);
-			}
-			return setFormError(SAVE_ERROR);
+			if (typeof latest !== "object") return setFormError(SAVE_ERROR);
+			pendingId.current = null;
+			setDeals(latest.deals);
+			setMore(latest.more);
+			return setFormError(
+				latest.deals.some((deal) => deal.id === sent)
+					? ALREADY_SAVED
+					: SAVE_ERROR,
+			);
 		}
 		if ("invalid" in result) {
 			if (result.invalid in FIELD_ERRORS)
@@ -261,6 +265,10 @@ export default function Deals() {
 								className="status"
 								value={side}
 								onChange={(event) => setSide(event.target.value)}
+								aria-invalid={fieldError?.field === "side" ? true : undefined}
+								aria-describedby={
+									fieldError?.field === "side" ? "deal-side-error" : undefined
+								}
 							>
 								{DEAL_SIDES.map((value) => (
 									<option key={value} value={value}>
@@ -268,6 +276,11 @@ export default function Deals() {
 									</option>
 								))}
 							</select>
+							{fieldError?.field === "side" && (
+								<p id="deal-side-error" className="error">
+									{fieldError.text}
+								</p>
+							)}
 							{field("street", "Street address", "off")}
 							{field("unit", "Unit (optional)", "off")}
 							{field("city", "City", "off")}
@@ -303,6 +316,12 @@ export default function Deals() {
 											{c.name}
 										</label>
 									))
+								)}
+								{clientsMore && (
+									<p className="notice">
+										Showing your first 100 clients, A to Z. Search is coming
+										soon.
+									</p>
 								)}
 								{clientsError && (
 									<p id="deal-clients-error" className="error">

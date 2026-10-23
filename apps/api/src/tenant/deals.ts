@@ -227,6 +227,9 @@ const sameDeal = (existing: Deal, deal: NewDeal) =>
 		.sort()
 		.join() === deal.clientIds.join();
 
+/** Thrown inside the transaction so it rolls back the deal as well. */
+class UnknownClient extends Error {}
+
 async function createOrReplay(
 	pool: pg.Pool,
 	request: FastifyRequest,
@@ -280,11 +283,19 @@ async function createOrReplay(
 						? { kind: "replayed", deal: existing }
 						: { kind: "conflict" };
 				}
-				await client.query(
-					`INSERT INTO deal_party (organization_id, deal_id, party_id)
-						SELECT $1, $2, unnest($3::uuid[])`,
-					[context.organizationId, deal.id, deal.clientIds],
-				);
+				// RLS repeats the own-client check. If it refuses (or a client has
+				// gone), that is the same 400 as above, not "not a member".
+				try {
+					await client.query(
+						`INSERT INTO deal_party (organization_id, deal_id, party_id)
+							SELECT $1, $2, unnest($3::uuid[])`,
+						[context.organizationId, deal.id, deal.clientIds],
+					);
+				} catch (error) {
+					if (MEMBERSHIP_LOST.has((error as { code?: string }).code ?? ""))
+						throw new UnknownClient();
+					throw error;
+				}
 				// Codes and a count only: the address and names stay out of history.
 				await recordChange(client, {
 					action: "deal.create",
@@ -305,6 +316,7 @@ async function createOrReplay(
 			},
 		);
 	} catch (error) {
+		if (error instanceof UnknownClient) return { kind: "unknown_client" };
 		if (MEMBERSHIP_LOST.has((error as { code?: string }).code ?? ""))
 			return NOT_MEMBER;
 		throw error;

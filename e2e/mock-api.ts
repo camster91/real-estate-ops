@@ -2,6 +2,13 @@
 // real; every /auth and /v1 request is answered here, so no API or database
 // is needed. Synthetic data only.
 import { expect, type Locator, type Page } from "@playwright/test";
+// The real deal rules, so the mock cannot drift from the API (ADR 0021).
+import {
+	canMoveDeal,
+	type DealStage,
+	parseNewDeal,
+	parseStageChange,
+} from "../packages/domain/src/deal";
 
 export const ORG_A = "0b9c2e1a-1d2f-4c3b-8a9e-1f2e3d4c5b6a";
 export const ORG_B = "5d6e7f80-1a2b-4c3d-8e9f-0a1b2c3d4e5f";
@@ -60,14 +67,6 @@ export interface MockDeal {
 	createdAt: string;
 	stageChangedAt: string;
 }
-
-// Same rules as @reo/domain canMoveDeal (ADR 0021).
-const OPEN_DEAL = ["draft", "active", "conditional", "firm"];
-const canMoveDeal = (from: string, to: string) =>
-	from !== to &&
-	to !== "draft" &&
-	from !== "closed" &&
-	(from === "fell_through" ? to === "active" : OPEN_DEAL.includes(from));
 
 export interface MockState {
 	/** Signed out, or the session's memberships. */
@@ -180,17 +179,10 @@ export async function mockApi(page: Page, state: MockState): Promise<void> {
 					if (next === "abort") return route.abort("failed");
 					if (next && next !== "commit_then_abort")
 						return reply(next.status, next.body);
-					const input = body as {
-						id: string;
-						side: string;
-						address: {
-							street: string;
-							unit?: string;
-							city: string;
-							postalCode: string;
-						};
-						clientIds: string[];
-					};
+					const parsed = parseNewDeal(body);
+					if (!parsed.ok)
+						return reply(400, { error: "invalid_deal", field: parsed.field });
+					const input = parsed.deal;
 					const known = state.clients?.[org];
 					const clients = input.clientIds.map((clientId) =>
 						Array.isArray(known)
@@ -199,32 +191,29 @@ export async function mockApi(page: Page, state: MockState): Promise<void> {
 					);
 					if (clients.some((c) => !c))
 						return reply(400, { error: "invalid_deal", field: "clientIds" });
-					const postal = input.address.postalCode.trim().toUpperCase();
 					const now = new Date().toISOString();
 					const deal: MockDeal = {
 						id: input.id,
 						side: input.side,
 						stage: "draft",
-						address: {
-							street: input.address.street.trim(),
-							unit: input.address.unit?.trim() || null,
-							city: input.address.city.trim(),
-							postalCode: postal.includes(" ")
-								? postal
-								: `${postal.slice(0, 3)} ${postal.slice(3)}`,
-						},
-						clients: clients.map((c) => ({
-							id: c?.id as string,
-							name: c?.name ?? null,
-						})),
+						address: input.address,
+						clients: clients
+							.map((c) => ({ id: c?.id as string, name: c?.name ?? null }))
+							.sort((a, b) => (a.name ?? "").localeCompare(b.name ?? "")),
 						version: 1,
 						createdAt: now,
 						stageChangedAt: now,
 					};
+					// Like the API: the same id replays only with the same details.
 					const existing = list.find((d) => d.id === deal.id);
 					if (existing)
-						return existing.side === deal.side &&
-							existing.address.street === deal.address.street
+						return JSON.stringify(existing.address) ===
+							JSON.stringify(deal.address) &&
+							existing.side === deal.side &&
+							existing.clients
+								.map((c) => c.id)
+								.sort()
+								.join() === input.clientIds.join()
 							? reply(200, { deal: existing })
 							: reply(409, { error: "conflict" });
 					state.deals = { ...state.deals, [org]: [...list, deal] };
@@ -238,11 +227,13 @@ export async function mockApi(page: Page, state: MockState): Promise<void> {
 						return reply(next.status, next.body);
 					const deal = list.find((d) => d.id === id);
 					if (!deal) return reply(404, { error: "not_found" });
-					const change = body as { stage: string; version: number };
+					const change = parseStageChange(body);
+					if (!change.ok)
+						return reply(400, { error: "invalid_stage", field: change.field });
 					if (deal.stage === change.stage) return reply(200, { deal });
 					if (deal.version !== change.version)
 						return reply(409, { error: "conflict", deal });
-					if (!canMoveDeal(deal.stage, change.stage))
+					if (!canMoveDeal(deal.stage as DealStage, change.stage))
 						return reply(409, { error: "invalid_transition", deal });
 					deal.stage = change.stage;
 					deal.version += 1;

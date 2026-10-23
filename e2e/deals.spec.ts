@@ -275,3 +275,108 @@ test("keyboard only: move a deal", async ({ page }) => {
 	await expect(live(page)).toHaveText("Deal moved to Conditional.");
 	expect(patches(s)).toHaveLength(1);
 });
+
+test("a deal saved with its reply lost is added once on retry", async ({
+	page,
+}) => {
+	const s = state({
+		deals: { [ORG_A]: [] },
+		dealReplies: ["commit_then_abort"],
+	});
+	await mockApi(page, s);
+	await page.goto(DEALS);
+	await fillDeal(page);
+	await page.getByRole("checkbox", { name: "Amy Synthetic" }).check();
+	await page.getByRole("button", { name: "Add deal" }).click();
+	await expect(page.getByRole("main").getByRole("alert")).toHaveText(
+		"That deal could not be saved. Please try again.",
+	);
+	await page.getByRole("button", { name: "Add deal" }).click();
+	await expect(live(page)).toHaveText("Deal added.");
+	expect(s.deals?.[ORG_A]).toHaveLength(1);
+	await expect(
+		page.getByRole("list", { name: "Deals" }).getByRole("listitem"),
+	).toHaveCount(1);
+});
+
+test("changing a lost-reply deal before retrying says it was saved", async ({
+	page,
+}) => {
+	const s = state({
+		deals: { [ORG_A]: [] },
+		dealReplies: ["commit_then_abort"],
+	});
+	await mockApi(page, s);
+	await page.goto(DEALS);
+	await fillDeal(page);
+	await page.getByRole("checkbox", { name: "Amy Synthetic" }).check();
+	await page.getByRole("button", { name: "Add deal" }).click();
+	await expect(page.getByRole("main").getByRole("alert")).toBeVisible();
+	await page.getByLabel("Street address").fill("2 King St W");
+	await page.getByRole("button", { name: "Add deal" }).click();
+	await expect(page.getByRole("main").getByRole("alert")).toHaveText(
+		"Your earlier deal was already saved. Press Add deal again to add this one as well.",
+	);
+	await expect(page.getByRole("list", { name: "Deals" })).toContainText(
+		"1 King St W",
+	);
+	await page.getByRole("button", { name: "Add deal" }).click();
+	await expect(live(page)).toHaveText("Deal added.");
+	const [first, second, third] = posts(s).map(
+		(r) => (r.body as { id: string }).id,
+	);
+	expect(second).toBe(first);
+	expect(third).not.toBe(first);
+	expect(s.deals?.[ORG_A]).toHaveLength(2);
+});
+
+test("says when only the first 100 clients can be chosen", async ({ page }) => {
+	await mockApi(page, state({ clientsMore: true }));
+	await page.goto(DEALS);
+	await expect(
+		page
+			.getByRole("group", { name: "Clients on this deal" })
+			.getByText("Showing your first 100 clients"),
+	).toBeVisible();
+});
+
+test("a rejected side shows its error", async ({ page }) => {
+	await mockApi(
+		page,
+		state({
+			dealReplies: [
+				{ status: 400, body: { error: "invalid_deal", field: "side" } },
+			],
+		}),
+	);
+	await page.goto(DEALS);
+	await fillDeal(page);
+	await page.getByRole("checkbox", { name: "Amy Synthetic" }).check();
+	await page.getByRole("button", { name: "Add deal" }).click();
+	const select = page.getByLabel("We represent the");
+	await expect(select).toBeFocused();
+	await expect(select).toHaveAttribute("aria-invalid", "true");
+	await expect(select).toHaveAccessibleDescription(
+		"Choose whom the brokerage represents.",
+	);
+});
+
+test("closing a deal keeps keyboard focus on the page", async ({ page }) => {
+	await mockApi(page, state());
+	await page.goto(`${DEALS}/${DEAL_ID}`);
+	await page.getByLabel("Move to").selectOption("closed");
+	await page.getByRole("button", { name: "Move deal" }).click();
+	await expect(page.getByText("A closed deal cannot be moved.")).toBeFocused();
+});
+
+test("a deal that cannot load offers a retry", async ({ page }) => {
+	const s = state({ deals: { [ORG_A]: "error" } });
+	await mockApi(page, s);
+	await page.goto(`${DEALS}/${DEAL_ID}`);
+	await expect(page.getByText("This deal could not be loaded.")).toBeVisible();
+	s.deals = { [ORG_A]: [deal()] };
+	await page.getByRole("button", { name: "Try again" }).click();
+	await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+		"12 Main Street, Unit 4, Ottawa ON K1A 0B1",
+	);
+});

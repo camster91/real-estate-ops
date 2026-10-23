@@ -10,7 +10,13 @@ import {
 } from "@reo/domain";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { type FormEvent, useCallback, useEffect, useState } from "react";
+import {
+	type FormEvent,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 import { changeStage, type Deal, getDeal } from "../../../../lib/api";
 import { AppHeader } from "../../app-header";
 import { sideLabel, stageLabel } from "../labels";
@@ -36,6 +42,9 @@ export default function DealDetail() {
 	const [signedOut, setSignedOut] = useState(false);
 	const [saving, setSaving] = useState(false);
 	const [announcement, setAnnouncement] = useState("");
+	const [attempt, setAttempt] = useState(0);
+	// Where focus goes when the stage form disappears (a closed deal).
+	const finalNote = useRef<HTMLParagraphElement>(null);
 
 	const show = useCallback((deal: Deal) => {
 		setView(deal);
@@ -44,6 +53,7 @@ export default function DealDetail() {
 
 	useEffect(() => {
 		let active = true;
+		void attempt; // "Try again" re-runs this load.
 		getDeal(organizationId, dealId).then((result) => {
 			if (!active) return;
 			if (result === "signed_out") return router.replace("/");
@@ -53,7 +63,7 @@ export default function DealDetail() {
 		return () => {
 			active = false;
 		};
-	}, [organizationId, dealId, router, show]);
+	}, [organizationId, dealId, router, show, attempt]);
 
 	const move = async (event: FormEvent) => {
 		event.preventDefault();
@@ -79,6 +89,8 @@ export default function DealDetail() {
 		}
 		show(result.deal);
 		setAnnouncement(`Deal moved to ${stageLabel(result.deal.stage)}.`);
+		if (nextStages(result.deal.stage).length === 0)
+			requestAnimationFrame(() => finalNote.current?.focus());
 	};
 
 	const base = `/o/${encodeURIComponent(organizationId)}`;
@@ -92,9 +104,19 @@ export default function DealDetail() {
 				{view === "error" && (
 					<>
 						<h1>Deal</h1>
-						<p role="alert" className="notice">
-							This deal could not be loaded. Please refresh the page.
-						</p>
+						<div role="alert" className="notice">
+							<p>This deal could not be loaded.</p>
+							<button
+								type="button"
+								className="button"
+								onClick={() => {
+									setView("loading");
+									setAttempt((n) => n + 1);
+								}}
+							>
+								Try again
+							</button>
+						</div>
 					</>
 				)}
 				{view === "not_found" && (
@@ -148,7 +170,9 @@ export default function DealDetail() {
 							them.
 						</p>
 						{options.length === 0 ? (
-							<p>A closed deal cannot be moved.</p>
+							<p ref={finalNote} tabIndex={-1}>
+								A closed deal cannot be moved.
+							</p>
 						) : (
 							<form className="actions-row" onSubmit={move}>
 								<label htmlFor="deal-stage">Move to</label>
