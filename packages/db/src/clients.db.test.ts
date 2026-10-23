@@ -234,16 +234,29 @@ describe("client edits", () => {
 		expect(await code(edit(await mine(), set))).toBe("23514");
 	});
 
-	it("the owner cannot change protected columns either", async () => {
+	it.each([
+		["organization_id", "$2"],
+		["id", "gen_random_uuid()"],
+		["kind", "'organization'"],
+		["assigned_principal_id", "$3"],
+		["created_by_principal_id", "$3"],
+		["classification", "'operational'"],
+		["created_at", "created_at - interval '1 day'"],
+	])("the owner cannot change %s either", async (column, value) => {
 		const id = await mine();
-		expect(
-			await code(
-				db.admin.query(
-					"UPDATE party SET assigned_principal_id = created_by_principal_id, kind = 'person', classification = 'operational', version = version + 1 WHERE id = $1",
-					[id],
-				),
-			),
-		).toBe("23514");
+		const error = await db.admin
+			.query(
+				`UPDATE party SET ${column} = ${value}, version = version + 1 WHERE id = $1 AND $2::uuid IS NOT NULL AND $3::uuid IS NOT NULL`,
+				[id, ids.orgB, pa2],
+			)
+			.then(
+				() => ({ code: "no error", message: "" }),
+				(e: { code: string; message: string }) => e,
+			);
+		expect(error).toMatchObject({
+			code: "23514",
+			message: "client edit not allowed",
+		});
 	});
 
 	it.each([
@@ -342,22 +355,48 @@ describe("consent records", () => {
 		]);
 	});
 
-	it("records are append-only, even for the owner", async () => {
+	it("the runtime role has no update or delete grant", async () => {
 		const partyId = await client();
 		await record(partyId);
 		for (const sql of [
 			"UPDATE consent_record SET status = 'withdrawn'",
 			"DELETE FROM consent_record",
+			"TRUNCATE consent_record",
 		])
 			expect(await code(as(ctx(ids.orgA, ids.pa), sql)), sql).toBe("42501");
-		expect(
-			await code(
-				db.admin.query(
-					"UPDATE consent_record SET status = 'withdrawn' WHERE party_id = $1",
-					[partyId],
-				),
-			),
-		).toBe("42501");
+	});
+
+	// The trigger, not a grant: the owner has every privilege. The owner can
+	// still disable the trigger; see ADR 0020 for that limit.
+	it.each([
+		"UPDATE consent_record SET status = 'withdrawn' WHERE party_id = $1",
+		"DELETE FROM consent_record WHERE party_id = $1",
+		"TRUNCATE consent_record",
+	])("the trigger refuses the owner: %s", async (sql) => {
+		const partyId = await client();
+		await record(partyId);
+		const error = await db.admin
+			.query(sql, sql.includes("$1") ? [partyId] : [])
+			.then(
+				() => ({ code: "no error", message: "" }),
+				(e: { code: string; message: string }) => e,
+			);
+		expect(error).toMatchObject({
+			code: "42501",
+			message: "consent_record is append-only",
+		});
+	});
+
+	it("table is forced and not owned by the runtime role", async () => {
+		const appUser = (await app.query("SELECT current_user AS u")).rows[0].u;
+		const { rows } = await db.admin.query(
+			"SELECT relrowsecurity, relforcerowsecurity, pg_get_userbyid(relowner) AS owner FROM pg_class WHERE oid = 'public.consent_record'::regclass",
+		);
+		expect(rows[0]).toMatchObject({
+			relrowsecurity: true,
+			relforcerowsecurity: true,
+		});
+		expect(rows[0].owner).not.toBe(appUser);
 	});
 
 	it("cannot record for a client assigned to someone else, or as someone else", async () => {

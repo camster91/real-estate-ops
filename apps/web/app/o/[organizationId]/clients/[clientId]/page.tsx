@@ -40,6 +40,9 @@ const EDIT_CONFLICT =
 	"This client was changed in another window. The latest details are shown; check them and save again.";
 const SAVE_ERROR = "The changes could not be saved. Please try again.";
 const SIGNED_OUT = "Your session has ended. Sign in again, then save.";
+const CONSENT_ERROR = "That could not be recorded. Please try again.";
+const CONSENT_CONFLICT =
+	"That may already be recorded. Check the history below before trying again.";
 const METHOD_LABELS: Record<string, string> = {
 	written: "Written",
 	electronic: "Electronic",
@@ -90,13 +93,23 @@ export default function ClientDetail() {
 	const [methods, setMethods] = useState<Record<string, string>>({});
 	const [consentBusy, setConsentBusy] = useState<string | null>(null);
 	const [consentMessage, setConsentMessage] = useState<string>();
-	// One id per purpose until it saves, so a retry is a replay.
+	const [consentSignedOut, setConsentSignedOut] = useState(false);
+	// One id per purpose, status and method until it saves, so a retry of the
+	// same choice is a replay. Any success for a purpose clears its ids.
 	const pendingConsent = useRef<Record<string, string>>({});
+	const clearPending = (purpose: string) => {
+		for (const key of Object.keys(pendingConsent.current))
+			if (key.startsWith(`${purpose}:`)) delete pendingConsent.current[key];
+	};
 
 	const loadConsents = useCallback(async () => {
 		const result = await getConsents(organizationId, clientId);
-		if (result === "signed_out") return router.replace("/");
+		if (result === "signed_out") {
+			router.replace("/");
+			return undefined;
+		}
 		setConsents(typeof result === "object" ? result : "error");
+		return typeof result === "object" ? result : undefined;
 	}, [organizationId, clientId, router]);
 
 	useEffect(() => {
@@ -170,29 +183,42 @@ export default function ClientDetail() {
 	const record = async (purpose: string, status: "granted" | "withdrawn") => {
 		if (consentBusy) return;
 		setConsentMessage(undefined);
+		setConsentSignedOut(false);
 		setAnnouncement("");
-		const key = `${purpose}:${status}`;
+		const method = methods[purpose] ?? "written";
+		const key = `${purpose}:${status}:${method}`;
 		pendingConsent.current[key] ??= crypto.randomUUID();
+		const id = pendingConsent.current[key];
 		setConsentBusy(purpose);
 		const result = await recordConsent(organizationId, clientId, {
-			id: pendingConsent.current[key],
+			id,
 			purpose,
 			status,
-			method: methods[purpose] ?? "written",
+			method,
 		});
-		setConsentBusy(null);
-		if (result === "signed_out")
-			return setConsentMessage("Your session has ended. Sign in again.");
-		if (result === "not_found") return setView("not_found");
-		if (result === "error" || result === "conflict") {
-			if (result === "conflict") delete pendingConsent.current[key];
-			return setConsentMessage("That could not be recorded. Please try again.");
+		if (result === "signed_out") {
+			setConsentBusy(null);
+			return setConsentSignedOut(true);
 		}
-		delete pendingConsent.current[key];
-		setAnnouncement(
-			status === "granted" ? "Consent recorded." : "Withdrawal recorded.",
-		);
-		await loadConsents();
+		if (result === "not_found") {
+			setConsentBusy(null);
+			return setView("not_found");
+		}
+		// After an error the record may still have been saved with its reply
+		// lost, so the history decides.
+		const latest = await loadConsents();
+		setConsentBusy(null);
+		if (
+			result === "saved" ||
+			latest?.history.some((entry) => entry.id === id)
+		) {
+			clearPending(purpose);
+			return setAnnouncement(
+				status === "granted" ? "Consent recorded." : "Withdrawal recorded.",
+			);
+		}
+		if (result === "conflict") delete pendingConsent.current[key];
+		setConsentMessage(result === "conflict" ? CONSENT_CONFLICT : CONSENT_ERROR);
 	};
 
 	const field = (name: Field, text: string, type: "text" | "email" | "tel") => {
@@ -326,11 +352,21 @@ export default function ClientDetail() {
 								{consentMessage}
 							</p>
 						)}
+						{consentSignedOut && (
+							<p role="alert" className="error">
+								Your session has ended. <Link href="/">Sign in</Link> again,
+								then record it.
+							</p>
+						)}
 						{consents === "loading" && <p role="status">Loading consent…</p>}
 						{consents === "error" && (
 							<div className="notice">
 								<p>Consent could not be loaded.</p>
-								<button type="button" className="button" onClick={loadConsents}>
+								<button
+									type="button"
+									className="button"
+									onClick={() => loadConsents()}
+								>
 									Try again
 								</button>
 							</div>
@@ -351,7 +387,12 @@ export default function ClientDetail() {
 													: "Not recorded"}
 											</span>
 											<div className="actions-row">
-												<label htmlFor={`method-${entry.purpose}`}>How</label>
+												<label htmlFor={`method-${entry.purpose}`}>
+													How
+													<span className="visually-hidden">
+														: {label(entry.purpose)}
+													</span>
+												</label>
 												<select
 													id={`method-${entry.purpose}`}
 													className="status"
@@ -372,7 +413,7 @@ export default function ClientDetail() {
 												<button
 													type="button"
 													className="link"
-													disabled={consentBusy === entry.purpose}
+													disabled={consentBusy !== null}
 													aria-label={`Record consent: ${label(entry.purpose)}`}
 													onClick={() => record(entry.purpose, "granted")}
 												>
@@ -381,7 +422,7 @@ export default function ClientDetail() {
 												<button
 													type="button"
 													className="link"
-													disabled={consentBusy === entry.purpose}
+													disabled={consentBusy !== null}
 													aria-label={`Record withdrawal: ${label(entry.purpose)}`}
 													onClick={() => record(entry.purpose, "withdrawn")}
 												>

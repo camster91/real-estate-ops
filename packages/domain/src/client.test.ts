@@ -122,14 +122,30 @@ describe("parseClientUpdate", () => {
 		});
 	});
 
+	it("clears email and phone sent as null", () => {
+		expect(
+			parseClientUpdate({ version: 1, name: "X", email: null, phone: null }),
+		).toMatchObject({ ok: true, update: { email: null, phone: null } });
+	});
+
 	it.each<[string, unknown, string]>([
-		["no version", { name: "X" }, "version"],
-		["a zero version", { version: 0, name: "X" }, "version"],
-		["a string version", { version: "1", name: "X" }, "version"],
-		["an id", { version: 1, id, name: "X" }, "body"],
-		["a bad name", { version: 1, name: "" }, "name"],
-		["a bad email", { version: 1, name: "X", email: "x" }, "email"],
-		["a bad phone", { version: 1, name: "X", phone: "1" }, "phone"],
+		["no version", { name: "X", email: "", phone: "" }, "body"],
+		[
+			"a zero version",
+			{ version: 0, name: "X", email: "", phone: "" },
+			"version",
+		],
+		[
+			"a string version",
+			{ version: "1", name: "X", email: "", phone: "" },
+			"version",
+		],
+		["an id", { version: 1, id, name: "X", email: "", phone: "" }, "body"],
+		["a missing email", { version: 1, name: "X", phone: "" }, "body"],
+		["a missing phone", { version: 1, name: "X", email: null }, "body"],
+		["a bad name", { version: 1, name: "", email: "", phone: "" }, "name"],
+		["a bad email", { version: 1, name: "X", email: "x", phone: "" }, "email"],
+		["a bad phone", { version: 1, name: "X", email: "", phone: "1" }, "phone"],
 		["not an object", null, "body"],
 	])("rejects %s", (_label, input, field) => {
 		expect(parseClientUpdate(input)).toEqual({ ok: false, field });

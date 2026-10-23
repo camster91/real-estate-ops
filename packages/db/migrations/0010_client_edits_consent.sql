@@ -2,13 +2,15 @@
 --
 -- Edits: only the assigned agent, while an active member, may change a
 -- client's name, email and phone, and each change must add exactly one to
--- version (optimistic concurrency). A trigger enforces this for every role,
--- including the table owner, and stamps updated_at.
+-- version (optimistic concurrency). A trigger enforces this for every role
+-- that does not disable it, including the table owner, and stamps updated_at.
 --
 -- Consent: one append-only row per grant or withdrawal, for a purpose from
 -- @reo/domain CONSENT_PURPOSES, with how it was given and who recorded it.
--- The current consent for a purpose is its latest row. Rows are never
--- updated or deleted, even by the owner, so the history is evidence.
+-- The current consent for a purpose is its latest row. A trigger refuses
+-- update, delete and truncate for every role, the owner included, so the
+-- history is evidence. As in 0005, the owner or a superuser can still disable
+-- the trigger; tamper evidence for that is the planned hash chain (ADR 0005).
 
 ALTER TABLE party ADD COLUMN updated_at timestamptz;
 UPDATE party SET updated_at = created_at;
@@ -64,7 +66,7 @@ CREATE TABLE consent_record (
 	status text NOT NULL CHECK (status IN ('granted', 'withdrawn')),
 	method text NOT NULL CHECK (method IN ('written', 'electronic', 'verbal')),
 	recorded_by_principal_id uuid NOT NULL,
-	recorded_at timestamptz NOT NULL DEFAULT now(),
+	recorded_at timestamptz NOT NULL DEFAULT clock_timestamp(),
 	classification text NOT NULL DEFAULT 'personal'
 		CHECK (classification IN ('operational', 'personal', 'financial', 'restricted_compliance')),
 	PRIMARY KEY (organization_id, id),

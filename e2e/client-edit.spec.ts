@@ -235,3 +235,94 @@ test("consent that cannot load offers a retry", async ({ page }) => {
 		page.getByRole("list", { name: "Consent" }).getByText("Not recorded"),
 	).toHaveCount(2);
 });
+
+test("an edit saved with its reply lost is fine on retry", async ({ page }) => {
+	const state = withClient({ clientPatchReplies: ["commit_then_abort"] });
+	await mockApi(page, state);
+	await page.goto(PAGE);
+	await page.getByRole("button", { name: "Edit details" }).click();
+	await page.getByLabel("Name").fill("Lost Reply");
+	await page.getByRole("button", { name: "Save changes" }).click();
+	await expect(page.getByRole("main").getByRole("alert")).toHaveText(
+		"The changes could not be saved. Please try again.",
+	);
+	// The retry sends the same values, which the API treats as unchanged.
+	await page.getByRole("button", { name: "Save changes" }).click();
+	await expect(live(page)).toHaveText("Client details saved.");
+	await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+		"Lost Reply",
+	);
+});
+
+test("a recording saved with its reply lost shows as recorded", async ({
+	page,
+}) => {
+	const state = withClient({ consentReplies: ["commit_then_abort"] });
+	await mockApi(page, state);
+	await page.goto(PAGE);
+	const updates = page
+		.getByRole("list", { name: "Consent" })
+		.getByRole("listitem")
+		.nth(1);
+	await updates.getByRole("button", { name: /^Record consent/ }).click();
+	await expect(live(page)).toHaveText("Consent recorded.");
+	await expect(updates).toContainText("Given (written)");
+	// A later withdrawal and a fresh grant each make a new record.
+	await updates.getByRole("button", { name: /^Record withdrawal/ }).click();
+	await expect(live(page)).toHaveText("Withdrawal recorded.");
+	await updates.getByRole("button", { name: /^Record consent/ }).click();
+	await expect(live(page)).toHaveText("Consent recorded.");
+	await expect(updates).toContainText("Given (written)");
+	const ids = sent(state, "POST", "/consents").map(
+		(r) => (r.body as { id: string }).id,
+	);
+	expect(new Set(ids).size).toBe(3);
+	await expect(
+		page.getByRole("list", { name: "Consent history" }).getByRole("listitem"),
+	).toHaveCount(3);
+});
+
+test("a conflicting recording says to check the history", async ({ page }) => {
+	await mockApi(
+		page,
+		withClient({
+			consentReplies: [{ status: 409, body: { error: "conflict" } }],
+		}),
+	);
+	await page.goto(PAGE);
+	await page
+		.getByRole("button", { name: /^Record consent/ })
+		.first()
+		.click();
+	await expect(page.getByRole("main").getByRole("alert")).toHaveText(
+		"That may already be recorded. Check the history below before trying again.",
+	);
+});
+
+test("each How select names its purpose", async ({ page }) => {
+	await mockApi(page, withClient());
+	await page.goto(PAGE);
+	await expect(
+		page.getByRole("combobox", { name: /^How\W+Send me market updates/ }),
+	).toBeVisible();
+	await expect(
+		page.getByRole("combobox", { name: /^How\W+Contact me about/ }),
+	).toBeVisible();
+});
+
+test("signed out while recording offers sign-in", async ({ page }) => {
+	await mockApi(
+		page,
+		withClient({
+			consentReplies: [
+				{ status: 401, body: { error: "authentication_required" } },
+			],
+		}),
+	);
+	await page.goto(PAGE);
+	await page
+		.getByRole("button", { name: /^Record consent/ })
+		.first()
+		.click();
+	await expect(page.getByRole("link", { name: "Sign in" })).toBeVisible();
+});

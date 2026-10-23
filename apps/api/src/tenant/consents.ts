@@ -62,28 +62,34 @@ export function registerConsentRoutes(
 						[clientId.toLowerCase()],
 					);
 					if (visible.rowCount === 0) return undefined;
-					return (
-						await client.query<ConsentRow>(
-							`SELECT ${COLUMNS} FROM consent_record
+					const history = await client.query<ConsentRow>(
+						`SELECT ${COLUMNS} FROM consent_record
 							WHERE party_id = $1
 							ORDER BY recorded_at DESC, id DESC
 							LIMIT ${HISTORY_LIMIT}`,
-							[clientId.toLowerCase()],
-						)
-					).rows;
+						[clientId.toLowerCase()],
+					);
+					// Current is the newest row per purpose over all history, not
+					// just the page above.
+					const latest = await client.query<ConsentRow>(
+						`SELECT DISTINCT ON (purpose) ${COLUMNS} FROM consent_record
+							WHERE party_id = $1
+							ORDER BY purpose, recorded_at DESC, id DESC`,
+						[clientId.toLowerCase()],
+					);
+					return { history: history.rows, latest: latest.rows };
 				},
 			);
 			if (result === NOT_MEMBER || result === undefined)
 				return reply.code(404).send({ error: "not_found" });
-			const history = result.map(toEntry);
-			// History is newest first, so the first entry per purpose is current.
+			const history = result.history.map(toEntry);
 			const current = CONSENT_PURPOSES.map((purpose) => {
-				const latest = history.find((entry) => entry.purpose === purpose);
+				const row = result.latest.find((entry) => entry.purpose === purpose);
 				return {
 					purpose,
-					status: latest?.status ?? null,
-					method: latest?.method ?? null,
-					recordedAt: latest?.recordedAt ?? null,
+					status: row?.status ?? null,
+					method: row?.method ?? null,
+					recordedAt: row?.recorded_at.toISOString() ?? null,
 				};
 			});
 			return { current, history };

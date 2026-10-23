@@ -90,7 +90,8 @@ export interface ClientUpdate extends Fields {
 
 /**
  * Validates an edit: the full set of editable fields plus the version seen.
- * A missing or blank email or phone clears it.
+ * Every field must be sent; an empty or null email or phone clears it, so a
+ * partial body can never clear details by accident.
  */
 export function parseClientUpdate(
 	input: unknown,
@@ -98,7 +99,11 @@ export function parseClientUpdate(
 	| { ok: true; update: ClientUpdate }
 	| { ok: false; field: "version" | "name" | "email" | "phone" | "body" } {
 	const body = asObject(input);
-	if (!body || !onlyKeys(body, UPDATE_KEYS))
+	if (
+		!body ||
+		!onlyKeys(body, UPDATE_KEYS) ||
+		![...UPDATE_KEYS].every((key) => key in body)
+	)
 		return { ok: false, field: "body" };
 	const version = body.version;
 	if (
