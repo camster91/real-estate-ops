@@ -181,6 +181,7 @@ export interface Client {
 	phone: string | null;
 	version: number;
 	createdAt: string;
+	updatedAt: string;
 }
 
 export interface NewClientBody {
@@ -274,4 +275,114 @@ export function formatPhone(phone: string): string {
 	if (/^\d{10}$/.test(digits))
 		return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
 	return phone;
+}
+
+export interface ClientUpdateBody {
+	version: number;
+	name: string;
+	email: string;
+	phone: string;
+}
+
+export type UpdateClientResult =
+	| { client: Client }
+	| { conflict: Client }
+	| { invalid: string }
+	| "signed_out"
+	| "not_found"
+	| "error";
+
+/** Saves edited details. A stale version comes back as the current client. */
+export async function updateClient(
+	organizationId: string,
+	clientId: string,
+	update: ClientUpdateBody,
+): Promise<UpdateClientResult> {
+	try {
+		const response = await fetch(
+			`${clientsPath(organizationId)}/${encodeURIComponent(clientId)}`,
+			{
+				...options,
+				method: "PATCH",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify(update),
+			},
+		);
+		if (response.status === 401) return "signed_out";
+		if (response.status === 404) return "not_found";
+		const body = (await json(response)) as
+			| { client?: Client; error?: string; field?: string }
+			| undefined;
+		if (response.status === 409 && body?.client)
+			return { conflict: body.client };
+		if (response.status === 400 && body?.error === "invalid_client")
+			return { invalid: body.field ?? "body" };
+		if (response.ok && body?.client) return { client: body.client };
+		return "error";
+	} catch {
+		return "error";
+	}
+}
+
+export interface ConsentEntry {
+	id: string;
+	purpose: string;
+	status: string;
+	method: string;
+	recordedAt: string;
+}
+
+export interface ConsentState {
+	current: {
+		purpose: string;
+		status: string | null;
+		method: string | null;
+		recordedAt: string | null;
+	}[];
+	history: ConsentEntry[];
+}
+
+const consentsPath = (organizationId: string, clientId: string) =>
+	`${clientsPath(organizationId)}/${encodeURIComponent(clientId)}/consents`;
+
+export async function getConsents(
+	organizationId: string,
+	clientId: string,
+): Promise<ConsentState | "signed_out" | "not_found" | "error"> {
+	try {
+		const response = await fetch(
+			consentsPath(organizationId, clientId),
+			options,
+		);
+		if (response.status === 401) return "signed_out";
+		if (response.status === 404) return "not_found";
+		if (!response.ok) return "error";
+		const body = (await json(response)) as ConsentState | undefined;
+		return Array.isArray(body?.current) && Array.isArray(body?.history)
+			? body
+			: "error";
+	} catch {
+		return "error";
+	}
+}
+
+export async function recordConsent(
+	organizationId: string,
+	clientId: string,
+	consent: { id: string; purpose: string; status: string; method: string },
+): Promise<"saved" | "signed_out" | "not_found" | "conflict" | "error"> {
+	try {
+		const response = await fetch(consentsPath(organizationId, clientId), {
+			...options,
+			method: "POST",
+			headers: { "content-type": "application/json" },
+			body: JSON.stringify(consent),
+		});
+		if (response.status === 401) return "signed_out";
+		if (response.status === 404) return "not_found";
+		if (response.status === 409) return "conflict";
+		return response.ok ? "saved" : "error";
+	} catch {
+		return "error";
+	}
 }

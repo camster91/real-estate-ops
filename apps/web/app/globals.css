@@ -378,3 +378,39 @@ dl.details dt {
 dl.details dd {
 	margin: 0;
 }
+
+/* Button: Secondary */
+.button.secondary {
+	color: var(--reo-color-text-brand);
+	background: var(--reo-color-bg-surface);
+	border: 1px solid var(--reo-color-border-strong);
+}
+.button.secondary:hover {
+	background: var(--reo-color-bg-brand-subtle);
+	color: var(--reo-color-text-brand);
+}
+.actions-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--reo-space-3) var(--reo-space-4);
+	align-items: center;
+	margin-top: var(--reo-space-3);
+}
+ul.tasks.consents .actions-row label {
+	font-weight: 600;
+}
+ul.tasks.consents select.status {
+	margin-top: 0;
+	min-width: 160px;
+}
+ol.history {
+	padding-left: var(--reo-space-6);
+	max-width: 720px;
+	display: grid;
+	gap: var(--reo-space-2);
+	color: var(--reo-color-text-muted);
+}
+h3 {
+	font-size: 1.125rem;
+	margin: var(--reo-space-8) 0 var(--reo-space-3);
+}
