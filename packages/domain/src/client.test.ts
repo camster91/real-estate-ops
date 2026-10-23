@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { NAME_MAX, parseNewClient } from "./client.js";
+import {
+	CONSENT_PURPOSE_LABELS,
+	CONSENT_PURPOSES,
+	CONSENT_WORDING_IS_PLACEHOLDER,
+	NAME_MAX,
+	parseClientUpdate,
+	parseConsentRecord,
+	parseNewClient,
+} from "./client.js";
 
 const id = "0b9c2e1a-1d2f-4c3b-8a9e-1f2e3d4c5b6a";
 
@@ -91,5 +99,114 @@ describe("parseNewClient", () => {
 		["a plus in the middle", { id, name: "X", phone: "416+5550100" }, "phone"],
 	])("rejects %s", (_label, input, field) => {
 		expect(parseNewClient(input)).toEqual({ ok: false, field });
+	});
+});
+
+describe("parseClientUpdate", () => {
+	it("accepts the full set of editable fields with a version", () => {
+		expect(
+			parseClientUpdate({
+				version: 2,
+				name: " New Name ",
+				email: "New@Example.invalid",
+				phone: "",
+			}),
+		).toEqual({
+			ok: true,
+			update: {
+				version: 2,
+				name: "New Name",
+				email: "new@example.invalid",
+				phone: null,
+			},
+		});
+	});
+
+	it.each<[string, unknown, string]>([
+		["no version", { name: "X" }, "version"],
+		["a zero version", { version: 0, name: "X" }, "version"],
+		["a string version", { version: "1", name: "X" }, "version"],
+		["an id", { version: 1, id, name: "X" }, "body"],
+		["a bad name", { version: 1, name: "" }, "name"],
+		["a bad email", { version: 1, name: "X", email: "x" }, "email"],
+		["a bad phone", { version: 1, name: "X", phone: "1" }, "phone"],
+		["not an object", null, "body"],
+	])("rejects %s", (_label, input, field) => {
+		expect(parseClientUpdate(input)).toEqual({ ok: false, field });
+	});
+});
+
+describe("parseConsentRecord", () => {
+	it("accepts a grant", () => {
+		expect(
+			parseConsentRecord({
+				id,
+				purpose: "market_updates",
+				status: "granted",
+				method: "written",
+			}),
+		).toEqual({
+			ok: true,
+			record: {
+				id,
+				purpose: "market_updates",
+				status: "granted",
+				method: "written",
+			},
+		});
+	});
+
+	it("every purpose has a label and is marked as placeholder wording", () => {
+		for (const purpose of CONSENT_PURPOSES) {
+			expect(CONSENT_PURPOSE_LABELS[purpose].length).toBeGreaterThan(10);
+		}
+		expect(CONSENT_WORDING_IS_PLACEHOLDER).toBe(true);
+	});
+
+	it.each<[string, unknown, string]>([
+		[
+			"an unknown purpose",
+			{ id, purpose: "spam", status: "granted", method: "written" },
+			"purpose",
+		],
+		[
+			"an inherited purpose",
+			{ id, purpose: "toString", status: "granted", method: "written" },
+			"purpose",
+		],
+		[
+			"an unknown status",
+			{ id, purpose: "market_updates", status: "maybe", method: "written" },
+			"status",
+		],
+		[
+			"an unknown method",
+			{ id, purpose: "market_updates", status: "granted", method: "guessed" },
+			"method",
+		],
+		[
+			"a bad id",
+			{
+				id: "x",
+				purpose: "market_updates",
+				status: "granted",
+				method: "written",
+			},
+			"id",
+		],
+		[
+			"an extra field",
+			{
+				id,
+				purpose: "market_updates",
+				status: "granted",
+				method: "written",
+				note: "x",
+			},
+			"body",
+		],
+		["an array", [], "body"],
+	])("rejects %s", (_label, input, field) => {
+		expect(parseConsentRecord(input)).toEqual({ ok: false, field });
 	});
 });
