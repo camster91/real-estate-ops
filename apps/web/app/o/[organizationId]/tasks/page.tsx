@@ -21,9 +21,9 @@ import {
 	listTasks,
 	type NewTaskBody,
 	rememberOrganization,
-	signOut,
 	type Task,
 } from "../../../lib/api";
+import { AppHeader } from "../app-header";
 import {
 	DoneTasks,
 	OpenTasks,
@@ -79,7 +79,6 @@ export default function MyTasks() {
 	const [messages, setMessages] = useState<Record<string, RowMessage>>({});
 	// A page-level notice for a task that moved lists because of another window.
 	const [notice, setNotice] = useState<string>();
-	const [signOutFailed, setSignOutFailed] = useState(false);
 	// The element to focus after a row moves between lists, so keyboard and
 	// screen-reader users are not dropped back at the top of the page.
 	const [focusTarget, setFocusTarget] = useState<string | null>(null);
@@ -274,31 +273,11 @@ export default function MyTasks() {
 		);
 	};
 
-	const leave = async () => {
-		setSignOutFailed(false);
-		// On a shared computer, never pretend the session ended when it did not.
-		if (await signOut()) router.replace("/");
-		else setSignOutFailed(true);
-	};
-
 	return (
 		<>
-			<header className="bar">
-				<span className="eyebrow">Real Estate Ops</span>
-				<nav aria-label="Account">
-					<Link href="/?choose=1">Switch brokerage</Link>
-					<button type="button" className="link" onClick={leave}>
-						Sign out
-					</button>
-				</nav>
-			</header>
+			<AppHeader organizationId={organizationId} current="tasks" />
 			<main id="main" tabIndex={-1}>
 				<h1>My tasks</h1>
-				{signOutFailed && (
-					<p role="alert" className="notice">
-						Sign-out did not complete. Please try again.
-					</p>
-				)}
 				{load === "loading" && <p role="status">Loading tasks…</p>}
 				{load === "error" && (
 					<div role="alert" className="notice">

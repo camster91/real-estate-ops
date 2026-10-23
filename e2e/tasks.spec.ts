@@ -312,7 +312,7 @@ test("a failed sign-out says so and stays", async ({ page }) => {
 	await page.goto(TASKS);
 	await expect(page.getByText("No open tasks.")).toBeVisible();
 	await page.getByRole("button", { name: "Sign out" }).click();
-	await expect(page.getByRole("main").getByRole("alert")).toHaveText(
+	await expect(page.getByRole("banner").getByRole("alert")).toHaveText(
 		"Sign-out did not complete. Please try again.",
 	);
 	await expect(page).toHaveURL(TASKS);

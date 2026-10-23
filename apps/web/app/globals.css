@@ -333,3 +333,48 @@ form.add .button {
 	clip-path: inset(50%);
 	white-space: nowrap;
 }
+
+/* Section navigation in the header */
+.bar nav.sections {
+	flex: 1;
+	justify-content: flex-start;
+}
+.bar nav.sections a {
+	text-decoration: none;
+	padding: var(--reo-space-2) 0;
+	border-bottom: 3px solid transparent;
+}
+.bar nav.sections a[aria-current="page"] {
+	color: var(--reo-color-text-default);
+	border-bottom-color: var(--reo-color-border-brand);
+}
+.bar .header-notice {
+	flex-basis: 100%;
+	margin: 0;
+	font-size: 1rem;
+}
+
+/* Clients */
+ul.tasks.clients a.title {
+	font-weight: 600;
+	color: var(--reo-color-text-brand);
+}
+dl.details {
+	display: grid;
+	grid-template-columns: max-content 1fr;
+	gap: var(--reo-space-3) var(--reo-space-6);
+	margin: var(--reo-space-6) 0;
+	padding: var(--reo-space-6);
+	background: var(--reo-color-bg-surface);
+	border: 1px solid var(--reo-color-border-default);
+	border-radius: var(--reo-radius-lg);
+	max-width: 720px;
+	overflow-wrap: anywhere;
+}
+dl.details dt {
+	font-weight: 600;
+	color: var(--reo-color-text-muted);
+}
+dl.details dd {
+	margin: 0;
+}

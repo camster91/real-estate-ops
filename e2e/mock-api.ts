@@ -25,6 +25,15 @@ const allowed = (from: string, to: string) =>
 // "commit_then_abort": the task is saved, but the response is lost.
 type Reply = { status: number; body?: unknown } | "abort" | "commit_then_abort";
 
+export interface MockClient {
+	id: string;
+	name: string;
+	email: string | null;
+	phone: string | null;
+	version: number;
+	createdAt: string;
+}
+
 export interface MockState {
 	/** Signed out, or the session's memberships. */
 	session: "signed_out" | { organizationId: string; name: string }[];
@@ -40,6 +49,10 @@ export interface MockState {
 	patchDelay?: number;
 	/** Status for POST /auth/logout; 204 (signed out) when unset. */
 	logoutStatus?: number;
+	/** Per organisation: its clients, or how the list call fails. */
+	clients?: Record<string, MockClient[] | "signed_out" | "not_found" | "error">;
+	/** Replies for the next client creations, in order; then a normal success. */
+	clientReplies?: Reply[];
 	/** Every API request, for assertions. */
 	requests: { method: string; path: string; body: unknown }[];
 }
@@ -87,6 +100,59 @@ export async function mockApi(page: Page, state: MockState): Promise<void> {
 					return reply(state.logoutStatus, { error: "internal" });
 				state.session = "signed_out";
 				return reply(204);
+			}
+			const clientRoute =
+				/^\/v1\/organizations\/([^/]+)\/clients(?:\/([^/]+))?$/.exec(
+					url.pathname,
+				);
+			if (clientRoute) {
+				const org = decodeURIComponent(clientRoute[1] as string);
+				const list = state.clients?.[org] ?? [];
+				if (typeof list === "string") {
+					const failure = LIST_FAILURES[list];
+					return reply(failure.status, failure.body);
+				}
+				if (method === "GET" && clientRoute[2]) {
+					const found = list.find((c) => c.id === clientRoute[2]);
+					return found
+						? reply(200, { client: found })
+						: reply(404, { error: "not_found" });
+				}
+				if (method === "GET") {
+					if (state.listDelay)
+						await new Promise((wait) => setTimeout(wait, state.listDelay));
+					return reply(200, {
+						clients: [...list].sort((a, b) => a.name.localeCompare(b.name)),
+					});
+				}
+				if (method === "POST") {
+					const next = state.clientReplies?.shift();
+					if (next === "abort") return route.abort("failed");
+					if (next && next !== "commit_then_abort")
+						return reply(next.status, next.body);
+					const input = body as {
+						id: string;
+						name: string;
+						email?: string;
+						phone?: string;
+					};
+					const client: MockClient = {
+						id: input.id,
+						name: input.name.trim(),
+						email: input.email ? input.email.trim().toLowerCase() : null,
+						phone: input.phone ? input.phone.replace(/[\s.()-]/g, "") : null,
+						version: 1,
+						createdAt: new Date().toISOString(),
+					};
+					const existing = list.find((c) => c.id === client.id);
+					if (existing)
+						return existing.name === client.name
+							? reply(200, { client: existing })
+							: reply(409, { error: "conflict" });
+					state.clients = { ...state.clients, [org]: [...list, client] };
+					if (next === "commit_then_abort") return route.abort("failed");
+					return reply(201, { client });
+				}
 			}
 			const one = /^\/v1\/organizations\/([^/]+)\/tasks\/([^/]+)$/.exec(
 				url.pathname,
