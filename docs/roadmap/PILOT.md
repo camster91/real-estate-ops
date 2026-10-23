@@ -18,7 +18,7 @@ Owner decision (23 October 2026): build one complete, polished workflow and run 
 | 1 | **Clients:** add and view your clients (person, email, phone), private to the assigned agent. Done (ADR 0019). | M2 | None to build. Staff roles come later (#24). |
 | 2 | **Consent and contact rules:** purpose-based consent with proof and withdrawal; quiet editing with version checks. Built with placeholder wording (ADR 0020). | M2 | Consent wording and retention, from the privacy owner |
 | 3 | **Deals:** a buyer or seller deal linked to clients and a property address; stages from draft to closed. Built with placeholder stages (ADR 0021). | M3/M4 | Stage names and rules, from the BOR or operations |
-| 4 | **Key dates and checklist:** conditions, deposit and closing dates in Toronto time; deal tasks from a reviewed template | M4 | The pilot checklist template, from the BOR |
+| 4 | **Key dates and checklist:** conditions, deposit and closing dates in Toronto time; deal tasks from a reviewed template. Key dates done (ADR 0022); checklist next. | M4 | The pilot checklist template, from the BOR |
 | 5 | **Documents:** upload, versioning and required documents per deal; encrypted storage in Canada | M1-E/M5 | Hosting region and storage vendor, from the owner |
 | 6 | **FINTRAC records:** identity verification and receipt-of-funds records with BOR review; restricted access | M5 | Compliance review of the forms, from the BOR or compliance |
 | 7 | **E-signing:** send for signature through a provider sandbox, with human approval before every send | M5/M6 | Provider and account (DocuSign or Authentisign), from the owner |
