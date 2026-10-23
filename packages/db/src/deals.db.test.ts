@@ -230,7 +230,7 @@ describe("deal table", () => {
 		["a padded street", { street: " 1 Main" }],
 		["a long street", { street: "x".repeat(201) }],
 		["a newline in the street", { street: "1\nMain" }],
-		["a line separator in the city", { city: "Ott awa" }],
+		["a line separator in the city", { city: "Ott\u2028awa" }],
 		["an empty unit", { unit: "" }],
 		["a long unit", { unit: "x".repeat(21) }],
 		["a long city", { city: "x".repeat(101) }],
