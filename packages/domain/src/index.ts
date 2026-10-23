@@ -18,6 +18,27 @@ export {
 	parseNewClient,
 } from "./client.js";
 export {
+	CITY_MAX,
+	canMoveDeal,
+	DEAL_CLIENTS_MAX,
+	DEAL_SIDE_LABELS,
+	DEAL_SIDES,
+	DEAL_STAGE_LABELS,
+	DEAL_STAGES,
+	DEAL_STAGES_ARE_PLACEHOLDER,
+	type DealAddress,
+	type DealField,
+	type DealSide,
+	type DealStage,
+	formatAddress,
+	type NewDeal,
+	OPEN_DEAL_STAGES,
+	parseNewDeal,
+	parseStageChange,
+	STREET_MAX,
+	UNIT_MAX,
+} from "./deal.js";
+export {
 	canTransition,
 	DONE_STATUSES,
 	type NewTask,
