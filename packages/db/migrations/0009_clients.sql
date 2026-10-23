@@ -23,7 +23,8 @@ CREATE TABLE party (
 			char_length(email) <= 254
 			AND email = lower(email)
 			-- Controls (including tabs and newlines) are refused by the next line.
-			AND email ~ '^[^ @]+@[^ @]+\.[^ @]+$'
+			-- No "?", "#", "%" or "&": an address can never carry mailto: parameters.
+			AND email ~ '^[^ @?#%&]+@[^ @?#%&]+\.[^ @?#%&]+$'
 			AND email !~ '[\x01-\x1f\x7f-\x9f\u2028\u2029]'
 		)
 	),
@@ -41,8 +42,11 @@ CREATE TABLE party (
 		REFERENCES membership (organization_id, principal_id)
 );
 
--- "My clients": the assigned agent's clients by name.
-CREATE INDEX party_assigned ON party (organization_id, assigned_principal_id, display_name);
+-- "My clients": the assigned agent's clients alphabetically. The ICU root
+-- collation ignores case and accents first, as people expect ("adam",
+-- "Émile", "Zoë"), whatever the database's default locale.
+CREATE INDEX party_assigned ON party
+	(organization_id, assigned_principal_id, display_name COLLATE "und-x-icu");
 CREATE INDEX party_creator ON party (organization_id, created_by_principal_id);
 
 ALTER TABLE party ENABLE ROW LEVEL SECURITY;

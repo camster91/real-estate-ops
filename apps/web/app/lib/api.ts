@@ -201,16 +201,23 @@ export type CreateClientResult =
 const clientsPath = (organizationId: string) =>
 	`/v1/organizations/${encodeURIComponent(organizationId)}/clients`;
 
+/** The first 100 clients A to Z; `more` says there are others not shown. */
 export async function listClients(
 	organizationId: string,
-): Promise<Client[] | "signed_out" | "not_found" | "error"> {
+): Promise<
+	{ clients: Client[]; more: boolean } | "signed_out" | "not_found" | "error"
+> {
 	try {
 		const response = await fetch(clientsPath(organizationId), options);
 		if (response.status === 401) return "signed_out";
 		if (response.status === 404) return "not_found";
 		if (!response.ok) return "error";
-		const body = (await json(response)) as { clients?: Client[] } | undefined;
-		return Array.isArray(body?.clients) ? body.clients : "error";
+		const body = (await json(response)) as
+			| { clients?: Client[]; more?: boolean }
+			| undefined;
+		return Array.isArray(body?.clients)
+			? { clients: body.clients, more: body.more === true }
+			: "error";
 	} catch {
 		return "error";
 	}

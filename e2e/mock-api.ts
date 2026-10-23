@@ -53,6 +53,8 @@ export interface MockState {
 	clients?: Record<string, MockClient[] | "signed_out" | "not_found" | "error">;
 	/** Replies for the next client creations, in order; then a normal success. */
 	clientReplies?: Reply[];
+	/** The client list says there are more than it returned. */
+	clientsMore?: boolean;
 	/** Every API request, for assertions. */
 	requests: { method: string; path: string; body: unknown }[];
 }
@@ -123,6 +125,7 @@ export async function mockApi(page: Page, state: MockState): Promise<void> {
 						await new Promise((wait) => setTimeout(wait, state.listDelay));
 					return reply(200, {
 						clients: [...list].sort((a, b) => a.name.localeCompare(b.name)),
+						more: state.clientsMore ?? false,
 					});
 				}
 				if (method === "POST") {

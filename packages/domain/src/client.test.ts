@@ -69,6 +69,22 @@ describe("parseNewClient", () => {
 			"email",
 		],
 		["a number email", { id, name: "X", email: 5 }, "email"],
+		[
+			"an email with mailto parameters",
+			{ id, name: "X", email: "a@b.ca?subject=hi" },
+			"email",
+		],
+		["an email with a fragment", { id, name: "X", email: "a@b.ca#x" }, "email"],
+		[
+			"an email with a percent",
+			{ id, name: "X", email: "a%40b@c.ca" },
+			"email",
+		],
+		[
+			"an email with an ampersand",
+			{ id, name: "X", email: "a&b@c.ca" },
+			"email",
+		],
 		["a short phone", { id, name: "X", phone: "555-01" }, "phone"],
 		["a long phone", { id, name: "X", phone: "1".repeat(16) }, "phone"],
 		["letters in a phone", { id, name: "X", phone: "416-CALL-NOW" }, "phone"],

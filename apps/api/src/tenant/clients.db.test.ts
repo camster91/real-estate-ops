@@ -146,18 +146,29 @@ describe("client routes", () => {
 				expect(raw).not.toContain(secret);
 	});
 
-	it("lists clients by name", async () => {
+	it("lists clients alphabetically, ignoring case and accents", async () => {
 		const tokenB = await signInAs(app, fake, "synthetic-b");
-		for (const name of ["Zoë Synthetic", "Alex Synthetic", "Marc Synthetic"])
+		for (const name of ["Zo\u00eb", "adam", "\u00c9mile", "bob"])
 			await post({ id: randomUUID(), name }, tokenB, ids.orgB);
-		const names = (await list(tokenB, ids.orgB))
-			.json()
-			.clients.map((c: { name: string }) => c.name);
-		expect(names).toEqual([
-			"Alex Synthetic",
-			"Marc Synthetic",
-			"Zoë Synthetic",
+		const body = (await list(tokenB, ids.orgB)).json();
+		expect(body.clients.map((c: { name: string }) => c.name)).toEqual([
+			"adam",
+			"bob",
+			"\u00c9mile",
+			"Zo\u00eb",
 		]);
+		expect(body.more).toBe(false);
+	});
+
+	it("says when there are more than 100 clients", async () => {
+		for (let i = 0; i < 101; i++)
+			await post(
+				{ id: randomUUID(), name: `Bulk ${String(i).padStart(3, "0")}` },
+				tokenA2,
+			);
+		const body = (await list(tokenA2)).json();
+		expect(body.clients).toHaveLength(100);
+		expect(body.more).toBe(true);
 	});
 
 	it("another member's client is not listed or shown", async () => {

@@ -154,6 +154,7 @@ describe("party table (clients)", () => {
 		["an email without a domain dot", { email: "a@example" }],
 		["an email with a space", { email: "a b@example.invalid" }],
 		["a long email", { email: `${"a".repeat(250)}@b.ca` }],
+		["an email with mailto parameters", { email: "a@b.ca?subject=hi" }],
 		["a formatted phone", { phone: "416-555-0100" }],
 		["a short phone", { phone: "55501" }],
 		["a plus inside a phone", { phone: "416+5550100" }],

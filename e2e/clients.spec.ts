@@ -76,6 +76,19 @@ test("list shows clients with contact details", async ({ page }, testInfo) => {
 	});
 });
 
+test("a long list says only the first 100 are shown", async ({ page }) => {
+	await mockApi(
+		page,
+		newState({ clients: { [ORG_A]: [client()] }, clientsMore: true }),
+	);
+	await page.goto(CLIENTS);
+	await expect(
+		page.getByText(
+			"Showing your first 100 clients, A to Z. Search is coming soon.",
+		),
+	).toBeVisible();
+});
+
 test("empty state", async ({ page }) => {
 	await mockApi(page, newState());
 	await page.goto(CLIENTS);

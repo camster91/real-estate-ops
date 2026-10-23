@@ -21,7 +21,9 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const FORBIDDEN = /[\p{Cc}\u2028\u2029]|\p{Cs}/u;
 // Deliberately simple: one "@", no spaces, a dot in the domain. Mailbox
 // verification happens when a message is sent, never by pattern alone.
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// "?", "#", "%" and "&" are refused so an address can never carry mailto:
+// parameters (e.g. a hidden bcc) into an email link.
+const EMAIL = /^[^\s@?#%&]+@[^\s@?#%&]+\.[^\s@?#%&]+$/;
 // Spaces, dots, dashes and brackets are formatting; a "+" only leads.
 const PHONE_FORMATTING = /[\s.()-]/g;
 const PHONE = /^\+?\d{7,15}$/;

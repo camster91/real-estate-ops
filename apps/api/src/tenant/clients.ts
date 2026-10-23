@@ -15,6 +15,7 @@ interface PartyRow {
 }
 
 const PURPOSE = "operations";
+const LIST_LIMIT = 100;
 const COLUMNS = "id, display_name, email, phone, version, created_at";
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -54,17 +55,21 @@ export function registerClientRoutes(
 				async ({ client, context }) =>
 					(
 						await client.query<PartyRow>(
+							// One extra row tells the screen there are more than shown.
 							`SELECT ${COLUMNS} FROM party
 							WHERE assigned_principal_id = $1
-							ORDER BY display_name, id
-							LIMIT 100`,
+							ORDER BY display_name COLLATE "und-x-icu", id
+							LIMIT ${LIST_LIMIT + 1}`,
 							[context.principalId],
 						)
 					).rows,
 			);
 			if (result === NOT_MEMBER)
 				return reply.code(404).send({ error: "not_found" });
-			return { clients: result.map(toClient) };
+			return {
+				clients: result.slice(0, LIST_LIMIT).map(toClient),
+				more: result.length > LIST_LIMIT,
+			};
 		},
 	);
 

@@ -33,6 +33,7 @@ const SESSION_ENDED =
 type Load = "loading" | "ready" | "error" | "not_found";
 type Field = "name" | "email" | "phone";
 
+// Matches the API's order (ICU root collation: case and accents last).
 const byName = (a: Client, b: Client) =>
 	a.name.localeCompare(b.name, "en-CA") || a.id.localeCompare(b.id);
 
@@ -41,6 +42,7 @@ export default function Clients() {
 	const { organizationId } = useParams<{ organizationId: string }>();
 	const [load, setLoad] = useState<Load>("loading");
 	const [clients, setClients] = useState<Client[]>([]);
+	const [more, setMore] = useState(false);
 	const [values, setValues] = useState<Record<Field, string>>({
 		name: "",
 		email: "",
@@ -69,7 +71,8 @@ export default function Clients() {
 		if (result === "signed_out") return router.replace("/");
 		if (result === "not_found" || result === "error") return setLoad(result);
 		rememberOrganization(organizationId);
-		setClients(result);
+		setClients(result.clients);
+		setMore(result.more);
 		setLoad("ready");
 	}, [organizationId, router]);
 
@@ -100,9 +103,10 @@ export default function Clients() {
 			const sent = pendingId.current;
 			pendingId.current = null;
 			const latest = await listClients(organizationId);
-			if (Array.isArray(latest)) {
-				setClients(latest);
-				if (latest.some((client) => client.id === sent))
+			if (typeof latest === "object") {
+				setClients(latest.clients);
+				setMore(latest.more);
+				if (latest.clients.some((client) => client.id === sent))
 					return setFormError(ALREADY_SAVED);
 			}
 			return setFormError(SAVE_ERROR);
@@ -204,6 +208,11 @@ export default function Clients() {
 									</li>
 								))}
 							</ul>
+						)}
+						{more && (
+							<p className="notice page-notice">
+								Showing your first 100 clients, A to Z. Search is coming soon.
+							</p>
 						)}
 						<form className="add" onSubmit={submit} noValidate>
 							<h2>Add a client</h2>

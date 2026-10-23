@@ -17,7 +17,7 @@ Status: Implemented for synthetic data. This is pilot slice 1 (`docs/roadmap/PIL
 3. **One set of rules.**
    - `@reo/domain` `parseNewClient` checks every new client:
      - the name is 1–200 characters, trimmed, with no control characters, line separators or half emoji;
-     - the email is optional, lower-cased, at most 254 characters, with one `@` and a dot in the domain;
+     - the email is optional, lower-cased, at most 254 characters, with one `@` and a dot in the domain, and without `?`, `#`, `%` or `&`, so an address can never carry `mailto:` parameters such as a hidden bcc;
      - the phone is optional and stored as digits with an optional leading `+` (7–15 digits), with spaces, dots, dashes and brackets removed.
    - The database repeats these rules as CHECK constraints. They use explicit character ranges, so the rules don't depend on the database locale.
 4. **No personal data in history.**
@@ -32,7 +32,7 @@ Status: Implemented for synthetic data. This is pilot slice 1 (`docs/roadmap/PIL
 
 | Route | Result |
 |---|---|
-| `GET /v1/organizations/:organizationId/clients` | The caller's clients, by name, limit 100, `no-store` |
+| `GET /v1/organizations/:organizationId/clients` | `{ clients, more }`: the caller's first 100 clients, A to Z with case and accents set aside (ICU root collation, the same order as the screen whatever the database locale), and `more` set when there are others. `no-store`. |
 | `GET /v1/organizations/:organizationId/clients/:clientId` | One client, or 404 for anything not visible or not a UUID |
 | `POST /v1/organizations/:organizationId/clients` | Body `{ id, name, email?, phone? }`; other fields are refused. Returns 201, 200 (replay), 400 `invalid_client` with `field`, 409 `conflict`, or 404. 4 KB body limit; same-origin `Origin` required. |
 
@@ -43,6 +43,7 @@ Status: Implemented for synthetic data. This is pilot slice 1 (`docs/roadmap/PIL
   - Each client shows its name (a link to the detail page), plus email and phone, or "No contact details".
   - Phones in North American format show as "(416) 555-0100".
   - The page has loading, empty and error states.
+  - When there are more than 100 clients, it says "Showing your first 100 clients, A to Z. Search is coming soon."
 - **Add a client form.**
   - Fields: Name, Email (optional) and Phone (optional).
   - Each field shows its own error inline, with `aria-invalid` and focus.
