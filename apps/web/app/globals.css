@@ -248,7 +248,7 @@ ul.tasks.done .link {
 }
 
 /* Select */
-ul.tasks select.status {
+select.status {
 	justify-self: start;
 	margin-top: var(--reo-space-2);
 	min-height: 48px;
@@ -261,7 +261,7 @@ ul.tasks select.status {
 	border: 1px solid var(--reo-color-border-strong);
 	border-radius: var(--reo-radius-sm);
 }
-ul.tasks select.status:disabled {
+select.status:disabled {
 	color: var(--reo-color-text-disabled);
 	background: var(--reo-color-bg-disabled);
 	border-color: var(--reo-color-border-default);
@@ -413,4 +413,41 @@ ol.history {
 h3 {
 	font-size: 1.125rem;
 	margin: var(--reo-space-8) 0 var(--reo-space-3);
+}
+
+/* Deal form: client choices */
+fieldset.choices {
+	border: 1px solid var(--reo-color-border-strong);
+	border-radius: var(--reo-radius-md);
+	padding: var(--reo-space-3) var(--reo-space-4);
+	margin: var(--reo-space-4) 0 0;
+	display: grid;
+	gap: var(--reo-space-2);
+}
+fieldset.choices legend {
+	font-weight: 600;
+	padding: 0 var(--reo-space-1);
+}
+form.add label.choice {
+	display: flex;
+	align-items: center;
+	gap: var(--reo-space-2);
+	font-weight: 400;
+	min-height: 44px;
+	margin: 0;
+}
+form.add label.choice input {
+	width: 20px;
+	height: 20px;
+	margin: 0;
+}
+ul.plain {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: grid;
+	gap: var(--reo-space-1);
+}
+form.actions-row select.status {
+	margin-top: 0;
 }

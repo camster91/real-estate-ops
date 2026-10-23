@@ -386,3 +386,140 @@ export async function recordConsent(
 		return "error";
 	}
 }
+
+export interface Deal {
+	id: string;
+	side: string;
+	stage: string;
+	address: {
+		street: string;
+		unit: string | null;
+		city: string;
+		postalCode: string;
+	};
+	/** Linked clients; the name is null if the client is no longer visible. */
+	clients: { id: string; name: string | null }[];
+	version: number;
+	createdAt: string;
+	stageChangedAt: string;
+}
+
+export interface NewDealBody {
+	id: string;
+	side: string;
+	address: { street: string; unit?: string; city: string; postalCode: string };
+	clientIds: string[];
+}
+
+export type CreateDealResult =
+	| { deal: Deal }
+	| { invalid: string }
+	| "signed_out"
+	| "not_found"
+	| "conflict"
+	| "error";
+
+export type StageResult =
+	| { deal: Deal }
+	| { conflict: Deal }
+	| "signed_out"
+	| "not_found"
+	| "error";
+
+const dealsPath = (organizationId: string) =>
+	`/v1/organizations/${encodeURIComponent(organizationId)}/deals`;
+
+/** The newest 100 deals; `more` says there are others not shown. */
+export async function listDeals(
+	organizationId: string,
+): Promise<
+	{ deals: Deal[]; more: boolean } | "signed_out" | "not_found" | "error"
+> {
+	try {
+		const response = await fetch(dealsPath(organizationId), options);
+		if (response.status === 401) return "signed_out";
+		if (response.status === 404) return "not_found";
+		if (!response.ok) return "error";
+		const body = (await json(response)) as
+			| { deals?: Deal[]; more?: boolean }
+			| undefined;
+		return Array.isArray(body?.deals)
+			? { deals: body.deals, more: body.more === true }
+			: "error";
+	} catch {
+		return "error";
+	}
+}
+
+export async function getDeal(
+	organizationId: string,
+	dealId: string,
+): Promise<Deal | "signed_out" | "not_found" | "error"> {
+	try {
+		const response = await fetch(
+			`${dealsPath(organizationId)}/${encodeURIComponent(dealId)}`,
+			options,
+		);
+		if (response.status === 401) return "signed_out";
+		if (response.status === 404) return "not_found";
+		if (!response.ok) return "error";
+		const body = (await json(response)) as { deal?: Deal } | undefined;
+		return body?.deal ?? "error";
+	} catch {
+		return "error";
+	}
+}
+
+export async function createDeal(
+	organizationId: string,
+	deal: NewDealBody,
+): Promise<CreateDealResult> {
+	try {
+		const response = await fetch(dealsPath(organizationId), {
+			...options,
+			method: "POST",
+			headers: { "content-type": "application/json" },
+			body: JSON.stringify(deal),
+		});
+		if (response.status === 401) return "signed_out";
+		if (response.status === 404) return "not_found";
+		if (response.status === 409) return "conflict";
+		const body = (await json(response)) as
+			| { deal?: Deal; error?: string; field?: string }
+			| undefined;
+		if (response.status === 400 && body?.error === "invalid_deal")
+			return { invalid: body.field ?? "body" };
+		if (response.ok && body?.deal) return { deal: body.deal };
+		return "error";
+	} catch {
+		return "error";
+	}
+}
+
+/** Moves a deal; a 409 (changed elsewhere, or not allowed) returns the latest. */
+export async function changeStage(
+	organizationId: string,
+	dealId: string,
+	stage: string,
+	version: number,
+): Promise<StageResult> {
+	try {
+		const response = await fetch(
+			`${dealsPath(organizationId)}/${encodeURIComponent(dealId)}`,
+			{
+				...options,
+				method: "PATCH",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ stage, version }),
+			},
+		);
+		if (response.status === 401) return "signed_out";
+		if (response.status === 404) return "not_found";
+		const body = (await json(response)) as { deal?: Deal } | undefined;
+		if (response.status === 409 && body?.deal) return { conflict: body.deal };
+		if (response.ok && body?.deal) return { deal: body.deal };
+		return "error";
+	} catch {
+		return "error";
+	}
+}

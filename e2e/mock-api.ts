@@ -45,6 +45,30 @@ export interface MockConsent {
 // Same purposes as @reo/domain CONSENT_PURPOSES (ADR 0020).
 const PURPOSES = ["transaction_service", "market_updates"];
 
+export interface MockDeal {
+	id: string;
+	side: string;
+	stage: string;
+	address: {
+		street: string;
+		unit: string | null;
+		city: string;
+		postalCode: string;
+	};
+	clients: { id: string; name: string | null }[];
+	version: number;
+	createdAt: string;
+	stageChangedAt: string;
+}
+
+// Same rules as @reo/domain canMoveDeal (ADR 0021).
+const OPEN_DEAL = ["draft", "active", "conditional", "firm"];
+const canMoveDeal = (from: string, to: string) =>
+	from !== to &&
+	to !== "draft" &&
+	from !== "closed" &&
+	(from === "fell_through" ? to === "active" : OPEN_DEAL.includes(from));
+
 export interface MockState {
 	/** Signed out, or the session's memberships. */
 	session: "signed_out" | { organizationId: string; name: string }[];
@@ -72,6 +96,12 @@ export interface MockState {
 	consents?: Record<string, MockConsent[] | "error">;
 	/** Replies for the next consent recordings, in order; then a normal success. */
 	consentReplies?: Reply[];
+	/** Per organisation: its deals, or how the list call fails. */
+	deals?: Record<string, MockDeal[] | "signed_out" | "not_found" | "error">;
+	/** Replies for the next deal additions, in order; then a normal success. */
+	dealReplies?: Reply[];
+	/** Replies for the next stage changes, in order; then the normal rules. */
+	dealPatchReplies?: Reply[];
 	/** Every API request, for assertions. */
 	requests: { method: string; path: string; body: unknown }[];
 }
@@ -119,6 +149,107 @@ export async function mockApi(page: Page, state: MockState): Promise<void> {
 					return reply(state.logoutStatus, { error: "internal" });
 				state.session = "signed_out";
 				return reply(204);
+			}
+			const dealRoute =
+				/^\/v1\/organizations\/([^/]+)\/deals(?:\/([^/]+))?$/.exec(
+					url.pathname,
+				);
+			if (dealRoute) {
+				const org = decodeURIComponent(dealRoute[1] as string);
+				const list = state.deals?.[org] ?? [];
+				if (typeof list === "string") {
+					const failure = LIST_FAILURES[list];
+					return reply(failure.status, failure.body);
+				}
+				const id = dealRoute[2];
+				if (method === "GET" && id) {
+					const found = list.find((d) => d.id === id);
+					return found
+						? reply(200, { deal: found })
+						: reply(404, { error: "not_found" });
+				}
+				if (method === "GET")
+					return reply(200, {
+						deals: [...list].sort((a, b) =>
+							b.createdAt.localeCompare(a.createdAt),
+						),
+						more: false,
+					});
+				if (method === "POST") {
+					const next = state.dealReplies?.shift();
+					if (next === "abort") return route.abort("failed");
+					if (next && next !== "commit_then_abort")
+						return reply(next.status, next.body);
+					const input = body as {
+						id: string;
+						side: string;
+						address: {
+							street: string;
+							unit?: string;
+							city: string;
+							postalCode: string;
+						};
+						clientIds: string[];
+					};
+					const known = state.clients?.[org];
+					const clients = input.clientIds.map((clientId) =>
+						Array.isArray(known)
+							? known.find((c) => c.id === clientId)
+							: undefined,
+					);
+					if (clients.some((c) => !c))
+						return reply(400, { error: "invalid_deal", field: "clientIds" });
+					const postal = input.address.postalCode.trim().toUpperCase();
+					const now = new Date().toISOString();
+					const deal: MockDeal = {
+						id: input.id,
+						side: input.side,
+						stage: "draft",
+						address: {
+							street: input.address.street.trim(),
+							unit: input.address.unit?.trim() || null,
+							city: input.address.city.trim(),
+							postalCode: postal.includes(" ")
+								? postal
+								: `${postal.slice(0, 3)} ${postal.slice(3)}`,
+						},
+						clients: clients.map((c) => ({
+							id: c?.id as string,
+							name: c?.name ?? null,
+						})),
+						version: 1,
+						createdAt: now,
+						stageChangedAt: now,
+					};
+					const existing = list.find((d) => d.id === deal.id);
+					if (existing)
+						return existing.side === deal.side &&
+							existing.address.street === deal.address.street
+							? reply(200, { deal: existing })
+							: reply(409, { error: "conflict" });
+					state.deals = { ...state.deals, [org]: [...list, deal] };
+					if (next === "commit_then_abort") return route.abort("failed");
+					return reply(201, { deal });
+				}
+				if (method === "PATCH" && id) {
+					const next = state.dealPatchReplies?.shift();
+					if (next === "abort") return route.abort("failed");
+					if (next && next !== "commit_then_abort")
+						return reply(next.status, next.body);
+					const deal = list.find((d) => d.id === id);
+					if (!deal) return reply(404, { error: "not_found" });
+					const change = body as { stage: string; version: number };
+					if (deal.stage === change.stage) return reply(200, { deal });
+					if (deal.version !== change.version)
+						return reply(409, { error: "conflict", deal });
+					if (!canMoveDeal(deal.stage, change.stage))
+						return reply(409, { error: "invalid_transition", deal });
+					deal.stage = change.stage;
+					deal.version += 1;
+					deal.stageChangedAt = new Date().toISOString();
+					if (next === "commit_then_abort") return route.abort("failed");
+					return reply(200, { deal });
+				}
 			}
 			const consentRoute =
 				/^\/v1\/organizations\/([^/]+)\/clients\/([^/]+)\/consents$/.exec(
