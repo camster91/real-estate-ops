@@ -232,6 +232,30 @@ describe("task table", () => {
 			expect(result.rowCount).toBe(0);
 		});
 
+		it("creator who is not the assignee cannot update", async () => {
+			// Not possible through the API yet (tasks are self-assigned), so the
+			// owner inserts it; the UPDATE policy must still refuse the creator.
+			const id = randomUUID();
+			await db.admin.query(
+				"INSERT INTO task (organization_id, id, title, assignee_principal_id, created_by_principal_id) VALUES ($1, $2, 'Assigned away', $3, $4)",
+				[ids.orgA, id, pa2, ids.pa],
+			);
+			const result = await setStatus(id, "waiting");
+			expect(result.rowCount).toBe(0);
+			const { rows } = await db.admin.query(
+				"SELECT status, version FROM task WHERE id = $1",
+				[id],
+			);
+			expect(rows[0]).toEqual({ status: "ready", version: 1 });
+			const assignee = await setStatus(
+				id,
+				"waiting",
+				"version + 1",
+				ctx(ids.orgA, pa2),
+			);
+			expect(assignee.rowCount).toBe(1);
+		});
+
 		it("suspended member cannot update", async () => {
 			const id = await mine();
 			const where = "organization_id = $1 AND principal_id = $2";

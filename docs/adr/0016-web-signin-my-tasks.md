@@ -19,7 +19,7 @@ Status: Implemented for synthetic data. Completes the web half of the M1 "assign
    - "Due (Toronto time)" is read as America/Toronto wall-clock time and sent with its correct offset, for example `2026-11-01T09:00:00-05:00`.
    - A time inside the spring-forward gap is refused before sending: "That time does not exist in Toronto (clocks change). Pick another time."
    - A time in the fall-back hour uses the earlier (first) occurrence.
-   - Due dates are shown in `en-CA`, for example "Sun, Nov 1, 9:00 a.m.".
+   - Due dates are shown in `en-CA`, for example "Sun, Nov 1, 9:00 a.m.". The year is added when it is not the current Toronto year, for example "Fri, Jan 15, 2027, 9:00 a.m." (ADR 0017 follow-up).
    - The helpers live once in `@reo/domain` (`zonedLocalToUtc`, `toOffsetIso`, `formatInZone`, `TORONTO`) and use only `Intl`.
 5. **Remember the last brokerage in this browser only.** The `localStorage` key `reo.lastOrganization` holds an organisation id. It is a convenience, not security: the API checks the membership on every request, and an id that is no longer one of the person's memberships falls back to the picker (or to their only brokerage).
 

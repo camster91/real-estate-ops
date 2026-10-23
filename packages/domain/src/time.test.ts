@@ -62,6 +62,23 @@ describe("Toronto time", () => {
 		expect(shown).toMatch(/a\.m\./);
 	});
 
+	it("shows the year only outside the current Toronto year", () => {
+		const now = new Date("2026-10-23T12:00:00Z");
+		expect(formatInZone("2026-11-01T14:00:00Z", TORONTO, now)).not.toContain(
+			"2026",
+		);
+		expect(formatInZone("2027-01-01T14:00:00Z", TORONTO, now)).toContain(
+			"2027",
+		);
+		expect(formatInZone("2025-12-31T14:00:00Z", TORONTO, now)).toContain(
+			"2025",
+		);
+		// 00:30 UTC on 1 January is still 31 December in Toronto.
+		expect(formatInZone("2027-01-01T00:30:00Z", TORONTO, now)).not.toContain(
+			"2027",
+		);
+	});
+
 	it("agrees with parseNewTask", () => {
 		for (const local of [
 			"2026-07-01T09:00",

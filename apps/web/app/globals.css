@@ -1,7 +1,76 @@
+/*
+ * Design tokens from the Figma file "Real Estate Ops — Design System" (#103,
+ * ADR 0018). Names match the Figma variables' code syntax (--reo-*): change a
+ * value in Figma and here together.
+ */
 :root {
-	font-family: system-ui, sans-serif;
-	color: #162e35;
-	background: #f3f6f4;
+	/* Primitives */
+	--reo-green-50: #e8f3ef;
+	--reo-green-600: #146451;
+	--reo-green-700: #0f4f40;
+	--reo-sage-0: #ffffff;
+	--reo-sage-50: #f3f6f4;
+	--reo-sage-100: #eef2ef;
+	--reo-sage-200: #dfe7e3;
+	--reo-sage-300: #bdcdc5;
+	--reo-sage-500: #6b847b;
+	--reo-sage-600: #44605a;
+	--reo-sage-900: #162e35;
+	--reo-red-50: #fbeae6;
+	--reo-red-600: #a1260d;
+	--reo-amber-50: #fdf3dc;
+	--reo-amber-700: #7a4b00;
+	--reo-blue-50: #e7f0fa;
+	--reo-blue-700: #1d4f86;
+
+	/* Colour roles */
+	--reo-color-bg-page: var(--reo-sage-50);
+	--reo-color-bg-surface: var(--reo-sage-0);
+	--reo-color-bg-muted: var(--reo-sage-100);
+	--reo-color-bg-brand: var(--reo-green-600);
+	--reo-color-bg-brand-hover: var(--reo-green-700);
+	--reo-color-bg-brand-subtle: var(--reo-green-50);
+	--reo-color-bg-danger-subtle: var(--reo-red-50);
+	--reo-color-bg-warning-subtle: var(--reo-amber-50);
+	--reo-color-bg-info-subtle: var(--reo-blue-50);
+	--reo-color-bg-disabled: var(--reo-sage-200);
+	--reo-color-text-default: var(--reo-sage-900);
+	--reo-color-text-muted: var(--reo-sage-600);
+	--reo-color-text-on-brand: var(--reo-sage-0);
+	--reo-color-text-brand: var(--reo-green-600);
+	--reo-color-text-danger: var(--reo-red-600);
+	--reo-color-text-warning: var(--reo-amber-700);
+	--reo-color-text-info: var(--reo-blue-700);
+	--reo-color-text-disabled: var(--reo-sage-500);
+	--reo-color-border-default: var(--reo-sage-300);
+	--reo-color-border-strong: var(--reo-sage-500);
+	--reo-color-border-focus: var(--reo-green-600);
+	--reo-color-border-danger: var(--reo-red-600);
+	--reo-color-border-brand: var(--reo-green-600);
+
+	/* Spacing and radius */
+	--reo-space-1: 4px;
+	--reo-space-2: 8px;
+	--reo-space-3: 12px;
+	--reo-space-4: 16px;
+	--reo-space-5: 20px;
+	--reo-space-6: 24px;
+	--reo-space-8: 32px;
+	--reo-space-10: 40px;
+	--reo-space-12: 48px;
+	--reo-space-16: 64px;
+	--reo-radius-sm: 6px;
+	--reo-radius-md: 8px;
+	--reo-radius-lg: 12px;
+	--reo-radius-full: 999px;
+
+	--reo-shadow-card: 0 1px 3px rgb(22 46 53 / 6%);
+
+	font-family: Inter, system-ui, sans-serif;
+	font-size: 16px;
+	line-height: 1.5;
+	color: var(--reo-color-text-default);
+	background: var(--reo-color-bg-page);
 }
 * {
 	box-sizing: border-box;
@@ -10,74 +79,101 @@ body {
 	margin: 0;
 }
 main {
-	max-width: 960px;
+	max-width: 800px;
 	margin: auto;
-	padding: clamp(24px, 6vw, 80px);
+	padding: var(--reo-space-10)
+		clamp(var(--reo-space-4), 5vw, var(--reo-space-10)) var(--reo-space-16);
 }
+
+/* Type: Heading/XL, Heading/M, Body/L, Body/M, Body/S, Eyebrow */
 h1 {
-	font-size: clamp(2rem, 5vw, 3.5rem);
-	line-height: 1.1;
-	max-width: 760px;
-}
-p {
-	font-size: 1.125rem;
-	line-height: 1.6;
-	max-width: 660px;
-}
-.eyebrow {
+	font-size: clamp(2rem, 4vw, 2.5rem);
+	line-height: 1.2;
+	letter-spacing: -0.5px;
 	font-weight: 700;
-}
-aside {
-	margin-top: 40px;
-	padding: 24px;
-	background: white;
-	border: 1px solid #bdcdc5;
-	border-radius: 12px;
-}
-.skip {
-	position: absolute;
-	left: 16px;
-	top: -80px;
-	background: white;
-	padding: 12px;
-	color: #162e35;
-}
-.skip:focus {
-	top: 16px;
-}
-:focus-visible {
-	outline: 3px solid #146451;
-	outline-offset: 5px;
+	margin: var(--reo-space-2) 0 var(--reo-space-6);
+	max-width: 720px;
 }
 h2 {
 	font-size: 1.375rem;
-	margin-top: 40px;
+	line-height: 30px;
+	font-weight: 600;
+	margin: var(--reo-space-10) 0 var(--reo-space-4);
 }
+p {
+	font-size: 1.125rem;
+	line-height: 28px;
+	max-width: 660px;
+}
+.eyebrow {
+	font-size: 0.875rem;
+	line-height: 20px;
+	letter-spacing: 0.4px;
+	font-weight: 700;
+}
+a {
+	color: var(--reo-color-text-brand);
+}
+a:hover {
+	color: var(--reo-color-text-default);
+}
+
+aside {
+	margin-top: var(--reo-space-10);
+	padding: var(--reo-space-6);
+	background: var(--reo-color-bg-surface);
+	border: 1px solid var(--reo-color-border-default);
+	border-radius: var(--reo-radius-lg);
+}
+.skip {
+	position: absolute;
+	left: var(--reo-space-4);
+	top: -80px;
+	background: var(--reo-color-bg-surface);
+	padding: var(--reo-space-3);
+	color: var(--reo-color-text-default);
+}
+.skip:focus {
+	top: var(--reo-space-4);
+}
+/* Focus: 3 px green outline outside the control (Button, Text field, Select). */
+:focus-visible {
+	outline: 3px solid var(--reo-color-border-focus);
+	outline-offset: 3px;
+}
+
 ul.actions,
 ul.choices,
 ul.tasks {
 	list-style: none;
 	padding: 0;
-	margin: 24px 0;
+	margin: var(--reo-space-6) 0;
 	display: grid;
-	gap: 12px;
-	max-width: 660px;
+	gap: var(--reo-space-3);
+	max-width: 720px;
 }
+
+/* Button: Primary (.button) and Link (.link) */
 .button {
 	display: inline-block;
-	min-height: 44px;
-	padding: 10px 20px;
+	min-height: 48px;
+	padding: var(--reo-space-3) var(--reo-space-5);
 	font: inherit;
 	font-weight: 600;
-	color: white;
-	background: #146451;
+	color: var(--reo-color-text-on-brand);
+	background: var(--reo-color-bg-brand);
 	border: 0;
-	border-radius: 8px;
+	border-radius: var(--reo-radius-md);
 	text-decoration: none;
 	cursor: pointer;
 }
+.button:hover {
+	background: var(--reo-color-bg-brand-hover);
+	color: var(--reo-color-text-on-brand);
+}
 .button:disabled {
-	opacity: 0.6;
+	color: var(--reo-color-text-disabled);
+	background: var(--reo-color-bg-disabled);
 	cursor: wait;
 }
 ul.choices .button {
@@ -86,80 +182,148 @@ ul.choices .button {
 }
 .link {
 	font: inherit;
-	color: #146451;
+	font-weight: 600;
+	color: var(--reo-color-text-brand);
 	background: none;
 	border: 0;
-	padding: 0;
+	padding: var(--reo-space-2) 0;
 	text-decoration: underline;
 	cursor: pointer;
 }
-a {
-	color: #146451;
+.link:hover {
+	color: var(--reo-color-text-default);
 }
+.link:disabled {
+	color: var(--reo-color-text-disabled);
+	cursor: wait;
+}
+
+/* Header */
 .bar {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 12px 24px;
+	gap: var(--reo-space-3) var(--reo-space-6);
 	align-items: center;
 	justify-content: space-between;
-	max-width: 960px;
-	margin: auto;
-	padding: 16px clamp(24px, 6vw, 80px) 0;
+	padding: var(--reo-space-3)
+		clamp(var(--reo-space-4), 5vw, var(--reo-space-10));
+	background: var(--reo-color-bg-surface);
+	border-bottom: 1px solid var(--reo-color-border-default);
+}
+.bar nav a {
+	font-weight: 600;
 }
 .bar nav {
 	display: flex;
-	gap: 20px;
+	gap: var(--reo-space-6);
 	align-items: center;
 }
+
+/* Task card */
 ul.tasks li {
-	padding: 16px;
-	background: white;
-	border: 1px solid #bdcdc5;
-	border-radius: 8px;
+	display: grid;
+	gap: var(--reo-space-1);
+	padding: var(--reo-space-4);
+	background: var(--reo-color-bg-surface);
+	border: 1px solid var(--reo-color-border-default);
+	border-radius: var(--reo-radius-lg);
+	box-shadow: var(--reo-shadow-card);
 	overflow-wrap: anywhere;
 }
 ul.tasks .title {
-	display: block;
 	font-weight: 600;
 }
 ul.tasks .meta {
-	display: block;
-	margin-top: 4px;
-	color: #44605a;
+	font-size: 0.875rem;
+	line-height: 20px;
+	color: var(--reo-color-text-muted);
 }
+ul.tasks.done li {
+	background: var(--reo-color-bg-muted);
+	box-shadow: none;
+}
+ul.tasks.done .link {
+	justify-self: start;
+	min-height: 44px;
+}
+
+/* Select */
+ul.tasks select.status {
+	justify-self: start;
+	margin-top: var(--reo-space-2);
+	min-height: 48px;
+	min-width: 200px;
+	max-width: 100%;
+	padding: var(--reo-space-3);
+	font: inherit;
+	color: var(--reo-color-text-default);
+	background: var(--reo-color-bg-surface);
+	border: 1px solid var(--reo-color-border-strong);
+	border-radius: var(--reo-radius-sm);
+}
+ul.tasks select.status:disabled {
+	color: var(--reo-color-text-disabled);
+	background: var(--reo-color-bg-disabled);
+	border-color: var(--reo-color-border-default);
+	cursor: wait;
+}
+ul.tasks .row-message {
+	margin-top: var(--reo-space-2);
+}
+
+/* Text field */
 form.add {
 	display: grid;
-	gap: 8px;
+	gap: var(--reo-space-1);
 	max-width: 480px;
+}
+form.add h2 {
+	margin-bottom: var(--reo-space-2);
 }
 form.add label {
 	font-weight: 600;
-	margin-top: 8px;
+	margin-top: var(--reo-space-3);
 }
 form.add input {
 	font: inherit;
-	min-height: 44px;
-	padding: 8px 12px;
-	border: 1px solid #6b847b;
-	border-radius: 6px;
+	min-height: 48px;
+	padding: var(--reo-space-3);
+	color: var(--reo-color-text-default);
+	background: var(--reo-color-bg-surface);
+	border: 1px solid var(--reo-color-border-strong);
+	border-radius: var(--reo-radius-sm);
 	width: 100%;
 }
 form.add input[aria-invalid="true"] {
-	border-color: #a1260d;
+	border: 2px solid var(--reo-color-border-danger);
 }
 form.add .button {
 	justify-self: start;
-	margin-top: 16px;
+	margin-top: var(--reo-space-4);
 }
 .error {
-	color: #a1260d;
+	color: var(--reo-color-text-danger);
 	margin: 0;
-	font-size: 1rem;
+	font-size: 0.875rem;
+	line-height: 20px;
 }
+
+/* Notice: Error by default; .page-notice is Info */
 .notice {
-	padding: 16px;
-	background: white;
-	border-left: 4px solid #a1260d;
+	padding: var(--reo-space-3) var(--reo-space-4);
+	background: var(--reo-color-bg-danger-subtle);
+	border-left: 4px solid var(--reo-color-border-danger);
+	border-radius: var(--reo-radius-md);
+	color: var(--reo-color-text-default);
+	max-width: 720px;
+}
+.notice p {
+	margin: 0 0 var(--reo-space-2);
+}
+.notice.page-notice {
+	background: var(--reo-color-bg-info-subtle);
+	border-left-color: var(--reo-color-text-info);
+	font-size: 1rem;
 }
 .visually-hidden {
 	position: absolute;
@@ -168,29 +332,4 @@ form.add .button {
 	overflow: hidden;
 	clip-path: inset(50%);
 	white-space: nowrap;
-}
-ul.tasks select.status {
-	display: block;
-	margin-top: 10px;
-	min-height: 44px;
-	padding: 6px 10px;
-	font: inherit;
-	border: 1px solid #6b847b;
-	border-radius: 6px;
-	background: white;
-	max-width: 100%;
-}
-ul.tasks select.status:disabled {
-	opacity: 0.6;
-	cursor: wait;
-}
-ul.tasks .row-message {
-	margin-top: 8px;
-}
-ul.tasks.done li {
-	background: #eef2ef;
-}
-ul.tasks.done .link {
-	margin-top: 8px;
-	min-height: 44px;
 }
