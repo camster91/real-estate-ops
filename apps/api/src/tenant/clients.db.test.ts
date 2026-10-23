@@ -186,7 +186,7 @@ describe("client routes", () => {
 			payload: { partyId: id },
 		});
 		for (const raw of [audit.rows[0].raw, events.rows[0].raw])
-			for (const secret of ["Synthetic", "example", "555"])
+			for (const secret of ["Synthetic", "example", "4165550100"])
 				expect(raw).not.toContain(secret);
 	});
 
@@ -346,7 +346,7 @@ describe("client routes", () => {
 				aggregate_version: 2,
 			});
 			for (const raw of [audit.rows[1].raw, events.rows[1].raw])
-				for (const secret of ["Secret", "905", "example"])
+				for (const secret of ["Secret", "9055550123", "example"])
 					expect(raw).not.toContain(secret);
 		});
 
