@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 import type pg from "pg";
 import { requireSession } from "../auth/guard.js";
 import { registerClientRoutes } from "./clients.js";
+import { registerConsentRoutes } from "./consents.js";
 import { inTenant, NOT_MEMBER } from "./context.js";
 import { registerTaskRoutes } from "./tasks.js";
 
@@ -19,6 +20,7 @@ export async function registerTenantRoutes(
 	const { pool } = options;
 	registerTaskRoutes(app, { pool });
 	registerClientRoutes(app, { pool });
+	registerConsentRoutes(app, { pool });
 
 	app.get(
 		"/v1/organizations/:organizationId/branches",
