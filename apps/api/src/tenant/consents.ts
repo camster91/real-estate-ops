@@ -62,21 +62,30 @@ export function registerConsentRoutes(
 						[clientId.toLowerCase()],
 					);
 					if (visible.rowCount === 0) return undefined;
-					const history = await client.query<ConsentRow>(
-						`SELECT ${COLUMNS} FROM consent_record
-							WHERE party_id = $1
-							ORDER BY recorded_at DESC, id DESC
-							LIMIT ${HISTORY_LIMIT}`,
-						[clientId.toLowerCase()],
-					);
+					// One statement, so current and history come from one snapshot.
 					// Current is the newest row per purpose over all history, not
-					// just the page above.
-					const latest = await client.query<ConsentRow>(
-						`SELECT DISTINCT ON (purpose) ${COLUMNS} FROM consent_record
-							WHERE party_id = $1
-							ORDER BY purpose, recorded_at DESC, id DESC`,
-						[clientId.toLowerCase()],
-					);
+					// just the page.
+					const rows = (
+						await client.query<ConsentRow & { kind: "latest" | "history" }>(
+							`WITH latest AS (
+								SELECT DISTINCT ON (purpose) ${COLUMNS} FROM consent_record
+								WHERE party_id = $1
+								ORDER BY purpose, recorded_at DESC, id DESC
+							), page AS (
+								SELECT ${COLUMNS} FROM consent_record
+								WHERE party_id = $1
+								ORDER BY recorded_at DESC, id DESC
+								LIMIT ${HISTORY_LIMIT}
+							)
+							SELECT 'latest' AS kind, * FROM latest
+							UNION ALL
+							SELECT 'history' AS kind, * FROM page
+							ORDER BY kind, recorded_at DESC, id DESC`,
+							[clientId.toLowerCase()],
+						)
+					).rows;
+					const history = { rows: rows.filter((r) => r.kind === "history") };
+					const latest = { rows: rows.filter((r) => r.kind === "latest") };
 					return { history: history.rows, latest: latest.rows };
 				},
 			);
@@ -138,9 +147,10 @@ async function record(
 			request,
 			PURPOSE,
 			async ({ client, context }): Promise<RecordOutcome> => {
-				// Only the client's assigned agent records consent.
+				// Only the client's assigned agent records consent. The row lock
+				// orders recordings for one client, so the newest is current.
 				const assigned = await client.query(
-					"SELECT 1 FROM party WHERE id = $1 AND assigned_principal_id = $2",
+					"SELECT 1 FROM party WHERE id = $1 AND assigned_principal_id = $2 FOR UPDATE",
 					[partyId, context.principalId],
 				);
 				if (assigned.rowCount === 0) return { kind: "missing" };

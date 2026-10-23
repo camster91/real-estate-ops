@@ -552,6 +552,40 @@ describe("client routes", () => {
 			});
 		});
 
+		it("recording waits for the client's row lock, so commit order is time order", async () => {
+			const id = await newClient();
+			const locker = await db.admin.connect();
+			let settled = false;
+			try {
+				await locker.query("BEGIN");
+				await locker.query("SELECT 1 FROM party WHERE id = $1 FOR UPDATE", [
+					id,
+				]);
+				const pending = recordConsent(id, {
+					id: randomUUID(),
+					purpose: "market_updates",
+					status: "granted",
+					method: "written",
+				}).then((response) => {
+					settled = true;
+					return response;
+				});
+				await new Promise((wait) => setTimeout(wait, 300));
+				expect(settled).toBe(false);
+				const released = (await locker.query("SELECT clock_timestamp() AS t"))
+					.rows[0].t as Date;
+				await locker.query("COMMIT");
+				const response = await pending;
+				expect(response.statusCode).toBe(201);
+				expect(
+					new Date(response.json().consent.recordedAt).getTime(),
+				).toBeGreaterThanOrEqual(released.getTime());
+			} finally {
+				if (!settled) await locker.query("ROLLBACK").catch(() => {});
+				locker.release();
+			}
+		});
+
 		it("a retried record is harmless and a changed one conflicts", async () => {
 			const id = await newClient();
 			const body = {
