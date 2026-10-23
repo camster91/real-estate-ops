@@ -267,6 +267,9 @@ select.status:disabled {
 	border-color: var(--reo-color-border-default);
 	cursor: wait;
 }
+form.actions-row select.status {
+	margin-top: 0;
+}
 ul.tasks .row-message {
 	margin-top: var(--reo-space-2);
 }
@@ -448,6 +451,19 @@ ul.plain {
 	display: grid;
 	gap: var(--reo-space-1);
 }
-form.actions-row select.status {
-	margin-top: 0;
+/* Key dates: state colour, with the state always in words too */
+ul.tasks.key-dates li[data-state="overdue"] {
+	border-left: 4px solid var(--reo-color-border-danger);
+}
+ul.tasks.key-dates li[data-state="due_soon"] {
+	border-left: 4px solid var(--reo-color-text-warning);
+}
+ul.tasks.key-dates li[data-state="done"] .title {
+	color: var(--reo-color-text-muted);
+}
+form.add.inline {
+	margin-top: var(--reo-space-3);
+	padding: 0;
+	border: 0;
+	background: none;
 }
