@@ -73,6 +73,12 @@ const live = (page: Page) =>
 	page.getByRole("main").locator('[aria-live="polite"]');
 const items = (page: Page) =>
 	page.getByRole("list", { name: "Key dates" }).getByRole("listitem");
+/** Opens a date's editor and waits until it is ready (its due field has focus). */
+const openEditor = async (page: Page, name: string, id: string) => {
+	await page.getByRole("button", { name: `Change: ${name}` }).click();
+	await expect(page.locator(`#edit-due-${id}`)).toBeFocused();
+};
+
 const saves = (s: MockState, method: string) =>
 	s.requests.filter(
 		(r) => r.method === method && r.path.includes("/key-dates"),
@@ -332,7 +338,7 @@ test("a failed edit keeps what was typed, then saves on retry", async ({
 }) => {
 	await mockApi(page, state({ keyDateReplies: ["abort"] }));
 	await page.goto(PAGE);
-	await page.getByRole("button", { name: "Change: Financing" }).click();
+	await openEditor(page, "Financing", financing().id);
 	const due = page.locator(`#edit-due-${financing().id}`);
 	await due.fill("2026-10-27T23:59");
 	await page.getByRole("button", { name: "Save Financing" }).click();
@@ -350,7 +356,7 @@ test("an edit that conflicts stays open with the latest values", async ({
 	const stored = financing();
 	await mockApi(page, state({ keyDates: { [DEAL_ID]: [stored] } }));
 	await page.goto(PAGE);
-	await page.getByRole("button", { name: "Change: Financing" }).click();
+	await openEditor(page, "Financing", stored.id);
 	Object.assign(stored, {
 		label: "Mortgage approval",
 		version: 2,
@@ -376,7 +382,7 @@ test("a rejected due time shows on the field", async ({ page }) => {
 		}),
 	);
 	await page.goto(PAGE);
-	await page.getByRole("button", { name: "Change: Financing" }).click();
+	await openEditor(page, "Financing", financing().id);
 	const due = page.locator(`#edit-due-${financing().id}`);
 	await due.fill("2026-10-27T23:59");
 	await page.getByRole("button", { name: "Save Financing" }).click();
@@ -391,7 +397,7 @@ test("focus returns to Change after saving or cancelling", async ({ page }) => {
 	await change.click();
 	await page.getByRole("button", { name: "Cancel" }).click();
 	await expect(change).toBeFocused();
-	await change.click();
+	await openEditor(page, "Financing", financing().id);
 	await page.locator(`#edit-label-${financing().id}`).fill("Financing (bank)");
 	await page.getByRole("button", { name: "Save Financing" }).click();
 	await expect(live(page)).toHaveText("Financing (bank) saved.");
@@ -406,7 +412,7 @@ test("an untouched due time is sent exactly as stored", async ({ page }) => {
 	const s = state({ keyDates: { [DEAL_ID]: [late] } });
 	await mockApi(page, s);
 	await page.goto(PAGE);
-	await page.getByRole("button", { name: "Change: Financing" }).click();
+	await openEditor(page, "Financing", late.id);
 	await page.locator(`#edit-label-${late.id}`).fill("Financing (bank)");
 	await page.getByRole("button", { name: "Save Financing" }).click();
 	await expect(live(page)).toHaveText("Financing (bank) saved.");
