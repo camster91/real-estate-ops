@@ -7,7 +7,7 @@ Status: Implemented for synthetic data. This is pilot slice 3 (`docs/roadmap/PIL
 1. **A deal** is one side of a transaction the brokerage represents: buyer, seller, tenant or landlord.
    - It has an Ontario address: street, optional unit, city and postal code. The province is always `ON`, and the postal code must be an Ontario one (K, L, M, N or P), stored as `K1A 0B1`.
    - It is linked to 1 to 4 of the agent's own clients, in `deal_party`.
-   - The address, side and clients are fixed in this slice. The database enforces this for every role: the trigger `app.deal_party_guard` accepts a link only in the transaction that created the deal, up to 4 links, and the deferred trigger `app.deal_has_client` refuses a deal with no client when its transaction commits. Editing them, prices, commissions and other parties (co-op agents, lawyers) come later.
+   - The address, side and clients are fixed in this slice. The database enforces this for every role: the trigger `app.deal_party_guard` accepts a link only in the transaction that created the deal, up to 4 links; `app.deal_party_immutable` refuses any update, delete or truncate of links; and the deferred trigger `app.deal_has_client` refuses a deal with no client when its transaction commits. Editing them, prices, commissions and other parties (co-op agents, lawyers) come later.
 2. **Visibility** is the same as for clients (ADR 0019).
    - Only the assigned agent and the creator see a deal, while they are active members. RLS enforces this on `deal` and `deal_party`.
    - A member adds deals only for themselves and links only clients assigned to them. Both the API and RLS check this. An unknown or someone else's client returns the same 400, whichever layer refuses it, so nothing about other clients leaks and the screen never mistakes it for a lost membership.
@@ -59,7 +59,7 @@ Writes need the same-origin `Origin` header.
   - every CHECK;
   - forced RLS and table ownership;
   - the trigger's stage rules and version rule, and one owner case per fixed column;
-  - links: at least one, at most four, and none after creation (the owner included).
+  - links: at least one, at most four, none after creation, and no owner update, delete or truncate.
 - `apps/api/src/tenant/deals.db.test.ts`:
   - add, list and show;
   - replays and conflicts;

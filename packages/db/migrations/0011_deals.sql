@@ -165,6 +165,24 @@ CREATE TRIGGER deal_party_guard
 	BEFORE INSERT ON deal_party
 	FOR EACH ROW EXECUTE FUNCTION app.deal_party_guard();
 
+-- Links are never changed or removed, by any role that does not disable
+-- these triggers (the owner included): a deal keeps the clients it was
+-- created with.
+CREATE FUNCTION app.deal_party_immutable() RETURNS trigger
+	LANGUAGE plpgsql SET search_path = pg_catalog, public
+	AS $$
+	BEGIN
+		RAISE EXCEPTION 'deal clients are fixed' USING ERRCODE = 'check_violation';
+	END
+	$$;
+REVOKE EXECUTE ON FUNCTION app.deal_party_immutable() FROM PUBLIC;
+CREATE TRIGGER deal_party_no_update_delete
+	BEFORE UPDATE OR DELETE ON deal_party
+	FOR EACH ROW EXECUTE FUNCTION app.deal_party_immutable();
+CREATE TRIGGER deal_party_no_truncate
+	BEFORE TRUNCATE ON deal_party
+	FOR EACH STATEMENT EXECUTE FUNCTION app.deal_party_immutable();
+
 -- Every deal has at least one client, checked when its transaction commits.
 CREATE FUNCTION app.deal_has_client() RETURNS trigger
 	LANGUAGE plpgsql SET search_path = pg_catalog, public

@@ -188,6 +188,19 @@ describe("deal table", () => {
 		).toMatchObject({ code: "23514", message: "a deal has at most 4 clients" });
 	});
 
+	it.each([
+		"UPDATE deal_party SET party_id = $2 WHERE deal_id = $1",
+		"DELETE FROM deal_party WHERE deal_id = $1 AND $2::uuid IS NOT NULL",
+		"TRUNCATE deal_party",
+	])("the owner cannot change or remove links: %s", async (sql) => {
+		const context = ctx(ids.orgA, ids.pa);
+		const id = await mine();
+		const other = await client(context);
+		expect(
+			await failure(db.admin.query(sql, sql.includes("$1") ? [id, other] : [])),
+		).toMatchObject({ code: "23514", message: "deal clients are fixed" });
+	});
+
 	it("clients cannot be linked after the deal is created", async () => {
 		const context = ctx(ids.orgA, ids.pa);
 		const id = await mine();
