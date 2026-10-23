@@ -354,6 +354,24 @@ describe("key date routes", () => {
 		).toBe(404);
 	});
 
+	it("a deal holds at most 200 key dates; a replay still works", async () => {
+		const deal = await newDeal();
+		const last = dateBody();
+		await db.admin.query(
+			"INSERT INTO deal_key_date (organization_id, id, deal_id, kind, due_at, created_by_principal_id) SELECT $1, CASE WHEN n = 1 THEN $4::uuid ELSE gen_random_uuid() END, $2, 'closing', now(), $3 FROM generate_series(1, 200) AS n",
+			[ids.orgA, deal.id, ids.pa, last.id],
+		);
+		const full = await send("POST", datesUrl(deal.id), dateBody());
+		expect(full.statusCode).toBe(409);
+		expect(full.json()).toEqual({ error: "limit_reached" });
+		expect((await send("GET", datesUrl(deal.id))).json().keyDates).toHaveLength(
+			200,
+		);
+		// The same id as an existing date is still a replay or conflict, not a limit.
+		const again = await send("POST", datesUrl(deal.id), last);
+		expect(again.json()).toEqual({ error: "conflict" });
+	});
+
 	it("bad ids and a missing Origin", async () => {
 		const { dealId, keyDate } = await newDate();
 		expect((await send("GET", datesUrl("nope"))).statusCode).toBe(404);

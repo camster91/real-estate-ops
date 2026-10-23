@@ -43,6 +43,8 @@ export {
 	KEY_DATE_KIND_LABELS,
 	KEY_DATE_KINDS,
 	KEY_DATE_LABEL_MAX,
+	KEY_DATE_YEARS,
+	KEY_DATES_PER_DEAL_MAX,
 	type KeyDateKind,
 	type KeyDateState,
 	type KeyDateUpdate,

@@ -8,8 +8,9 @@
 -- A trigger, for every role that does not disable it (the owner included),
 -- lets only label, due_at and done_at change, requires version to go up by
 -- exactly one, stamps updated_at, and sets done_at from the server clock:
--- the time something was marked done is never supplied by a client. There
--- is no delete.
+-- the time something was marked done is never supplied by a client. Insert
+-- and delete triggers below cover the rest. As in 0005, the owner or a
+-- superuser can still disable these triggers.
 
 CREATE TABLE deal_key_date (
 	organization_id uuid NOT NULL,
@@ -115,6 +116,46 @@ REVOKE EXECUTE ON FUNCTION app.deal_key_date_guard() FROM PUBLIC;
 CREATE TRIGGER deal_key_date_guard
 	BEFORE UPDATE ON deal_key_date
 	FOR EACH ROW EXECUTE FUNCTION app.deal_key_date_guard();
+
+-- A new key date starts open at version 1, for every role that does not
+-- disable this trigger (the owner included): a done time or version is never
+-- supplied, and the timestamps come from the server.
+CREATE FUNCTION app.deal_key_date_insert_guard() RETURNS trigger
+	LANGUAGE plpgsql SET search_path = pg_catalog, public
+	AS $$
+	BEGIN
+		IF NEW.done_at IS NOT NULL
+			OR NEW.version <> 1
+			OR NEW.classification <> 'operational'
+		THEN
+			RAISE EXCEPTION 'key date insert not allowed' USING ERRCODE = 'check_violation';
+		END IF;
+		NEW.created_at := now();
+		NEW.updated_at := now();
+		RETURN NEW;
+	END
+	$$;
+REVOKE EXECUTE ON FUNCTION app.deal_key_date_insert_guard() FROM PUBLIC;
+CREATE TRIGGER deal_key_date_insert_guard
+	BEFORE INSERT ON deal_key_date
+	FOR EACH ROW EXECUTE FUNCTION app.deal_key_date_insert_guard();
+
+-- No delete, for every role that does not disable these triggers: a wrong
+-- date is changed, so the deal keeps its history of deadlines.
+CREATE FUNCTION app.deal_key_date_no_delete() RETURNS trigger
+	LANGUAGE plpgsql SET search_path = pg_catalog, public
+	AS $$
+	BEGIN
+		RAISE EXCEPTION 'key dates cannot be deleted' USING ERRCODE = 'check_violation';
+	END
+	$$;
+REVOKE EXECUTE ON FUNCTION app.deal_key_date_no_delete() FROM PUBLIC;
+CREATE TRIGGER deal_key_date_no_delete
+	BEFORE DELETE ON deal_key_date
+	FOR EACH ROW EXECUTE FUNCTION app.deal_key_date_no_delete();
+CREATE TRIGGER deal_key_date_no_truncate
+	BEFORE TRUNCATE ON deal_key_date
+	FOR EACH STATEMENT EXECUTE FUNCTION app.deal_key_date_no_delete();
 
 GRANT SELECT ON deal_key_date TO reo_app;
 GRANT INSERT (organization_id, id, deal_id, kind, label, due_at,

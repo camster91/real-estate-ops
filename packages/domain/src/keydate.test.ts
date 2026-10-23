@@ -81,6 +81,16 @@ describe("parseNewKeyDate", () => {
 			{ id, kind: "closing", dueAt: "2026-02-30T12:00:00Z" },
 			"dueAt",
 		],
+		[
+			"year 0000",
+			{ id, kind: "closing", dueAt: "0000-01-01T00:00:00Z" },
+			"dueAt",
+		],
+		[
+			"year 2101",
+			{ id, kind: "closing", dueAt: "2101-01-01T12:00:00Z" },
+			"dueAt",
+		],
 		["an extra key", { id, kind: "closing", dueAt: due, done: true }, "body"],
 		["not an object", "x", "body"],
 	])("rejects %s", (_label, input, field) => {
@@ -108,6 +118,7 @@ describe("parseKeyDateUpdate", () => {
 		["a zero version", { ...full, version: 0 }, "version"],
 		["a bad label", { ...full, label: "x".repeat(101) }, "label"],
 		["a bad due time", { ...full, dueAt: "soon" }, "dueAt"],
+		["year 1999", { ...full, dueAt: "1999-12-31T12:00:00Z" }, "dueAt"],
 		["done as text", { ...full, done: "yes" }, "done"],
 	])("rejects %s", (_label, input, field) => {
 		expect(parseKeyDateUpdate(input)).toEqual({ ok: false, field });

@@ -1,5 +1,6 @@
 import { recordChange } from "@reo/db";
 import {
+	KEY_DATES_PER_DEAL_MAX,
 	type KeyDateKind,
 	type KeyDateUpdate,
 	type NewKeyDate,
@@ -38,6 +39,7 @@ const toKeyDate = (row: KeyDateRow) => ({
 type CreateOutcome =
 	| { kind: "created" | "replayed"; row: KeyDateRow }
 	| { kind: "conflict" }
+	| { kind: "limit" }
 	| { kind: "missing" };
 
 type EditOutcome =
@@ -77,7 +79,7 @@ export function registerKeyDateRoutes(
 							`SELECT ${COLUMNS} FROM deal_key_date
 								WHERE deal_id = $1
 								ORDER BY due_at, id
-								LIMIT 200`,
+								LIMIT ${KEY_DATES_PER_DEAL_MAX}`,
 							[dealId.toLowerCase()],
 						)
 					).rows;
@@ -112,6 +114,8 @@ export function registerKeyDateRoutes(
 				return reply.code(404).send({ error: "not_found" });
 			if (result.kind === "conflict")
 				return reply.code(409).send({ error: "conflict" });
+			if (result.kind === "limit")
+				return reply.code(409).send({ error: "limit_reached" });
 			return reply
 				.code(result.kind === "created" ? 201 : 200)
 				.send({ keyDate: toKeyDate(result.row) });
@@ -168,12 +172,28 @@ async function create(
 			request,
 			PURPOSE,
 			async ({ client, context }): Promise<CreateOutcome> => {
-				// Only the deal's assigned agent adds key dates.
+				// Only the deal's assigned agent adds key dates. The lock makes the
+				// per-deal limit below hold under concurrent adds.
 				const assigned = await client.query(
-					"SELECT 1 FROM deal WHERE id = $1 AND assigned_principal_id = $2",
+					"SELECT 1 FROM deal WHERE id = $1 AND assigned_principal_id = $2 FOR UPDATE",
 					[dealId, context.principalId],
 				);
 				if (assigned.rowCount === 0) return { kind: "missing" };
+				const replay = (
+					await client.query<KeyDateRow>(
+						`SELECT ${COLUMNS} FROM deal_key_date WHERE id = $1`,
+						[keyDate.id],
+					)
+				).rows[0];
+				if (!replay) {
+					const count = (
+						await client.query<{ n: number }>(
+							"SELECT count(*)::int AS n FROM deal_key_date WHERE deal_id = $1",
+							[dealId],
+						)
+					).rows[0]?.n;
+					if ((count ?? 0) >= KEY_DATES_PER_DEAL_MAX) return { kind: "limit" };
+				}
 				// The client-chosen id makes a retried POST safe.
 				const inserted = await client.query<KeyDateRow>(
 					`INSERT INTO deal_key_date (organization_id, id, deal_id, kind,

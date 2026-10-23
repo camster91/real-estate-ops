@@ -305,6 +305,44 @@ describe("deal key dates", () => {
 		).toMatchObject({ code: "23514", message: "key date change not allowed" });
 	});
 
+	it.each([
+		["a done time", "done_at", "'2000-01-01T00:00:00Z'"],
+		["a version", "version", "7"],
+		["a classification", "classification", "'personal'"],
+	])("the owner cannot insert %s", async (_label, column, value) => {
+		expect(
+			await failure(
+				db.admin.query(
+					`INSERT INTO deal_key_date (organization_id, id, deal_id, kind, due_at, created_by_principal_id, ${column}) VALUES ($1, $2, $3, 'closing', now(), $4, ${value})`,
+					[ids.orgA, randomUUID(), await myDeal(), ids.pa],
+				),
+			),
+		).toMatchObject({ code: "23514", message: "key date insert not allowed" });
+	});
+
+	it("an owner insert gets server timestamps", async () => {
+		const id = randomUUID();
+		await db.admin.query(
+			"INSERT INTO deal_key_date (organization_id, id, deal_id, kind, due_at, created_by_principal_id, created_at, updated_at) VALUES ($1, $2, $3, 'closing', now(), $4, '1999-01-01Z', '1999-01-01Z')",
+			[ids.orgA, id, await myDeal(), ids.pa],
+		);
+		const { rows } = await db.admin.query(
+			"SELECT created_at > '2020-01-01Z' AND updated_at > '2020-01-01Z' AS fresh FROM deal_key_date WHERE id = $1",
+			[id],
+		);
+		expect(rows[0].fresh).toBe(true);
+	});
+
+	it.each([
+		"DELETE FROM deal_key_date WHERE id = $1",
+		"TRUNCATE deal_key_date",
+	])("the owner cannot remove key dates: %s", async (sql) => {
+		const id = await myDate();
+		expect(
+			await failure(db.admin.query(sql, sql.includes("$1") ? [id] : [])),
+		).toMatchObject({ code: "23514", message: "key dates cannot be deleted" });
+	});
+
 	it("no delete", async () => {
 		expect(
 			await code(as(ctx(ids.orgA, ids.pa), "DELETE FROM deal_key_date")),

@@ -24,6 +24,10 @@ export const needsLabel = (kind: KeyDateKind) =>
 	kind === "condition" || kind === "other";
 
 export const KEY_DATE_LABEL_MAX = 100;
+/** Due times outside these years are refused as typing mistakes. */
+export const KEY_DATE_YEARS = Object.freeze({ min: 2000, max: 2100 });
+/** Key dates per deal; more are refused rather than hidden from the list. */
+export const KEY_DATES_PER_DEAL_MAX = 200;
 /** "Due soon" means within this many hours. */
 export const DUE_SOON_HOURS = 72;
 
@@ -48,6 +52,16 @@ const FORBIDDEN = /[\p{Cc}\u2028\u2029]|\p{Cs}/u;
 const VERSION_MAX = 2147483647;
 const NEW_KEYS = new Set(["id", "kind", "label", "dueAt"]);
 const UPDATE_KEYS = new Set(["version", "label", "dueAt", "done"]);
+
+/** A due time with an offset, within KEY_DATE_YEARS. */
+function parseDue(value: unknown): Date | undefined {
+	const date = parseOffsetDateTime(value);
+	if (!date) return undefined;
+	const year = date.getUTCFullYear();
+	return year >= KEY_DATE_YEARS.min && year <= KEY_DATE_YEARS.max
+		? date
+		: undefined;
+}
 
 const asObject = (input: unknown) =>
 	typeof input === "object" && input !== null && !Array.isArray(input)
@@ -87,7 +101,7 @@ export function parseNewKeyDate(
 	const label = parseLabel(body.label);
 	if (label === undefined || (label === null && needsLabel(kind)))
 		return { ok: false, field: "label" };
-	const dueAt = parseOffsetDateTime(body.dueAt);
+	const dueAt = parseDue(body.dueAt);
 	if (!dueAt) return { ok: false, field: "dueAt" };
 	return {
 		ok: true,
@@ -121,7 +135,7 @@ export function parseKeyDateUpdate(
 		return { ok: false, field: "version" };
 	const label = parseLabel(body.label);
 	if (label === undefined) return { ok: false, field: "label" };
-	const dueAt = parseOffsetDateTime(body.dueAt);
+	const dueAt = parseDue(body.dueAt);
 	if (!dueAt) return { ok: false, field: "dueAt" };
 	if (typeof body.done !== "boolean") return { ok: false, field: "done" };
 	return { ok: true, update: { version, label, dueAt, done: body.done } };

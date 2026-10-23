@@ -19,7 +19,12 @@ import {
 	useRef,
 	useState,
 } from "react";
-import { type KeyDate, listKeyDates, saveKeyDate } from "../../../../lib/api";
+import {
+	type KeyDate,
+	type KeyDateUpdateBody,
+	listKeyDates,
+	saveKeyDate,
+} from "../../../../lib/api";
 
 const kindLabel = (kind: string) =>
 	KEY_DATE_KIND_LABELS[kind as KeyDateKind] ?? kind;
@@ -32,12 +37,14 @@ const localValue = (iso: string) =>
 
 const LABEL_ERROR =
 	"Name it, like Financing or Home inspection (up to 100 characters).";
-const DUE_ERROR = "Enter a date and time.";
+const DUE_ERROR = "Enter a date and time between 2000 and 2100.";
 const GAP_ERROR =
 	"That time does not exist in Toronto (the clocks spring forward). Choose another time.";
 const SAVE_ERROR = "That could not be saved. Please try again.";
+const LIMIT_ERROR = "This deal already has 200 key dates.";
 const CHANGED =
-	"This date was changed in another window. The latest is shown; check it and try again.";
+	"This date was changed in another window. The latest is shown; check it and save again.";
+const SIGNED_OUT = "Your session has ended. Sign in again, then try again.";
 const STATE_TEXT = {
 	overdue: "Overdue",
 	due_soon: "Due soon",
@@ -55,6 +62,12 @@ function toDueAt(local: string): { dueAt: string } | { error: string } {
 	return { dueAt: toOffsetIso(instant, TORONTO) };
 }
 
+type Outcome =
+	| { saved: KeyDate }
+	| { conflict: KeyDate }
+	| { invalid: string }
+	| { failed: string };
+
 /** Key dates on one deal: list, add, mark done and change (ADR 0022). */
 export function KeyDates(props: {
 	organizationId: string;
@@ -67,8 +80,12 @@ export function KeyDates(props: {
 		"loading",
 	);
 	const [signedOut, setSignedOut] = useState(false);
-	const [busy, setBusy] = useState(false);
+	// One save at a time per row, and the add form on its own.
+	const [busyRow, setBusyRow] = useState<string | null>(null);
+	const [adding, setAdding] = useState(false);
 	const [messages, setMessages] = useState<Record<string, string>>({});
+	// States move on with time: re-render every minute.
+	const [now, setNow] = useState(() => new Date());
 	// Add form
 	const [kind, setKind] = useState<string>("condition");
 	const [label, setLabel] = useState("");
@@ -85,6 +102,8 @@ export function KeyDates(props: {
 	const [editErrors, setEditErrors] = useState<Errors>({});
 	const editLabelInput = useRef<HTMLInputElement>(null);
 	const editDueInput = useRef<HTMLInputElement>(null);
+	// Where focus returns after an edit closes.
+	const changeButtons = useRef<Record<string, HTMLButtonElement | null>>({});
 
 	const load = useCallback(async () => {
 		setDates("loading");
@@ -97,6 +116,11 @@ export function KeyDates(props: {
 	useEffect(() => {
 		load();
 	}, [load]);
+
+	useEffect(() => {
+		const timer = setInterval(() => setNow(new Date()), 60_000);
+		return () => clearInterval(timer);
+	}, []);
 
 	const put = (date: KeyDate) =>
 		setDates((current) =>
@@ -114,7 +138,7 @@ export function KeyDates(props: {
 
 	const add = async (event: FormEvent) => {
 		event.preventDefault();
-		if (busy) return;
+		if (adding) return;
 		setErrors({});
 		setFormError(undefined);
 		setSignedOut(false);
@@ -130,17 +154,18 @@ export function KeyDates(props: {
 			return;
 		}
 		pendingId.current ??= crypto.randomUUID();
-		setBusy(true);
+		setAdding(true);
 		const result = await saveKeyDate(organizationId, dealId, {
 			id: pendingId.current,
 			kind,
 			...(label.trim() ? { label } : {}),
 			dueAt: when.dueAt,
 		});
-		setBusy(false);
+		setAdding(false);
 		if (result === "signed_out") return setSignedOut(true);
 		if (result === "not_found") return onNotFound();
 		if (result === "error") return setFormError(SAVE_ERROR);
+		if (result === "limit") return setFormError(LIMIT_ERROR);
 		if (result === "conflict" || "conflict" in result) {
 			// The same id with other details: an earlier try may have been saved.
 			pendingId.current = null;
@@ -169,61 +194,68 @@ export function KeyDates(props: {
 		announce("Key date added.");
 	};
 
+	/** Saves one change to a date; the caller decides what the screen does. */
 	const update = async (
 		date: KeyDate,
-		changes: { label: string | null; dueAt: string; done: boolean },
-	) => {
-		if (busy) return false;
+		changes: Omit<KeyDateUpdateBody, "version">,
+	): Promise<Outcome | null> => {
+		if (busyRow) return null;
 		note(date.id);
 		setSignedOut(false);
 		announce("");
-		setBusy(true);
+		setBusyRow(date.id);
 		const result = await saveKeyDate(
 			organizationId,
 			dealId,
 			{ version: date.version, ...changes },
 			date.id,
 		);
-		setBusy(false);
+		setBusyRow(null);
 		if (result === "signed_out") {
 			setSignedOut(true);
-			return false;
+			return { failed: SIGNED_OUT };
 		}
 		if (result === "not_found") {
 			onNotFound();
-			return false;
+			return null;
 		}
-		if (result === "error" || result === "conflict") {
-			note(date.id, SAVE_ERROR);
-			return false;
-		}
+		if (typeof result === "string") return { failed: SAVE_ERROR };
 		if ("conflict" in result) {
 			put(result.conflict);
-			note(date.id, CHANGED);
-			return false;
+			return { conflict: result.conflict };
 		}
-		if ("invalid" in result) {
-			note(date.id, SAVE_ERROR);
-			return false;
-		}
+		if ("invalid" in result) return { invalid: result.invalid };
 		put(result.keyDate);
-		return result.keyDate;
+		return { saved: result.keyDate };
 	};
 
 	const toggle = async (date: KeyDate) => {
-		const saved = await update(date, {
+		const outcome = await update(date, {
 			label: date.label,
 			dueAt: date.dueAt,
 			done: !date.doneAt,
 		});
-		if (saved)
-			announce(`${title(saved)} marked ${saved.doneAt ? "done" : "not done"}.`);
+		if (!outcome) return;
+		if ("saved" in outcome)
+			return announce(
+				`${title(outcome.saved)} marked ${outcome.saved.doneAt ? "done" : "not done"}.`,
+			);
+		note(date.id, "conflict" in outcome ? CHANGED : SAVE_ERROR);
+	};
+
+	const closeEdit = (id: string) => {
+		setEditing(null);
+		requestAnimationFrame(() => changeButtons.current[id]?.focus());
+	};
+
+	const fillEdit = (date: KeyDate) => {
+		setEditLabel(date.label ?? "");
+		setEditDue(localValue(date.dueAt));
 	};
 
 	const startEdit = (date: KeyDate) => {
 		setEditing(date.id);
-		setEditLabel(date.label ?? "");
-		setEditDue(localValue(date.dueAt));
+		fillEdit(date);
 		setEditErrors({});
 		note(date.id);
 		requestAnimationFrame(() => editDueInput.current?.focus());
@@ -231,28 +263,49 @@ export function KeyDates(props: {
 
 	const saveEdit = async (event: FormEvent, date: KeyDate) => {
 		event.preventDefault();
+		setEditErrors({});
 		const found: Errors = {};
 		if (needsLabel(date.kind as KeyDateKind) && !editLabel.trim())
 			found.label = LABEL_ERROR;
-		const when = toDueAt(editDue);
+		// An untouched due time is sent exactly as stored, so a repeated
+		// fall-back hour or stored seconds never shift it.
+		const when =
+			editDue === localValue(date.dueAt)
+				? { dueAt: date.dueAt }
+				: toDueAt(editDue);
 		if ("error" in when) found.dueAt = when.error;
 		if (found.label || found.dueAt || "error" in when) {
 			setEditErrors(found);
 			(found.label ? editLabelInput : editDueInput).current?.focus();
 			return;
 		}
-		const saved = await update(date, {
+		const outcome = await update(date, {
 			label: editLabel.trim() ? editLabel : null,
 			dueAt: when.dueAt,
 			done: Boolean(date.doneAt),
 		});
-		if (saved) {
-			setEditing(null);
-			announce(`${title(saved)} saved.`);
-		} else setEditing(null);
+		if (!outcome) return;
+		if ("saved" in outcome) {
+			closeEdit(date.id);
+			return announce(`${title(outcome.saved)} saved.`);
+		}
+		// Keep the form open so nothing typed is lost.
+		if ("conflict" in outcome) {
+			fillEdit(outcome.conflict);
+			note(date.id, CHANGED);
+			return editDueInput.current?.focus();
+		}
+		if ("invalid" in outcome && outcome.invalid === "label") {
+			setEditErrors({ label: LABEL_ERROR });
+			return editLabelInput.current?.focus();
+		}
+		if ("invalid" in outcome && outcome.invalid === "dueAt") {
+			setEditErrors({ dueAt: DUE_ERROR });
+			return editDueInput.current?.focus();
+		}
+		note(date.id, "failed" in outcome ? outcome.failed : SAVE_ERROR);
 	};
 
-	const now = new Date();
 	return (
 		<section aria-labelledby="key-dates-heading">
 			<h2 id="key-dates-heading">Key dates</h2>
@@ -278,6 +331,9 @@ export function KeyDates(props: {
 					<ul className="tasks key-dates" aria-label="Key dates">
 						{dates.map((date) => {
 							const state = keyDateState(date.dueAt, date.doneAt, now);
+							const dueText = formatInZone(date.dueAt, TORONTO, now);
+							// Unique even for two unnamed deposits.
+							const name = `${title(date)}, due ${dueText}`;
 							const messageId = `key-date-${date.id}-message`;
 							return (
 								<li key={date.id} data-state={state}>
@@ -285,7 +341,7 @@ export function KeyDates(props: {
 									<span className="meta">
 										{[
 											date.label ? kindLabel(date.kind) : null,
-											`Due ${formatInZone(date.dueAt, TORONTO, now)}`,
+											`Due ${dueText}`,
 											date.doneAt
 												? `Done ${formatInZone(date.doneAt, TORONTO, now)}`
 												: STATE_TEXT[state as keyof typeof STATE_TEXT],
@@ -301,6 +357,7 @@ export function KeyDates(props: {
 									{editing === date.id ? (
 										<form
 											className="add inline"
+											aria-label={`Change ${name}`}
 											onSubmit={(event) => saveEdit(event, date)}
 											noValidate
 										>
@@ -353,14 +410,15 @@ export function KeyDates(props: {
 												<button
 													type="submit"
 													className="button"
-													disabled={busy}
+													disabled={busyRow === date.id}
+													aria-label={`Save ${title(date)}`}
 												>
 													Save date
 												</button>
 												<button
 													type="button"
 													className="link"
-													onClick={() => setEditing(null)}
+													onClick={() => closeEdit(date.id)}
 												>
 													Cancel
 												</button>
@@ -371,8 +429,8 @@ export function KeyDates(props: {
 											<button
 												type="button"
 												className="link"
-												disabled={busy}
-												aria-label={`${date.doneAt ? "Mark not done" : "Mark done"}: ${title(date)}`}
+												disabled={busyRow === date.id}
+												aria-label={`${date.doneAt ? "Mark not done" : "Mark done"}: ${name}`}
 												aria-describedby={
 													messages[date.id] ? messageId : undefined
 												}
@@ -383,8 +441,11 @@ export function KeyDates(props: {
 											<button
 												type="button"
 												className="link"
-												disabled={busy}
-												aria-label={`Change: ${title(date)}`}
+												ref={(element) => {
+													changeButtons.current[date.id] = element;
+												}}
+												disabled={busyRow === date.id}
+												aria-label={`Change: ${name}`}
 												onClick={() => startEdit(date)}
 											>
 												Change
@@ -434,6 +495,8 @@ export function KeyDates(props: {
 					id="key-date-due"
 					ref={dueInput}
 					type="datetime-local"
+					min="2000-01-01T00:00"
+					max="2100-12-31T23:59"
 					value={due}
 					onChange={(event) => setDue(event.target.value)}
 					aria-invalid={errors.dueAt ? true : undefined}
@@ -449,7 +512,7 @@ export function KeyDates(props: {
 						{formError}
 					</p>
 				)}
-				<button type="submit" className="button" disabled={busy}>
+				<button type="submit" className="button" disabled={adding}>
 					Add key date
 				</button>
 			</form>

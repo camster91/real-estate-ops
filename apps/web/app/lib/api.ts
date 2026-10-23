@@ -554,6 +554,7 @@ export type SaveKeyDateResult =
 	| "signed_out"
 	| "not_found"
 	| "conflict"
+	| "limit"
 	| "error";
 
 const keyDatesPath = (organizationId: string, dealId: string) =>
@@ -599,7 +600,11 @@ export async function saveKeyDate(
 			| { keyDate?: KeyDate; error?: string; field?: string }
 			| undefined;
 		if (response.status === 409)
-			return parsed?.keyDate ? { conflict: parsed.keyDate } : "conflict";
+			return parsed?.keyDate
+				? { conflict: parsed.keyDate }
+				: parsed?.error === "limit_reached"
+					? "limit"
+					: "conflict";
 		if (response.status === 400 && parsed?.error === "invalid_key_date")
 			return { invalid: parsed.field ?? "body" };
 		if (response.ok && parsed?.keyDate) return { keyDate: parsed.keyDate };

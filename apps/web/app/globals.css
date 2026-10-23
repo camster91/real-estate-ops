@@ -267,6 +267,9 @@ select.status:disabled {
 	border-color: var(--reo-color-border-default);
 	cursor: wait;
 }
+form.actions-row select.status {
+	margin-top: 0;
+}
 ul.tasks .row-message {
 	margin-top: var(--reo-space-2);
 }
@@ -447,9 +450,6 @@ ul.plain {
 	margin: 0;
 	display: grid;
 	gap: var(--reo-space-1);
-}
-form.actions-row select.status {
-	margin-top: 0;
 }
 /* Key dates: state colour, with the state always in words too */
 ul.tasks.key-dates li[data-state="overdue"] {

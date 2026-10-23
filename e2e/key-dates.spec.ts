@@ -151,7 +151,9 @@ test("a condition needs a name and a due time", async ({ page }) => {
 		"aria-invalid",
 		"true",
 	);
-	await expect(page.getByText("Enter a date and time.")).toBeVisible();
+	await expect(
+		page.getByText("Enter a date and time between 2000 and 2100."),
+	).toBeVisible();
 	expect(saves(s, "POST")).toHaveLength(0);
 });
 
@@ -218,7 +220,7 @@ test("change a date", async ({ page }) => {
 	await expect(due).toBeFocused();
 	await expect(due).toHaveValue("2026-10-22T23:59");
 	await due.fill("2026-10-27T23:59");
-	await page.getByRole("button", { name: "Save date" }).click();
+	await page.getByRole("button", { name: "Save Financing" }).click();
 	await expect(live(page)).toHaveText("Financing saved.");
 	await expect(items(page).nth(1)).toContainText(
 		"Due Tue, Oct 27, 11:59 p.m. · Upcoming",
@@ -243,7 +245,7 @@ test("changed in another window shows the latest", async ({ page }) => {
 	});
 	await page.getByRole("button", { name: "Mark done: Financing" }).click();
 	await expect(items(page).getByRole("alert")).toHaveText(
-		"This date was changed in another window. The latest is shown; check it and try again.",
+		"This date was changed in another window. The latest is shown; check it and save again.",
 	);
 	await expect(items(page)).toContainText("Due Thu, Oct 29, 11:59 p.m.");
 });
@@ -268,4 +270,183 @@ test("keyboard only: mark done", async ({ page }) => {
 	await page.keyboard.press("Enter");
 	await expect(live(page)).toHaveText("Financing marked done.");
 	expect(saves(s, "PATCH")).toHaveLength(1);
+});
+
+test("an add saved with its reply lost is added once on retry", async ({
+	page,
+}) => {
+	const s = state({ keyDates: {}, keyDateReplies: ["commit_then_abort"] });
+	await mockApi(page, s);
+	await page.goto(PAGE);
+	await page.getByLabel("Name", { exact: true }).fill("Appraisal");
+	await page.getByLabel("Due (Toronto time)").fill("2026-10-28T17:00");
+	await page.getByRole("button", { name: "Add key date" }).click();
+	await expect(page.getByText("That could not be saved.")).toBeVisible();
+	await page.getByRole("button", { name: "Add key date" }).click();
+	await expect(live(page)).toHaveText("Key date added.");
+	expect(s.keyDates?.[DEAL_ID]).toHaveLength(1);
+	await expect(items(page)).toHaveCount(1);
+});
+
+test("an add that conflicts reloads the list and says why", async ({
+	page,
+}) => {
+	const s = state({
+		keyDateReplies: [{ status: 409, body: { error: "conflict" } }],
+	});
+	await mockApi(page, s);
+	await page.goto(PAGE);
+	await expect(items(page)).toHaveCount(3);
+	const lists = () =>
+		s.requests.filter(
+			(r) => r.method === "GET" && r.path.endsWith("/key-dates"),
+		).length;
+	const before = lists();
+	await page.getByLabel("Name", { exact: true }).fill("Appraisal");
+	await page.getByLabel("Due (Toronto time)").fill("2026-10-28T17:00");
+	await page.getByRole("button", { name: "Add key date" }).click();
+	await expect(
+		page.getByText("An earlier try may already be saved."),
+	).toBeVisible();
+	expect(lists()).toBe(before + 1);
+});
+
+test("a deal with 200 key dates says so", async ({ page }) => {
+	await mockApi(
+		page,
+		state({
+			keyDateReplies: [{ status: 409, body: { error: "limit_reached" } }],
+		}),
+	);
+	await page.goto(PAGE);
+	await page.getByLabel("Name", { exact: true }).fill("One more");
+	await page.getByLabel("Due (Toronto time)").fill("2026-10-28T17:00");
+	await page.getByRole("button", { name: "Add key date" }).click();
+	await expect(
+		page.getByText("This deal already has 200 key dates."),
+	).toBeVisible();
+});
+
+test("a failed edit keeps what was typed, then saves on retry", async ({
+	page,
+}) => {
+	await mockApi(page, state({ keyDateReplies: ["abort"] }));
+	await page.goto(PAGE);
+	await page.getByRole("button", { name: "Change: Financing" }).click();
+	const due = page.locator(`#edit-due-${financing().id}`);
+	await due.fill("2026-10-27T23:59");
+	await page.getByRole("button", { name: "Save Financing" }).click();
+	await expect(items(page).getByRole("alert")).toHaveText(
+		"That could not be saved. Please try again.",
+	);
+	await expect(due).toHaveValue("2026-10-27T23:59");
+	await page.getByRole("button", { name: "Save Financing" }).click();
+	await expect(live(page)).toHaveText("Financing saved.");
+});
+
+test("an edit that conflicts stays open with the latest values", async ({
+	page,
+}) => {
+	const stored = financing();
+	await mockApi(page, state({ keyDates: { [DEAL_ID]: [stored] } }));
+	await page.goto(PAGE);
+	await page.getByRole("button", { name: "Change: Financing" }).click();
+	Object.assign(stored, {
+		label: "Mortgage approval",
+		version: 2,
+	});
+	await page.locator(`#edit-due-${stored.id}`).fill("2026-10-27T23:59");
+	await page.getByRole("button", { name: "Save Financing" }).click();
+	await expect(items(page).getByRole("alert")).toContainText(
+		"This date was changed in another window.",
+	);
+	await expect(page.locator(`#edit-label-${stored.id}`)).toHaveValue(
+		"Mortgage approval",
+	);
+	await expect(page.locator(`#edit-due-${stored.id}`)).toBeFocused();
+});
+
+test("a rejected due time shows on the field", async ({ page }) => {
+	await mockApi(
+		page,
+		state({
+			keyDateReplies: [
+				{ status: 400, body: { error: "invalid_key_date", field: "dueAt" } },
+			],
+		}),
+	);
+	await page.goto(PAGE);
+	await page.getByRole("button", { name: "Change: Financing" }).click();
+	const due = page.locator(`#edit-due-${financing().id}`);
+	await due.fill("2026-10-27T23:59");
+	await page.getByRole("button", { name: "Save Financing" }).click();
+	await expect(due).toHaveAttribute("aria-invalid", "true");
+	await expect(due).toBeFocused();
+});
+
+test("focus returns to Change after saving or cancelling", async ({ page }) => {
+	await mockApi(page, state());
+	await page.goto(PAGE);
+	const change = page.getByRole("button", { name: "Change: Financing" });
+	await change.click();
+	await page.getByRole("button", { name: "Cancel" }).click();
+	await expect(change).toBeFocused();
+	await change.click();
+	await page.locator(`#edit-label-${financing().id}`).fill("Financing (bank)");
+	await page.getByRole("button", { name: "Save Financing" }).click();
+	await expect(live(page)).toHaveText("Financing (bank) saved.");
+	await expect(
+		page.getByRole("button", { name: "Change: Financing (bank)" }),
+	).toBeFocused();
+});
+
+test("an untouched due time is sent exactly as stored", async ({ page }) => {
+	// 1:30 a.m. EST on 1 November: the second 1:30 of the fall-back night.
+	const late = { ...financing(), dueAt: "2026-11-01T06:30:15.000Z" };
+	const s = state({ keyDates: { [DEAL_ID]: [late] } });
+	await mockApi(page, s);
+	await page.goto(PAGE);
+	await page.getByRole("button", { name: "Change: Financing" }).click();
+	await page.locator(`#edit-label-${late.id}`).fill("Financing (bank)");
+	await page.getByRole("button", { name: "Save Financing" }).click();
+	await expect(live(page)).toHaveText("Financing (bank) saved.");
+	expect(saves(s, "PATCH")[0]?.body).toMatchObject({
+		dueAt: "2026-11-01T06:30:15.000Z",
+	});
+});
+
+test("two unnamed deposits have different button names", async ({ page }) => {
+	const second = {
+		...deposit(),
+		id: "44444444-4444-4444-8444-444444444444",
+		dueAt: "2026-11-20T22:00:00.000Z",
+	};
+	await mockApi(page, state({ keyDates: { [DEAL_ID]: [deposit(), second] } }));
+	await page.goto(PAGE);
+	await expect(
+		page.getByRole("button", {
+			name: "Mark done: Deposit due, due Sat, Oct 24",
+		}),
+	).toHaveCount(1);
+	await expect(
+		page.getByRole("button", {
+			name: "Mark done: Deposit due, due Fri, Nov 20",
+		}),
+	).toHaveCount(1);
+});
+
+test("keyboard only: add a key date", async ({ page }) => {
+	const s = state({ keyDates: {} });
+	await mockApi(page, s);
+	await page.goto(PAGE);
+	const name = page.getByLabel("Name", { exact: true });
+	await tabTo(page, name, 30);
+	await expectFocusRing(name);
+	await page.keyboard.type("Status certificate");
+	await page.keyboard.press("Tab");
+	await expect(page.getByLabel("Due (Toronto time)")).toBeFocused();
+	await page.getByLabel("Due (Toronto time)").fill("2026-10-29T17:00");
+	await page.keyboard.press("Enter");
+	await expect(live(page)).toHaveText("Key date added.");
+	expect(saves(s, "POST")).toHaveLength(1);
 });
