@@ -8,7 +8,7 @@ import { signOut } from "../../lib/api";
 /** The header on every brokerage page: sections, switch brokerage, sign out. */
 export function AppHeader(props: {
 	organizationId: string;
-	current: "tasks" | "clients";
+	current: "tasks" | "clients" | "deals";
 }) {
 	const router = useRouter();
 	const [signOutFailed, setSignOutFailed] = useState(false);
@@ -30,6 +30,7 @@ export function AppHeader(props: {
 			<nav aria-label="Sections" className="sections">
 				{section(`${base}/tasks`, "My tasks", "tasks")}
 				{section(`${base}/clients`, "Clients", "clients")}
+				{section(`${base}/deals`, "Deals", "deals")}
 			</nav>
 			<nav aria-label="Account">
 				<Link href="/?choose=1">Switch brokerage</Link>

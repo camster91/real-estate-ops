@@ -2,6 +2,13 @@
 // real; every /auth and /v1 request is answered here, so no API or database
 // is needed. Synthetic data only.
 import { expect, type Locator, type Page } from "@playwright/test";
+// The real deal rules, so the mock cannot drift from the API (ADR 0021).
+import {
+	canMoveDeal,
+	type DealStage,
+	parseNewDeal,
+	parseStageChange,
+} from "../packages/domain/src/deal";
 
 export const ORG_A = "0b9c2e1a-1d2f-4c3b-8a9e-1f2e3d4c5b6a";
 export const ORG_B = "5d6e7f80-1a2b-4c3d-8e9f-0a1b2c3d4e5f";
@@ -45,6 +52,22 @@ export interface MockConsent {
 // Same purposes as @reo/domain CONSENT_PURPOSES (ADR 0020).
 const PURPOSES = ["transaction_service", "market_updates"];
 
+export interface MockDeal {
+	id: string;
+	side: string;
+	stage: string;
+	address: {
+		street: string;
+		unit: string | null;
+		city: string;
+		postalCode: string;
+	};
+	clients: { id: string; name: string | null }[];
+	version: number;
+	createdAt: string;
+	stageChangedAt: string;
+}
+
 export interface MockState {
 	/** Signed out, or the session's memberships. */
 	session: "signed_out" | { organizationId: string; name: string }[];
@@ -72,6 +95,12 @@ export interface MockState {
 	consents?: Record<string, MockConsent[] | "error">;
 	/** Replies for the next consent recordings, in order; then a normal success. */
 	consentReplies?: Reply[];
+	/** Per organisation: its deals, or how the list call fails. */
+	deals?: Record<string, MockDeal[] | "signed_out" | "not_found" | "error">;
+	/** Replies for the next deal additions, in order; then a normal success. */
+	dealReplies?: Reply[];
+	/** Replies for the next stage changes, in order; then the normal rules. */
+	dealPatchReplies?: Reply[];
 	/** Every API request, for assertions. */
 	requests: { method: string; path: string; body: unknown }[];
 }
@@ -119,6 +148,99 @@ export async function mockApi(page: Page, state: MockState): Promise<void> {
 					return reply(state.logoutStatus, { error: "internal" });
 				state.session = "signed_out";
 				return reply(204);
+			}
+			const dealRoute =
+				/^\/v1\/organizations\/([^/]+)\/deals(?:\/([^/]+))?$/.exec(
+					url.pathname,
+				);
+			if (dealRoute) {
+				const org = decodeURIComponent(dealRoute[1] as string);
+				const list = state.deals?.[org] ?? [];
+				if (typeof list === "string") {
+					const failure = LIST_FAILURES[list];
+					return reply(failure.status, failure.body);
+				}
+				const id = dealRoute[2];
+				if (method === "GET" && id) {
+					const found = list.find((d) => d.id === id);
+					return found
+						? reply(200, { deal: found })
+						: reply(404, { error: "not_found" });
+				}
+				if (method === "GET")
+					return reply(200, {
+						deals: [...list].sort((a, b) =>
+							b.createdAt.localeCompare(a.createdAt),
+						),
+						more: false,
+					});
+				if (method === "POST") {
+					const next = state.dealReplies?.shift();
+					if (next === "abort") return route.abort("failed");
+					if (next && next !== "commit_then_abort")
+						return reply(next.status, next.body);
+					const parsed = parseNewDeal(body);
+					if (!parsed.ok)
+						return reply(400, { error: "invalid_deal", field: parsed.field });
+					const input = parsed.deal;
+					const known = state.clients?.[org];
+					const clients = input.clientIds.map((clientId) =>
+						Array.isArray(known)
+							? known.find((c) => c.id === clientId)
+							: undefined,
+					);
+					if (clients.some((c) => !c))
+						return reply(400, { error: "invalid_deal", field: "clientIds" });
+					const now = new Date().toISOString();
+					const deal: MockDeal = {
+						id: input.id,
+						side: input.side,
+						stage: "draft",
+						address: input.address,
+						clients: clients
+							.map((c) => ({ id: c?.id as string, name: c?.name ?? null }))
+							.sort((a, b) => (a.name ?? "").localeCompare(b.name ?? "")),
+						version: 1,
+						createdAt: now,
+						stageChangedAt: now,
+					};
+					// Like the API: the same id replays only with the same details.
+					const existing = list.find((d) => d.id === deal.id);
+					if (existing)
+						return JSON.stringify(existing.address) ===
+							JSON.stringify(deal.address) &&
+							existing.side === deal.side &&
+							existing.clients
+								.map((c) => c.id)
+								.sort()
+								.join() === input.clientIds.join()
+							? reply(200, { deal: existing })
+							: reply(409, { error: "conflict" });
+					state.deals = { ...state.deals, [org]: [...list, deal] };
+					if (next === "commit_then_abort") return route.abort("failed");
+					return reply(201, { deal });
+				}
+				if (method === "PATCH" && id) {
+					const next = state.dealPatchReplies?.shift();
+					if (next === "abort") return route.abort("failed");
+					if (next && next !== "commit_then_abort")
+						return reply(next.status, next.body);
+					const deal = list.find((d) => d.id === id);
+					if (!deal) return reply(404, { error: "not_found" });
+					const change = parseStageChange(body);
+					if (!change.ok)
+						return reply(400, { error: "invalid_stage", field: change.field });
+					if (deal.stage === change.stage) return reply(200, { deal });
+					if (deal.version !== change.version)
+						return reply(409, { error: "conflict", deal });
+					if (!canMoveDeal(deal.stage as DealStage, change.stage))
+						return reply(409, { error: "invalid_transition", deal });
+					deal.stage = change.stage;
+					deal.version += 1;
+					deal.stageChangedAt = new Date().toISOString();
+					if (next === "commit_then_abort") return route.abort("failed");
+					return reply(200, { deal });
+				}
 			}
 			const consentRoute =
 				/^\/v1\/organizations\/([^/]+)\/clients\/([^/]+)\/consents$/.exec(

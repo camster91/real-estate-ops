@@ -4,6 +4,7 @@ import { requireSession } from "../auth/guard.js";
 import { registerClientRoutes } from "./clients.js";
 import { registerConsentRoutes } from "./consents.js";
 import { inTenant, NOT_MEMBER } from "./context.js";
+import { registerDealRoutes } from "./deals.js";
 import { registerTaskRoutes } from "./tasks.js";
 
 interface BranchRow {
@@ -21,6 +22,7 @@ export async function registerTenantRoutes(
 	registerTaskRoutes(app, { pool });
 	registerClientRoutes(app, { pool });
 	registerConsentRoutes(app, { pool });
+	registerDealRoutes(app, { pool });
 
 	app.get(
 		"/v1/organizations/:organizationId/branches",
