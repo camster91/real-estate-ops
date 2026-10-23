@@ -47,6 +47,52 @@ const post = (
 		payload: body as Record<string, unknown>,
 	});
 
+const patch = (
+	id: string,
+	body: unknown,
+	token = tokenA,
+	headers: Record<string, string> = { origin: PUBLIC_URL },
+) =>
+	app.inject({
+		method: "PATCH",
+		url: `${clientsUrl(ids.orgA)}/${id}`,
+		cookies: { [SESSION_COOKIE]: token },
+		headers,
+		payload: body as Record<string, unknown>,
+	});
+
+const consents = (id: string, token = tokenA) =>
+	app.inject({
+		url: `${clientsUrl(ids.orgA)}/${id}/consents`,
+		cookies: { [SESSION_COOKIE]: token },
+	});
+
+const recordConsent = (
+	id: string,
+	body: unknown,
+	token = tokenA,
+	headers: Record<string, string> = { origin: PUBLIC_URL },
+) =>
+	app.inject({
+		method: "POST",
+		url: `${clientsUrl(ids.orgA)}/${id}/consents`,
+		cookies: { [SESSION_COOKIE]: token },
+		headers,
+		payload: body as Record<string, unknown>,
+	});
+
+/** A complete, valid edit at version 1. */
+const EDIT = { version: 1, name: "X", email: "", phone: "" };
+
+/** Adds a client for pa and returns its id. */
+const newClient = async (name = "Synthetic Editable") => {
+	const id = randomUUID();
+	expect(
+		(await post({ id, name, email: "edit@example.invalid" })).statusCode,
+	).toBe(201);
+	return id;
+};
+
 const countWhere = async (table: string, where: string, params: unknown[]) =>
 	(
 		await db.admin.query(
@@ -112,6 +158,7 @@ describe("client routes", () => {
 			phone: "4165550100",
 			version: 1,
 			createdAt: expect.any(String),
+			updatedAt: expect.any(String),
 		};
 		expect(created.json()).toEqual({ client });
 		const listed = await list();
@@ -142,7 +189,7 @@ describe("client routes", () => {
 			payload: { partyId: id },
 		});
 		for (const raw of [audit.rows[0].raw, events.rows[0].raw])
-			for (const secret of ["Synthetic", "example", "555"])
+			for (const secret of ["Synthetic", "example", "4165550100"])
 				expect(raw).not.toContain(secret);
 	});
 
@@ -266,6 +313,333 @@ describe("client routes", () => {
 		expect(await countWhere("party", "id = $1", [id])).toBe(0);
 	});
 
+	describe("editing", () => {
+		it("edits a client, bumps the version and audits without personal data", async () => {
+			const id = await newClient();
+			const response = await patch(id, {
+				version: 1,
+				name: "Secret Edited Name",
+				email: "",
+				phone: "(905) 555-0123",
+			});
+			expect(response.statusCode).toBe(200);
+			expect(response.headers["cache-control"]).toBe("no-store");
+			expect(response.json().client).toMatchObject({
+				id,
+				name: "Secret Edited Name",
+				email: null,
+				phone: "9055550123",
+				version: 2,
+			});
+			const audit = await db.admin.query(
+				"SELECT action, details, details::text AS raw FROM audit_event WHERE resource_id = $1 ORDER BY occurred_at",
+				[id],
+			);
+			expect(audit.rows).toHaveLength(2);
+			expect(audit.rows[1]).toMatchObject({
+				action: "party.update",
+				details: { fieldsChanged: 3 },
+			});
+			const events = await db.admin.query(
+				"SELECT event_type, aggregate_version, payload::text AS raw FROM outbox_event WHERE aggregate_id = $1 ORDER BY aggregate_version",
+				[id],
+			);
+			expect(events.rows[1]).toMatchObject({
+				event_type: "party.updated",
+				aggregate_version: 2,
+			});
+			for (const raw of [audit.rows[1].raw, events.rows[1].raw])
+				for (const secret of ["Secret", "9055550123", "example"])
+					expect(raw).not.toContain(secret);
+		});
+
+		it("saving the same details again is harmless", async () => {
+			const id = await newClient();
+			const body = {
+				version: 1,
+				name: "Same",
+				email: "same@example.invalid",
+				phone: "",
+			};
+			const first = await patch(id, body);
+			const again = await patch(id, body);
+			expect(again.statusCode).toBe(200);
+			expect(again.json()).toEqual(first.json());
+			expect(await countWhere("audit_event", "resource_id = $1", [id])).toBe(2);
+		});
+
+		it("a stale version is 409 with the current client", async () => {
+			const id = await newClient();
+			await patch(id, { version: 1, name: "First edit", email: "", phone: "" });
+			const stale = await patch(id, {
+				version: 1,
+				name: "Second edit",
+				email: "",
+				phone: "",
+			});
+			expect(stale.statusCode).toBe(409);
+			expect(stale.json()).toMatchObject({
+				error: "conflict",
+				client: { id, name: "First edit", version: 2 },
+			});
+		});
+
+		it("another member's client is 404", async () => {
+			const id = await newClient();
+			const response = await patch(id, { ...EDIT, name: "Hijack" }, tokenA2);
+			expect(response.statusCode).toBe(404);
+			expect(await countWhere("party", "id = $1 AND version = 1", [id])).toBe(
+				1,
+			);
+		});
+
+		it.each<[string, Record<string, unknown>, string]>([
+			["a bad name", { ...EDIT, name: "" }, "name"],
+			["a bad email", { ...EDIT, email: "nope" }, "email"],
+			["no version", { name: "X", email: "", phone: "" }, "body"],
+			["no email or phone", { version: 1, name: "X" }, "body"],
+			["a missing phone", { version: 1, name: "X", email: null }, "body"],
+			["an id in the body", { ...EDIT, id: randomUUID() }, "body"],
+		])("%s is 400", async (_label, body, field) => {
+			const response = await patch(await newClient(), body);
+			expect(response.statusCode).toBe(400);
+			expect(response.json()).toEqual({ error: "invalid_client", field });
+		});
+
+		it("a body without email and phone never clears them", async () => {
+			const id = await newClient();
+			expect((await patch(id, { version: 1, name: "X" })).statusCode).toBe(400);
+			expect(
+				await countWhere("party", "id = $1 AND email IS NOT NULL", [id]),
+			).toBe(1);
+		});
+
+		it("another organisation's member cannot edit or see consent", async () => {
+			const id = await newClient();
+			const tokenB = await signInAs(app, fake, "synthetic-b");
+			for (const org of [ids.orgA, ids.orgB]) {
+				const url = `${clientsUrl(org)}/${id}`;
+				const edit = await app.inject({
+					method: "PATCH",
+					url,
+					cookies: { [SESSION_COOKIE]: tokenB },
+					headers: { origin: PUBLIC_URL },
+					payload: { ...EDIT, name: "Cross" },
+				});
+				expect(edit.statusCode).toBe(404);
+				const read = await app.inject({
+					url: `${url}/consents`,
+					cookies: { [SESSION_COOKIE]: tokenB },
+				});
+				expect(read.statusCode).toBe(404);
+				const record = await app.inject({
+					method: "POST",
+					url: `${url}/consents`,
+					cookies: { [SESSION_COOKIE]: tokenB },
+					headers: { origin: PUBLIC_URL },
+					payload: {
+						id: randomUUID(),
+						purpose: "market_updates",
+						status: "granted",
+						method: "written",
+					},
+				});
+				expect(record.statusCode).toBe(404);
+			}
+			expect(await countWhere("party", "id = $1 AND version = 1", [id])).toBe(
+				1,
+			);
+			expect(await countWhere("consent_record", "party_id = $1", [id])).toBe(0);
+		});
+
+		it("a PATCH without Origin is 403", async () => {
+			expect(
+				(await patch(await newClient(), EDIT, tokenA, {})).statusCode,
+			).toBe(403);
+		});
+	});
+
+	describe("consent", () => {
+		it("starts with no consent for every purpose", async () => {
+			const id = await newClient();
+			const response = await consents(id);
+			expect(response.statusCode).toBe(200);
+			expect(response.headers["cache-control"]).toBe("no-store");
+			expect(response.json()).toEqual({
+				current: [
+					{
+						purpose: "transaction_service",
+						status: null,
+						method: null,
+						recordedAt: null,
+					},
+					{
+						purpose: "market_updates",
+						status: null,
+						method: null,
+						recordedAt: null,
+					},
+				],
+				history: [],
+			});
+		});
+
+		it("records a grant then a withdrawal; the latest is current; history keeps both", async () => {
+			const id = await newClient();
+			const grant = randomUUID();
+			const created = await recordConsent(id, {
+				id: grant,
+				purpose: "market_updates",
+				status: "granted",
+				method: "written",
+			});
+			expect(created.statusCode).toBe(201);
+			const withdrawn = await recordConsent(id, {
+				id: randomUUID(),
+				purpose: "market_updates",
+				status: "withdrawn",
+				method: "verbal",
+			});
+			expect(withdrawn.statusCode).toBe(201);
+			const body = (await consents(id)).json();
+			expect(body.current[1]).toMatchObject({
+				purpose: "market_updates",
+				status: "withdrawn",
+				method: "verbal",
+				recordedAt: expect.any(String),
+			});
+			expect(body.history.map((h: { status: string }) => h.status)).toEqual([
+				"withdrawn",
+				"granted",
+			]);
+			const audit = await db.admin.query(
+				"SELECT action, details FROM audit_event WHERE resource_id = $1",
+				[grant],
+			);
+			expect(audit.rows[0]).toMatchObject({
+				action: "consent.record",
+				details: {
+					purpose: "market_updates",
+					status: "granted",
+					method: "written",
+				},
+			});
+		});
+
+		it("current is the newest per purpose even beyond the history page", async () => {
+			const id = await newClient();
+			const record = (purpose: string, status: string) =>
+				recordConsent(id, {
+					id: randomUUID(),
+					purpose,
+					status,
+					method: "written",
+				});
+			expect(
+				(await record("transaction_service", "withdrawn")).statusCode,
+			).toBe(201);
+			for (let i = 0; i < 51; i++) await record("market_updates", "granted");
+			const body = (await consents(id)).json();
+			expect(body.history).toHaveLength(50);
+			expect(
+				body.history.some(
+					(h: { purpose: string }) => h.purpose === "transaction_service",
+				),
+			).toBe(false);
+			expect(body.current[0]).toMatchObject({
+				purpose: "transaction_service",
+				status: "withdrawn",
+			});
+		});
+
+		it("recording waits for the client's row lock, so commit order is time order", async () => {
+			const id = await newClient();
+			const locker = await db.admin.connect();
+			let settled = false;
+			try {
+				await locker.query("BEGIN");
+				await locker.query("SELECT 1 FROM party WHERE id = $1 FOR UPDATE", [
+					id,
+				]);
+				const pending = recordConsent(id, {
+					id: randomUUID(),
+					purpose: "market_updates",
+					status: "granted",
+					method: "written",
+				}).then((response) => {
+					settled = true;
+					return response;
+				});
+				await new Promise((wait) => setTimeout(wait, 300));
+				expect(settled).toBe(false);
+				const released = (await locker.query("SELECT clock_timestamp() AS t"))
+					.rows[0].t as Date;
+				await locker.query("COMMIT");
+				const response = await pending;
+				expect(response.statusCode).toBe(201);
+				expect(
+					new Date(response.json().consent.recordedAt).getTime(),
+				).toBeGreaterThanOrEqual(released.getTime());
+			} finally {
+				if (!settled) await locker.query("ROLLBACK").catch(() => {});
+				locker.release();
+			}
+		});
+
+		it("a retried record is harmless and a changed one conflicts", async () => {
+			const id = await newClient();
+			const body = {
+				id: randomUUID(),
+				purpose: "transaction_service",
+				status: "granted",
+				method: "electronic",
+			};
+			expect((await recordConsent(id, body)).statusCode).toBe(201);
+			expect((await recordConsent(id, body)).statusCode).toBe(200);
+			expect(
+				(await recordConsent(id, { ...body, status: "withdrawn" })).statusCode,
+			).toBe(409);
+			expect(await countWhere("consent_record", "id = $1", [body.id])).toBe(1);
+		});
+
+		it("another member cannot read or record consent for my client", async () => {
+			const id = await newClient();
+			expect((await consents(id, tokenA2)).statusCode).toBe(404);
+			const response = await recordConsent(
+				id,
+				{
+					id: randomUUID(),
+					purpose: "market_updates",
+					status: "granted",
+					method: "written",
+				},
+				tokenA2,
+			);
+			expect(response.statusCode).toBe(404);
+			expect(await countWhere("consent_record", "party_id = $1", [id])).toBe(0);
+		});
+
+		it.each<[string, Record<string, unknown>, string]>([
+			[
+				"an unknown purpose",
+				{ purpose: "spam", status: "granted", method: "written" },
+				"purpose",
+			],
+			[
+				"an unknown method",
+				{ purpose: "market_updates", status: "granted", method: "guess" },
+				"method",
+			],
+		])("%s is 400", async (_label, fields, field) => {
+			const response = await recordConsent(await newClient(), {
+				id: randomUUID(),
+				...fields,
+			});
+			expect(response.statusCode).toBe(400);
+			expect(response.json()).toEqual({ error: "invalid_consent", field });
+		});
+	});
+
 	it("logs carry no names, emails, phones or ids", async () => {
 		const lines: string[] = [];
 		const write = vi
@@ -277,6 +651,7 @@ describe("client routes", () => {
 		const shared = app;
 		app = buildApp();
 		const id = randomUUID();
+		const consentId = randomUUID();
 		try {
 			await post({
 				id,
@@ -287,6 +662,20 @@ describe("client routes", () => {
 			await list();
 			await detail(id);
 			await post({ id, name: "Different" });
+			await patch(id, {
+				version: 1,
+				name: "Secret Edited Name",
+				email: "",
+				phone: "9055550123",
+			});
+			await patch(id, { ...EDIT, name: "Stale Secret" });
+			await consents(id);
+			await recordConsent(id, {
+				id: consentId,
+				purpose: "market_updates",
+				status: "granted",
+				method: "written",
+			});
 		} finally {
 			write.mockRestore();
 			await app.close();
@@ -298,7 +687,11 @@ describe("client routes", () => {
 			"Secret Synthetic Name",
 			"secret@example.invalid",
 			"6475550199",
+			"Secret Edited Name",
+			"Stale Secret",
+			"9055550123",
 			id,
+			consentId,
 			ids.orgA,
 			tokenA,
 		])

@@ -34,6 +34,17 @@ export interface MockClient {
 	createdAt: string;
 }
 
+export interface MockConsent {
+	id: string;
+	purpose: string;
+	status: string;
+	method: string;
+	recordedAt: string;
+}
+
+// Same purposes as @reo/domain CONSENT_PURPOSES (ADR 0020).
+const PURPOSES = ["transaction_service", "market_updates"];
+
 export interface MockState {
 	/** Signed out, or the session's memberships. */
 	session: "signed_out" | { organizationId: string; name: string }[];
@@ -55,6 +66,12 @@ export interface MockState {
 	clientReplies?: Reply[];
 	/** The client list says there are more than it returned. */
 	clientsMore?: boolean;
+	/** Replies for the next client edits, in order; then the normal rules. */
+	clientPatchReplies?: Reply[];
+	/** Per client id: consent history, newest first, or how the read fails. */
+	consents?: Record<string, MockConsent[] | "error">;
+	/** Replies for the next consent recordings, in order; then a normal success. */
+	consentReplies?: Reply[];
 	/** Every API request, for assertions. */
 	requests: { method: string; path: string; body: unknown }[];
 }
@@ -103,6 +120,56 @@ export async function mockApi(page: Page, state: MockState): Promise<void> {
 				state.session = "signed_out";
 				return reply(204);
 			}
+			const consentRoute =
+				/^\/v1\/organizations\/([^/]+)\/clients\/([^/]+)\/consents$/.exec(
+					url.pathname,
+				);
+			if (consentRoute) {
+				const org = decodeURIComponent(consentRoute[1] as string);
+				const list = state.clients?.[org];
+				const id = consentRoute[2] as string;
+				if (!Array.isArray(list) || !list.some((c) => c.id === id))
+					return reply(404, { error: "not_found" });
+				const history = state.consents?.[id] ?? [];
+				if (method === "GET") {
+					if (history === "error") return reply(500, { error: "internal" });
+					return reply(200, {
+						current: PURPOSES.map((purpose) => {
+							const latest = history.find((c) => c.purpose === purpose);
+							return {
+								purpose,
+								status: latest?.status ?? null,
+								method: latest?.method ?? null,
+								recordedAt: latest?.recordedAt ?? null,
+							};
+						}),
+						history,
+					});
+				}
+				if (method === "POST") {
+					const next = state.consentReplies?.shift();
+					if (next === "abort") return route.abort("failed");
+					if (next && next !== "commit_then_abort")
+						return reply(next.status, next.body);
+					const input = body as Omit<MockConsent, "recordedAt">;
+					const known = Array.isArray(history)
+						? history.find((c) => c.id === input.id)
+						: undefined;
+					if (known)
+						return known.purpose === input.purpose &&
+							known.status === input.status &&
+							known.method === input.method
+							? reply(200, { consent: known })
+							: reply(409, { error: "conflict" });
+					const consent = { ...input, recordedAt: new Date().toISOString() };
+					state.consents = {
+						...state.consents,
+						[id]: [consent, ...(Array.isArray(history) ? history : [])],
+					};
+					if (next === "commit_then_abort") return route.abort("failed");
+					return reply(201, { consent });
+				}
+			}
 			const clientRoute =
 				/^\/v1\/organizations\/([^/]+)\/clients(?:\/([^/]+))?$/.exec(
 					url.pathname,
@@ -119,6 +186,40 @@ export async function mockApi(page: Page, state: MockState): Promise<void> {
 					return found
 						? reply(200, { client: found })
 						: reply(404, { error: "not_found" });
+				}
+				if (method === "PATCH" && clientRoute[2]) {
+					const next = state.clientPatchReplies?.shift();
+					if (next === "abort") return route.abort("failed");
+					if (next && next !== "commit_then_abort")
+						return reply(next.status, next.body);
+					const found = list.find((c) => c.id === clientRoute[2]);
+					if (!found) return reply(404, { error: "not_found" });
+					const change = body as {
+						version: number;
+						name: string;
+						email: string;
+						phone: string;
+					};
+					const updated = {
+						name: change.name.trim(),
+						email: change.email.trim()
+							? change.email.trim().toLowerCase()
+							: null,
+						phone: change.phone.trim()
+							? change.phone.replace(/[\s.()-]/g, "")
+							: null,
+					};
+					if (
+						updated.name === found.name &&
+						updated.email === found.email &&
+						updated.phone === found.phone
+					)
+						return reply(200, { client: found });
+					if (found.version !== change.version)
+						return reply(409, { error: "conflict", client: found });
+					Object.assign(found, updated, { version: found.version + 1 });
+					if (next === "commit_then_abort") return route.abort("failed");
+					return reply(200, { client: found });
 				}
 				if (method === "GET") {
 					if (state.listDelay)

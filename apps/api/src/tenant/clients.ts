@@ -1,5 +1,10 @@
 import { recordChange } from "@reo/db";
-import { type NewClient, parseNewClient } from "@reo/domain";
+import {
+	type ClientUpdate,
+	type NewClient,
+	parseClientUpdate,
+	parseNewClient,
+} from "@reo/domain";
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import type pg from "pg";
 import { requireSession } from "../auth/guard.js";
@@ -12,12 +17,15 @@ interface PartyRow {
 	phone: string | null;
 	version: number;
 	created_at: Date;
+	updated_at: Date;
 }
 
 const PURPOSE = "operations";
 const LIST_LIMIT = 100;
-const COLUMNS = "id, display_name, email, phone, version, created_at";
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const COLUMNS =
+	"id, display_name, email, phone, version, created_at, updated_at";
+export const UUID =
+	/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const toClient = (row: PartyRow) => ({
 	id: row.id,
@@ -26,7 +34,12 @@ const toClient = (row: PartyRow) => ({
 	phone: row.phone,
 	version: row.version,
 	createdAt: row.created_at.toISOString(),
+	updatedAt: row.updated_at.toISOString(),
 });
+
+type EditOutcome =
+	| { kind: "changed" | "unchanged" | "conflict"; row: PartyRow }
+	| { kind: "missing" };
 
 type CreateOutcome =
 	| { kind: "created" | "replayed"; row: PartyRow }
@@ -34,7 +47,7 @@ type CreateOutcome =
 
 // Membership can end between inTenant's check and the insert; RLS (42501) or
 // the membership FK (23503) then refuses the row: "not a member", not a 500.
-const MEMBERSHIP_LOST = new Set(["42501", "23503"]);
+export const MEMBERSHIP_LOST = new Set(["42501", "23503"]);
 
 /** "My clients": list, add and view the caller's own clients (ADR 0019). */
 export function registerClientRoutes(
@@ -120,6 +133,102 @@ export function registerClientRoutes(
 				.send({ client: toClient(result.row) });
 		},
 	);
+
+	app.patch(
+		"/v1/organizations/:organizationId/clients/:clientId",
+		{ preHandler: requireSession(pool), bodyLimit: 4096 },
+		async (request, reply) => {
+			reply.header("cache-control", "no-store");
+			const { clientId } = request.params as { clientId: string };
+			if (!UUID.test(clientId))
+				return reply.code(404).send({ error: "not_found" });
+			const parsed = parseClientUpdate(request.body);
+			if (!parsed.ok)
+				return reply
+					.code(400)
+					.send({ error: "invalid_client", field: parsed.field });
+			const result = await edit(
+				pool,
+				request,
+				clientId.toLowerCase(),
+				parsed.update,
+			);
+			if (result === NOT_MEMBER || result.kind === "missing")
+				return reply.code(404).send({ error: "not_found" });
+			if (result.kind === "conflict")
+				return reply
+					.code(409)
+					.send({ error: "conflict", client: toClient(result.row) });
+			return { client: toClient(result.row) };
+		},
+	);
+}
+
+/**
+ * One edit in one transaction: lock the caller's own client, then replay,
+ * refuse a stale version, or apply it with its audit row and event.
+ */
+async function edit(
+	pool: pg.Pool,
+	request: FastifyRequest,
+	clientId: string,
+	update: ClientUpdate,
+): Promise<EditOutcome | typeof NOT_MEMBER> {
+	try {
+		return await inTenant(
+			pool,
+			request,
+			PURPOSE,
+			async ({ client, context }): Promise<EditOutcome> => {
+				const current = (
+					await client.query<PartyRow>(
+						`SELECT ${COLUMNS} FROM party
+							WHERE id = $1 AND assigned_principal_id = $2
+							FOR UPDATE`,
+						[clientId, context.principalId],
+					)
+				).rows[0];
+				if (!current) return { kind: "missing" };
+				const changed = [
+					current.display_name !== update.name,
+					current.email !== update.email,
+					current.phone !== update.phone,
+				].filter(Boolean).length;
+				// Already saved: a retried request, whatever version it carried.
+				if (changed === 0) return { kind: "unchanged", row: current };
+				if (current.version !== update.version)
+					return { kind: "conflict", row: current };
+				const updated = (
+					await client.query<PartyRow>(
+						`UPDATE party SET display_name = $2, email = $3, phone = $4,
+								version = version + 1
+							WHERE id = $1
+							RETURNING ${COLUMNS}`,
+						[clientId, update.name, update.email, update.phone],
+					)
+				).rows[0];
+				if (!updated) return { kind: "missing" };
+				// A count only: field names and values stay out of history.
+				await recordChange(client, {
+					action: "party.update",
+					resourceType: "party",
+					resourceId: clientId,
+					details: { fieldsChanged: changed },
+					event: {
+						type: "party.updated",
+						schemaVersion: 1,
+						aggregateVersion: updated.version,
+						payload: { partyId: clientId },
+					},
+				});
+				return { kind: "changed", row: updated };
+			},
+		);
+	} catch (error) {
+		if (MEMBERSHIP_LOST.has((error as { code?: string }).code ?? ""))
+			return NOT_MEMBER;
+		throw error;
+	}
 }
 
 async function createOrReplay(

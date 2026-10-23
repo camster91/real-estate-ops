@@ -75,9 +75,9 @@ Status: Implemented for synthetic data. This is pilot slice 1 (`docs/roadmap/PIL
 
 ## Not done
 
-- Editing and deleting clients.
+- Editing clients (done in ADR 0020) and deleting them.
 - Companies.
-- Contact points with consent (slice 2).
+- Contact points (deferred; consent is per purpose, ADR 0020).
 - Search.
 - Duplicate detection.
 - Assigning clients to others.

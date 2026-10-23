@@ -1,8 +1,20 @@
 export {
+	type ClientUpdate,
+	CONSENT_METHODS,
+	CONSENT_PURPOSE_LABELS,
+	CONSENT_PURPOSES,
+	CONSENT_STATUSES,
+	CONSENT_WORDING_IS_PLACEHOLDER,
+	type ConsentMethod,
+	type ConsentPurpose,
+	type ConsentRecord,
+	type ConsentStatus,
 	EMAIL_MAX,
 	NAME_MAX,
 	type NewClient,
 	type NewClientResult,
+	parseClientUpdate,
+	parseConsentRecord,
 	parseNewClient,
 } from "./client.js";
 export {
