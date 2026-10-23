@@ -142,11 +142,17 @@ export async function changeStatus(
 	}
 }
 
-export async function signOut(): Promise<void> {
+/** Ends the session. False when the server could not confirm it. */
+export async function signOut(): Promise<boolean> {
 	try {
-		await fetch("/auth/logout", { ...options, method: "POST" });
+		const response = await fetch("/auth/logout", {
+			...options,
+			method: "POST",
+		});
+		// 401: the session had already ended.
+		return response.ok || response.status === 401;
 	} catch {
-		// The page goes to sign-in either way.
+		return false;
 	}
 }
 

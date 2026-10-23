@@ -10,6 +10,11 @@ import {
 	tabTo,
 } from "./mock-api";
 
+// Due dates show the year only outside the current year; pin "today".
+test.beforeEach(async ({ page }) => {
+	await page.clock.setFixedTime(new Date("2026-10-23T12:00:00Z"));
+});
+
 const TASKS = `/o/${ORG_A}/tasks`;
 const TITLE = "Synthetic status task";
 
@@ -182,6 +187,54 @@ test("reopen focuses the reopened task", async ({ page }) => {
 	await expectFocusRing(
 		page.getByRole("combobox", { name: `Status of ${TITLE}` }),
 	);
+});
+
+test("a task finished while the done list loads still appears", async ({
+	page,
+}) => {
+	const state = newState({ tasks: { [ORG_A]: [task()] } });
+	const select = await open(page, state);
+	state.listDelay = 1500;
+	await page.getByRole("button", { name: "Show done tasks" }).click();
+	await expect(page.getByText("Loading done tasks…")).toBeVisible();
+	await select.selectOption("completed");
+	await expect(live(page)).toHaveText("Task marked done.");
+	const done = page.getByRole("list", { name: "Done tasks" });
+	await expect(done).toContainText(TITLE, { timeout: 5000 });
+});
+
+test("tasks with the same title get distinct names", async ({ page }) => {
+	const twin = task({ id: "6d5e4f30-8b72-4d6e-9f50-4b3c2d1e0f9a" });
+	await mockApi(page, newState({ tasks: { [ORG_A]: [task(), twin] } }));
+	await page.goto(TASKS);
+	await expect(
+		page.getByRole("combobox", { name: `Status of ${TITLE} (1 of 2)` }),
+	).toBeVisible();
+	await expect(
+		page.getByRole("combobox", { name: `Status of ${TITLE} (2 of 2)` }),
+	).toBeVisible();
+});
+
+test("a later change clears old row messages", async ({ page }) => {
+	const other = task({
+		id: "7e6f5a41-9c83-4e7f-a061-5c4d3e2f1a0b",
+		title: "Synthetic other task",
+	});
+	const state = newState({
+		tasks: { [ORG_A]: [task(), other] },
+		patchReplies: ["abort"],
+	});
+	const select = await open(page, state);
+	await select.selectOption("waiting");
+	const message = page.getByText(
+		"The status could not be changed. Please try again.",
+	);
+	await expect(message).toBeVisible();
+	await page
+		.getByRole("combobox", { name: "Status of Synthetic other task" })
+		.selectOption("blocked");
+	await expect(live(page)).toHaveText("Status changed to Blocked.");
+	await expect(message).toHaveCount(0);
 });
 
 test("in flight", async ({ page }) => {

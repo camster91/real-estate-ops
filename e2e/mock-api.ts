@@ -38,6 +38,8 @@ export interface MockState {
 	patchReplies: Reply[];
 	/** Delay for status changes, in milliseconds. */
 	patchDelay?: number;
+	/** Status for POST /auth/logout; 204 (signed out) when unset. */
+	logoutStatus?: number;
 	/** Every API request, for assertions. */
 	requests: { method: string; path: string; body: unknown }[];
 }
@@ -81,6 +83,8 @@ export async function mockApi(page: Page, state: MockState): Promise<void> {
 							memberships: state.session,
 						});
 			if (url.pathname === "/auth/logout" && method === "POST") {
+				if (state.logoutStatus && state.logoutStatus !== 204)
+					return reply(state.logoutStatus, { error: "internal" });
 				state.session = "signed_out";
 				return reply(204);
 			}
@@ -116,20 +120,27 @@ export async function mockApi(page: Page, state: MockState): Promise<void> {
 				const org = decodeURIComponent(tasks[1] as string);
 				const list = state.tasks[org] ?? "not_found";
 				if (method === "GET") {
+					// The reply is what the list held when the request arrived, even
+					// if it is delayed: a slow response can be out of date.
+					const done = url.searchParams.get("show") === "done";
+					const snapshot =
+						typeof list === "string"
+							? list
+							: list
+									.filter((t) => DONE.includes(t.status) === done)
+									.map((t) => ({ ...t }))
+									.sort((a, b) =>
+										done
+											? b.statusChangedAt.localeCompare(a.statusChangedAt)
+											: 0,
+									);
 					if (state.listDelay)
-						await new Promise((done) => setTimeout(done, state.listDelay));
-					if (typeof list === "string") {
-						const failure = LIST_FAILURES[list];
+						await new Promise((wait) => setTimeout(wait, state.listDelay));
+					if (typeof snapshot === "string") {
+						const failure = LIST_FAILURES[snapshot];
 						return reply(failure.status, failure.body);
 					}
-					const done = url.searchParams.get("show") === "done";
-					return reply(200, {
-						tasks: list
-							.filter((t) => DONE.includes(t.status) === done)
-							.sort((a, b) =>
-								done ? b.statusChangedAt.localeCompare(a.statusChangedAt) : 0,
-							),
-					});
+					return reply(200, { tasks: snapshot });
 				}
 				if (method === "POST") {
 					const next = state.createReplies.shift();

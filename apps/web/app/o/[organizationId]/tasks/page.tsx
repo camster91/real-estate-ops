@@ -79,6 +79,7 @@ export default function MyTasks() {
 	const [messages, setMessages] = useState<Record<string, RowMessage>>({});
 	// A page-level notice for a task that moved lists because of another window.
 	const [notice, setNotice] = useState<string>();
+	const [signOutFailed, setSignOutFailed] = useState(false);
 	// The element to focus after a row moves between lists, so keyboard and
 	// screen-reader users are not dropped back at the top of the page.
 	const [focusTarget, setFocusTarget] = useState<string | null>(null);
@@ -172,11 +173,23 @@ export default function MyTasks() {
 		setAnnouncement("Task added.");
 	};
 
+	// Tasks that changed list while the done list was loading: the response
+	// may predate them, so they are merged in when it arrives.
+	const movedWhileLoading = useRef(new Map<string, Task>());
+
 	const loadDone = useCallback(async () => {
+		movedWhileLoading.current.clear();
 		setDone("loading");
 		const result = await listTasks(organizationId, "done");
 		if (result === "signed_out") return router.replace("/");
-		setDone(Array.isArray(result) ? result : "error");
+		if (!Array.isArray(result)) return setDone("error");
+		let merged = result;
+		for (const task of movedWhileLoading.current.values()) {
+			merged = without(merged, task.id);
+			if (isDone(task.status)) merged = [task, ...merged];
+		}
+		movedWhileLoading.current.clear();
+		setDone(merged);
 	}, [organizationId, router]);
 
 	const toggleDone = () => {
@@ -191,6 +204,7 @@ export default function MyTasks() {
 			const rest = without(current, task.id);
 			return isDone(task.status) ? rest : [...rest, task].sort(byDue);
 		});
+		if (done === "loading") movedWhileLoading.current.set(task.id, task);
 		setDone((current) => {
 			if (!Array.isArray(current)) return current;
 			const rest = without(current, task.id);
@@ -202,7 +216,8 @@ export default function MyTasks() {
 		if (busy.has(task.id)) return;
 		setBusy((current) => new Set(current).add(task.id));
 		setPending((current) => ({ ...current, [task.id]: status }));
-		setMessages(({ [task.id]: _, ...rest }) => rest);
+		// A new change replaces any earlier row message, on any row.
+		setMessages({});
 		setNotice(undefined);
 		setAnnouncement("");
 		const result = await changeStatus(
@@ -260,8 +275,10 @@ export default function MyTasks() {
 	};
 
 	const leave = async () => {
-		await signOut();
-		router.replace("/");
+		setSignOutFailed(false);
+		// On a shared computer, never pretend the session ended when it did not.
+		if (await signOut()) router.replace("/");
+		else setSignOutFailed(true);
 	};
 
 	return (
@@ -277,6 +294,11 @@ export default function MyTasks() {
 			</header>
 			<main id="main" tabIndex={-1}>
 				<h1>My tasks</h1>
+				{signOutFailed && (
+					<p role="alert" className="notice">
+						Sign-out did not complete. Please try again.
+					</p>
+				)}
 				{load === "loading" && <p role="status">Loading tasks…</p>}
 				{load === "error" && (
 					<div role="alert" className="notice">

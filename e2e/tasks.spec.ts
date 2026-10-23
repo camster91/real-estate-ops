@@ -9,6 +9,11 @@ import {
 	tabTo,
 } from "./mock-api";
 
+// Due dates show the year only outside the current year; pin "today".
+test.beforeEach(async ({ page }) => {
+	await page.clock.setFixedTime(new Date("2026-10-23T12:00:00Z"));
+});
+
 const TASKS = `/o/${ORG_A}/tasks`;
 const UUID =
 	/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
@@ -275,6 +280,42 @@ test("brokerage not available", async ({ page }) => {
 	await expect(
 		alert.getByRole("link", { name: "Switch brokerage" }),
 	).toHaveAttribute("href", "/?choose=1");
+});
+
+test("a due date in another year shows the year", async ({ page }) => {
+	await mockApi(
+		page,
+		newState({
+			tasks: {
+				[ORG_A]: [
+					{
+						id: "5c4d3e2f-7a61-4c5d-8e4f-3a2b1c0d9e8f",
+						title: "Synthetic renewal",
+						status: "ready",
+						dueAt: "2027-01-15T14:00:00.000Z",
+						version: 1,
+						statusChangedAt: "2026-10-20T14:00:00.000Z",
+					},
+				],
+			},
+		}),
+	);
+	await page.goto(TASKS);
+	await expect(page.getByRole("list", { name: "Tasks" })).toContainText(
+		/Fri, Jan 15, 2027, 9:00\sa\.m\./,
+	);
+});
+
+test("a failed sign-out says so and stays", async ({ page }) => {
+	const state = newState({ logoutStatus: 500 });
+	await mockApi(page, state);
+	await page.goto(TASKS);
+	await expect(page.getByText("No open tasks.")).toBeVisible();
+	await page.getByRole("button", { name: "Sign out" }).click();
+	await expect(page.getByRole("main").getByRole("alert")).toHaveText(
+		"Sign-out did not complete. Please try again.",
+	);
+	await expect(page).toHaveURL(TASKS);
 });
 
 test("sign out", async ({ page }) => {

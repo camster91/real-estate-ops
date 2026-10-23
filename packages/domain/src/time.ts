@@ -93,14 +93,29 @@ export function toOffsetIso(date: Date, timeZone: string): string {
 	return `${wall}${sign}${pad(Math.floor(minutes / 60))}:${pad(minutes % 60)}`;
 }
 
-/** A date and time for people to read, e.g. "Sun, Nov 1, 9:00 a.m.". */
-export function formatInZone(iso: string, timeZone: string): string {
+const yearIn = (date: Date, timeZone: string) =>
+	new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric" }).format(date);
+
+/**
+ * A date and time for people to read, e.g. "Sun, Nov 1, 9:00 a.m.". The year
+ * is added when it differs from the current year in that zone, e.g.
+ * "Fri, Jan 1, 2027, 9:00 a.m.".
+ */
+export function formatInZone(
+	iso: string,
+	timeZone: string,
+	now: Date = new Date(),
+): string {
+	const date = new Date(iso);
 	return new Intl.DateTimeFormat("en-CA", {
 		timeZone,
 		weekday: "short",
 		month: "short",
 		day: "numeric",
+		...(yearIn(date, timeZone) === yearIn(now, timeZone)
+			? {}
+			: { year: "numeric" }),
 		hour: "numeric",
 		minute: "2-digit",
-	}).format(new Date(iso));
+	}).format(date);
 }

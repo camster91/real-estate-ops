@@ -15,6 +15,28 @@ export const STATUS_LABELS: Record<string, string> = {
 
 const STATUS_CHOICES = [...OPEN_STATUSES, "completed", "cancelled"] as const;
 
+/**
+ * Accessible names for tasks: the title, or "<title> (2 of 3)" when several
+ * tasks share it, so screen-reader users can tell the controls apart.
+ */
+function namesFor(tasks: Task[]): Map<string, string> {
+	const total = new Map<string, number>();
+	for (const task of tasks)
+		total.set(task.title, (total.get(task.title) ?? 0) + 1);
+	const seen = new Map<string, number>();
+	const names = new Map<string, string>();
+	for (const task of tasks) {
+		const count = total.get(task.title) ?? 1;
+		const index = (seen.get(task.title) ?? 0) + 1;
+		seen.set(task.title, index);
+		names.set(
+			task.id,
+			count > 1 ? `${task.title} (${index} of ${count})` : task.title,
+		);
+	}
+	return names;
+}
+
 /** A short message shown under one task, e.g. after a conflict. */
 export interface RowMessage {
 	text: string;
@@ -51,6 +73,7 @@ export function OpenTasks(props: {
 }) {
 	const { tasks, busy, pending, messages, onChange } = props;
 	if (tasks.length === 0) return <p>No open tasks. Add a task below.</p>;
+	const names = namesFor(tasks);
 	return (
 		<ul className="tasks" aria-label="Tasks">
 			{tasks.map((task) => {
@@ -64,7 +87,7 @@ export function OpenTasks(props: {
 						<select
 							id={`status-${task.id}`}
 							className="status"
-							aria-label={`Status of ${task.title}`}
+							aria-label={`Status of ${names.get(task.id)}`}
 							value={pending[task.id] ?? task.status}
 							disabled={busy.has(task.id)}
 							aria-describedby={messages[task.id] ? messageId : undefined}
@@ -103,6 +126,7 @@ export function DoneTasks(props: {
 			</div>
 		);
 	if (state.length === 0) return <p>No done tasks yet.</p>;
+	const names = namesFor(state);
 	return (
 		<ul className="tasks done" aria-label="Done tasks">
 			{state.map((task) => {
@@ -118,7 +142,7 @@ export function DoneTasks(props: {
 						<button
 							type="button"
 							className="link"
-							aria-label={`Reopen ${task.title}`}
+							aria-label={`Reopen ${names.get(task.id)}`}
 							disabled={busy.has(task.id)}
 							aria-describedby={messages[task.id] ? messageId : undefined}
 							onClick={() => onReopen(task)}

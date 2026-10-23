@@ -70,6 +70,13 @@ Task JSON now includes `statusChangedAt`.
 - `e2e/status.spec.ts`, at 390, 768 and 1440 px: change, finishing the last task, reopen, a conflict from another window, in flight, error, session ended and keyboard use.
   - Mutation checks: removing the in-flight lock fails "in flight"; skipping the conflict update fails "two tabs".
 
+## Follow-up fixes (23 October 2026)
+
+- A task that changes list while the done list is loading is merged into the response, so it never goes missing.
+- When two tasks share a title, their controls are named "<title> (1 of 2)" and so on.
+- A new status change clears earlier row messages.
+- If sign-out fails, the page says "Sign-out did not complete. Please try again." and stays put, instead of showing sign-in while the session is still live.
+
 ## Not done
 
 - Reasons for Waiting and Blocked.
