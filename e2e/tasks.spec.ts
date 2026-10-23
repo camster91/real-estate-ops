@@ -153,7 +153,7 @@ test("server rejects the title", async ({ page }) => {
 	await mockApi(page, state);
 	await page.goto(TASKS);
 	const title = page.getByLabel("Title");
-	await title.fill("Synthetic​title");
+	await title.fill("Synthetic\u200btitle");
 	await page.getByRole("button", { name: "Add task" }).click();
 	const message = page.getByText(
 		"Enter a title of 1 to 200 characters without line breaks.",
@@ -162,7 +162,7 @@ test("server rejects the title", async ({ page }) => {
 	await expect(title).toHaveAttribute("aria-invalid", "true");
 	await expect(title).toHaveAttribute("aria-describedby", "title-error");
 	await expectFocusRing(title);
-	await expect(title).toHaveValue("Synthetic​title");
+	await expect(title).toHaveValue("Synthetic\u200btitle");
 	await expectNoHorizontalScroll(page);
 });
 
@@ -312,7 +312,7 @@ test("a failed sign-out says so and stays", async ({ page }) => {
 	await page.goto(TASKS);
 	await expect(page.getByText("No open tasks.")).toBeVisible();
 	await page.getByRole("button", { name: "Sign out" }).click();
-	await expect(page.getByRole("main").getByRole("alert")).toHaveText(
+	await expect(page.getByRole("banner").getByRole("alert")).toHaveText(
 		"Sign-out did not complete. Please try again.",
 	);
 	await expect(page).toHaveURL(TASKS);

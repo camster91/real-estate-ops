@@ -173,3 +173,105 @@ export function rememberedOrganization(): string | null {
 		return null;
 	}
 }
+
+export interface Client {
+	id: string;
+	name: string;
+	email: string | null;
+	phone: string | null;
+	version: number;
+	createdAt: string;
+}
+
+export interface NewClientBody {
+	id: string;
+	name: string;
+	email?: string;
+	phone?: string;
+}
+
+export type CreateClientResult =
+	| { client: Client }
+	| { invalid: string }
+	| "signed_out"
+	| "not_found"
+	| "conflict"
+	| "error";
+
+const clientsPath = (organizationId: string) =>
+	`/v1/organizations/${encodeURIComponent(organizationId)}/clients`;
+
+/** The first 100 clients A to Z; `more` says there are others not shown. */
+export async function listClients(
+	organizationId: string,
+): Promise<
+	{ clients: Client[]; more: boolean } | "signed_out" | "not_found" | "error"
+> {
+	try {
+		const response = await fetch(clientsPath(organizationId), options);
+		if (response.status === 401) return "signed_out";
+		if (response.status === 404) return "not_found";
+		if (!response.ok) return "error";
+		const body = (await json(response)) as
+			| { clients?: Client[]; more?: boolean }
+			| undefined;
+		return Array.isArray(body?.clients)
+			? { clients: body.clients, more: body.more === true }
+			: "error";
+	} catch {
+		return "error";
+	}
+}
+
+export async function getClient(
+	organizationId: string,
+	clientId: string,
+): Promise<Client | "signed_out" | "not_found" | "error"> {
+	try {
+		const response = await fetch(
+			`${clientsPath(organizationId)}/${encodeURIComponent(clientId)}`,
+			options,
+		);
+		if (response.status === 401) return "signed_out";
+		if (response.status === 404) return "not_found";
+		if (!response.ok) return "error";
+		const body = (await json(response)) as { client?: Client } | undefined;
+		return body?.client ?? "error";
+	} catch {
+		return "error";
+	}
+}
+
+export async function createClient(
+	organizationId: string,
+	client: NewClientBody,
+): Promise<CreateClientResult> {
+	try {
+		const response = await fetch(clientsPath(organizationId), {
+			...options,
+			method: "POST",
+			headers: { "content-type": "application/json" },
+			body: JSON.stringify(client),
+		});
+		if (response.status === 401) return "signed_out";
+		if (response.status === 404) return "not_found";
+		if (response.status === 409) return "conflict";
+		const body = (await json(response)) as
+			| { client?: Client; error?: string; field?: string }
+			| undefined;
+		if (response.status === 400 && body?.error === "invalid_client")
+			return { invalid: body.field ?? "body" };
+		if (response.ok && body?.client) return { client: body.client };
+		return "error";
+	} catch {
+		return "error";
+	}
+}
+
+/** "(416) 555-0100" for 10-digit North American numbers; otherwise as stored. */
+export function formatPhone(phone: string): string {
+	const digits = phone.startsWith("+1") ? phone.slice(2) : phone;
+	if (/^\d{10}$/.test(digits))
+		return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+	return phone;
+}
