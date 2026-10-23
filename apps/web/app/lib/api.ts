@@ -523,3 +523,88 @@ export async function changeStage(
 		return "error";
 	}
 }
+
+export interface KeyDate {
+	id: string;
+	kind: string;
+	label: string | null;
+	dueAt: string;
+	doneAt: string | null;
+	version: number;
+}
+
+export interface NewKeyDateBody {
+	id: string;
+	kind: string;
+	label?: string;
+	dueAt: string;
+}
+
+export interface KeyDateUpdateBody {
+	version: number;
+	label: string | null;
+	dueAt: string;
+	done: boolean;
+}
+
+export type SaveKeyDateResult =
+	| { keyDate: KeyDate }
+	| { conflict: KeyDate }
+	| { invalid: string }
+	| "signed_out"
+	| "not_found"
+	| "conflict"
+	| "error";
+
+const keyDatesPath = (organizationId: string, dealId: string) =>
+	`${dealsPath(organizationId)}/${encodeURIComponent(dealId)}/key-dates`;
+
+export async function listKeyDates(
+	organizationId: string,
+	dealId: string,
+): Promise<KeyDate[] | "signed_out" | "not_found" | "error"> {
+	try {
+		const response = await fetch(keyDatesPath(organizationId, dealId), options);
+		if (response.status === 401) return "signed_out";
+		if (response.status === 404) return "not_found";
+		if (!response.ok) return "error";
+		const body = (await json(response)) as { keyDates?: KeyDate[] } | undefined;
+		return Array.isArray(body?.keyDates) ? body.keyDates : "error";
+	} catch {
+		return "error";
+	}
+}
+
+/** Adds (POST) or changes (PATCH, with `keyDateId`) a key date. */
+export async function saveKeyDate(
+	organizationId: string,
+	dealId: string,
+	body: NewKeyDateBody | KeyDateUpdateBody,
+	keyDateId?: string,
+): Promise<SaveKeyDateResult> {
+	try {
+		const base = keyDatesPath(organizationId, dealId);
+		const response = await fetch(
+			keyDateId ? `${base}/${encodeURIComponent(keyDateId)}` : base,
+			{
+				...options,
+				method: keyDateId ? "PATCH" : "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify(body),
+			},
+		);
+		if (response.status === 401) return "signed_out";
+		if (response.status === 404) return "not_found";
+		const parsed = (await json(response)) as
+			| { keyDate?: KeyDate; error?: string; field?: string }
+			| undefined;
+		if (response.status === 409)
+			return parsed?.keyDate ? { conflict: parsed.keyDate } : "conflict";
+		if (response.status === 400 && parsed?.error === "invalid_key_date")
+			return { invalid: parsed.field ?? "body" };
+		if (response.ok && parsed?.keyDate) return { keyDate: parsed.keyDate };
+		return "error";
+	} catch {
+		return "error";
+	}
+}

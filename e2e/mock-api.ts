@@ -9,6 +9,11 @@ import {
 	parseNewDeal,
 	parseStageChange,
 } from "../packages/domain/src/deal";
+import {
+	needsLabel,
+	parseKeyDateUpdate,
+	parseNewKeyDate,
+} from "../packages/domain/src/keydate";
 
 export const ORG_A = "0b9c2e1a-1d2f-4c3b-8a9e-1f2e3d4c5b6a";
 export const ORG_B = "5d6e7f80-1a2b-4c3d-8e9f-0a1b2c3d4e5f";
@@ -68,6 +73,15 @@ export interface MockDeal {
 	stageChangedAt: string;
 }
 
+export interface MockKeyDate {
+	id: string;
+	kind: string;
+	label: string | null;
+	dueAt: string;
+	doneAt: string | null;
+	version: number;
+}
+
 export interface MockState {
 	/** Signed out, or the session's memberships. */
 	session: "signed_out" | { organizationId: string; name: string }[];
@@ -101,6 +115,10 @@ export interface MockState {
 	dealReplies?: Reply[];
 	/** Replies for the next stage changes, in order; then the normal rules. */
 	dealPatchReplies?: Reply[];
+	/** Per deal id: its key dates, or how the list call fails. */
+	keyDates?: Record<string, MockKeyDate[] | "error">;
+	/** Replies for the next key date saves (add or change), in order. */
+	keyDateReplies?: Reply[];
 	/** Every API request, for assertions. */
 	requests: { method: string; path: string; body: unknown }[];
 }
@@ -148,6 +166,88 @@ export async function mockApi(page: Page, state: MockState): Promise<void> {
 					return reply(state.logoutStatus, { error: "internal" });
 				state.session = "signed_out";
 				return reply(204);
+			}
+			const keyDateRoute =
+				/^\/v1\/organizations\/([^/]+)\/deals\/([^/]+)\/key-dates(?:\/([^/]+))?$/.exec(
+					url.pathname,
+				);
+			if (keyDateRoute) {
+				const org = decodeURIComponent(keyDateRoute[1] as string);
+				const dealId = keyDateRoute[2] as string;
+				const deals = state.deals?.[org];
+				if (!Array.isArray(deals) || !deals.some((d) => d.id === dealId))
+					return reply(404, { error: "not_found" });
+				const list = state.keyDates?.[dealId] ?? [];
+				if (method === "GET")
+					return list === "error"
+						? reply(500, { error: "internal" })
+						: reply(200, {
+								keyDates: [...list].sort((a, b) =>
+									a.dueAt.localeCompare(b.dueAt),
+								),
+							});
+				if (list === "error") return reply(500, { error: "internal" });
+				const next = state.keyDateReplies?.shift();
+				if (next === "abort") return route.abort("failed");
+				if (next && next !== "commit_then_abort")
+					return reply(next.status, next.body);
+				if (method === "POST") {
+					const parsed = parseNewKeyDate(body);
+					if (!parsed.ok)
+						return reply(400, {
+							error: "invalid_key_date",
+							field: parsed.field,
+						});
+					const input = parsed.keyDate;
+					const keyDate: MockKeyDate = {
+						id: input.id,
+						kind: input.kind,
+						label: input.label,
+						dueAt: input.dueAt.toISOString(),
+						doneAt: null,
+						version: 1,
+					};
+					const existing = list.find((k) => k.id === keyDate.id);
+					if (existing)
+						return existing.label === keyDate.label &&
+							existing.dueAt === keyDate.dueAt &&
+							existing.kind === keyDate.kind
+							? reply(200, { keyDate: existing })
+							: reply(409, { error: "conflict" });
+					state.keyDates = { ...state.keyDates, [dealId]: [...list, keyDate] };
+					if (next === "commit_then_abort") return route.abort("failed");
+					return reply(201, { keyDate });
+				}
+				if (method === "PATCH" && keyDateRoute[3]) {
+					const keyDate = list.find((k) => k.id === keyDateRoute[3]);
+					if (!keyDate) return reply(404, { error: "not_found" });
+					const parsed = parseKeyDateUpdate(body);
+					if (!parsed.ok)
+						return reply(400, {
+							error: "invalid_key_date",
+							field: parsed.field,
+						});
+					const change = parsed.update;
+					if (change.label === null && needsLabel(keyDate.kind as "condition"))
+						return reply(400, { error: "invalid_key_date", field: "label" });
+					const dueAt = change.dueAt.toISOString();
+					if (
+						keyDate.label === change.label &&
+						keyDate.dueAt === dueAt &&
+						(keyDate.doneAt !== null) === change.done
+					)
+						return reply(200, { keyDate });
+					if (keyDate.version !== change.version)
+						return reply(409, { error: "conflict", keyDate });
+					keyDate.label = change.label;
+					keyDate.dueAt = dueAt;
+					keyDate.doneAt = change.done
+						? (keyDate.doneAt ?? new Date().toISOString())
+						: null;
+					keyDate.version += 1;
+					if (next === "commit_then_abort") return route.abort("failed");
+					return reply(200, { keyDate });
+				}
 			}
 			const dealRoute =
 				/^\/v1\/organizations\/([^/]+)\/deals(?:\/([^/]+))?$/.exec(
