@@ -39,6 +39,20 @@ export {
 	UNIT_MAX,
 } from "./deal.js";
 export {
+	DUE_SOON_HOURS,
+	KEY_DATE_KIND_LABELS,
+	KEY_DATE_KINDS,
+	KEY_DATE_LABEL_MAX,
+	type KeyDateKind,
+	type KeyDateState,
+	type KeyDateUpdate,
+	keyDateState,
+	type NewKeyDate,
+	needsLabel,
+	parseKeyDateUpdate,
+	parseNewKeyDate,
+} from "./keydate.js";
+export {
 	canTransition,
 	DONE_STATUSES,
 	type NewTask,
@@ -50,4 +64,10 @@ export {
 	type TaskStatus,
 	TITLE_MAX,
 } from "./task.js";
-export { formatInZone, TORONTO, toOffsetIso, zonedLocalToUtc } from "./time.js";
+export {
+	formatInZone,
+	parseOffsetDateTime,
+	TORONTO,
+	toOffsetIso,
+	zonedLocalToUtc,
+} from "./time.js";

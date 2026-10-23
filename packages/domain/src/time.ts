@@ -119,3 +119,31 @@ export function formatInZone(
 		minute: "2-digit",
 	}).format(date);
 }
+
+// ISO 8601 date-time with an explicit offset or Z; seconds and fractions optional.
+const DATE_TIME =
+	/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.\d{1,9})?)?(?:Z|[+-]\d{2}:\d{2})$/;
+
+/**
+ * Reads an ISO 8601 date-time that states its offset (or Z) as an instant.
+ * Impossible calendar dates (30 February) and times are refused rather than
+ * rolled over. Undefined when the value is not such a string.
+ */
+export function parseOffsetDateTime(value: unknown): Date | undefined {
+	if (typeof value !== "string") return undefined;
+	const match = DATE_TIME.exec(value);
+	if (!match) return undefined;
+	const [, year, month, day, hour, minute, second] = match.map(Number);
+	const calendar = new Date(
+		Date.UTC(year as number, (month as number) - 1, day),
+	);
+	if (
+		calendar.getUTCMonth() !== (month as number) - 1 ||
+		(hour as number) > 23 ||
+		(minute as number) > 59 ||
+		(second ?? 0) > 59
+	)
+		return undefined;
+	const date = new Date(value);
+	return Number.isNaN(date.getTime()) ? undefined : date;
+}

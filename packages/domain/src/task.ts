@@ -1,3 +1,5 @@
+import { parseOffsetDateTime } from "./time.js";
+
 /** Task states from docs/product/CORE_MODEL.md. */
 export const TASK_STATUSES = Object.freeze([
 	"ready",
@@ -26,30 +28,11 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 // Control characters, line/paragraph separators, and lone surrogates (half an
 // emoji, which PostgreSQL would silently replace). Mirrors the database CHECK.
 const FORBIDDEN = /[\p{Cc}\u2028\u2029]|\p{Cs}/u;
-// ISO 8601 date-time with an explicit offset or Z; seconds and fractions optional.
-const DATE_TIME =
-	/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.\d{1,9})?)?(?:Z|[+-]\d{2}:\d{2})$/;
 const ALLOWED_KEYS = new Set(["id", "title", "dueAt"]);
 
 function parseDueAt(value: unknown): Date | null | undefined {
 	if (value === undefined || value === null) return null;
-	if (typeof value !== "string") return undefined;
-	const match = DATE_TIME.exec(value);
-	if (!match) return undefined;
-	const [, year, month, day, hour, minute, second] = match.map(Number);
-	// Reject impossible calendar dates (e.g. 30 February) that Date would roll over.
-	const calendar = new Date(
-		Date.UTC(year as number, (month as number) - 1, day),
-	);
-	if (
-		calendar.getUTCMonth() !== (month as number) - 1 ||
-		(hour as number) > 23 ||
-		(minute as number) > 59 ||
-		(second ?? 0) > 59
-	)
-		return undefined;
-	const date = new Date(value);
-	return Number.isNaN(date.getTime()) ? undefined : date;
+	return parseOffsetDateTime(value);
 }
 
 /** Validates a request to create a task. The only rules; shared by every app. */
