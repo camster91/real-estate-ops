@@ -5,6 +5,7 @@ import { registerClientRoutes } from "./clients.js";
 import { registerConsentRoutes } from "./consents.js";
 import { inTenant, NOT_MEMBER } from "./context.js";
 import { registerDealRoutes } from "./deals.js";
+import { registerKeyDateRoutes } from "./keydates.js";
 import { registerTaskRoutes } from "./tasks.js";
 
 interface BranchRow {
@@ -23,6 +24,7 @@ export async function registerTenantRoutes(
 	registerClientRoutes(app, { pool });
 	registerConsentRoutes(app, { pool });
 	registerDealRoutes(app, { pool });
+	registerKeyDateRoutes(app, { pool });
 
 	app.get(
 		"/v1/organizations/:organizationId/branches",
