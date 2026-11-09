@@ -20,6 +20,7 @@ import {
 import { changeStage, type Deal, getDeal } from "../../../../lib/api";
 import { AppHeader } from "../../app-header";
 import { sideLabel, stageLabel } from "../labels";
+import { KeyDates } from "./key-dates";
 
 type View = Deal | "loading" | "not_found" | "error";
 
@@ -46,6 +47,7 @@ export default function DealDetail() {
 	// Where focus goes when the stage form disappears (a closed deal).
 	const finalNote = useRef<HTMLParagraphElement>(null);
 
+	const notFound = useCallback(() => setView("not_found"), []);
 	const show = useCallback((deal: Deal) => {
 		setView(deal);
 		setTarget(nextStages(deal.stage)[0] ?? "");
@@ -199,6 +201,12 @@ export default function DealDetail() {
 								then move the deal.
 							</p>
 						)}
+						<KeyDates
+							organizationId={organizationId}
+							dealId={dealId}
+							announce={setAnnouncement}
+							onNotFound={notFound}
+						/>
 					</>
 				)}
 				<p role="status" aria-live="polite" className="visually-hidden">
