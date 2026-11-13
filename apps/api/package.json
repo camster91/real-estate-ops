@@ -16,7 +16,7 @@
 		"@reo/db": "workspace:*",
 		"@reo/domain": "workspace:*",
 		"fastify": "5.12.6",
-		"openid-client": "6.8.8",
+		"openid-client": "6.8.9",
 		"pg": "8.23.1"
 	},
 	"devDependencies": {
