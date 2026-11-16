@@ -61,8 +61,8 @@ importers:
         specifier: 8.23.1
         version: 8.23.1
       jose:
-        specifier: 6.2.13
-        version: 6.2.13
+        specifier: 6.2.17
+        version: 6.2.17
 
   apps/mac-gateway:
     dependencies:
@@ -1018,11 +1018,8 @@ packages:
     resolution: {integrity: sha512-aq+t5NAc+cS6rZQQVWC2x98CPqGtKKTMDd4Gaodv0wShnItdKg/51djkGJ1hqH+Oy0ivDftCbSLCQob8zso01w==}
     engines: {node: '>= 10'}
 
-  jose@6.2.13:
-    resolution: {integrity: sha512-7TIg10ZE1x82YediN+lcrPNvGMKge9yFHQD+Qho/b8y2adfugU3AsvvHfxV0fzyFllT6l9xCjf4RWY9g/Z9PJQ==}
-
-  jose@6.2.16:
-    resolution: {integrity: sha512-4LSJpbuBuPdGrONCdZUy0xnxtLf8eEz+EY0SMXdHQEBU7bgUHDVblU/JAjryv3wID9/LK7/YuwFwq+AQNfMscQ==}
+  jose@6.2.17:
+    resolution: {integrity: sha512-wOuK9V1yujQFH5S0ZWmLcDZN7+IKh9bUCC2ZPCf2HDlol3WWHy+PPyNjEI75FXRLMp3vDKQcupP59xhVU95hcg==}
 
   json-schema-ref-resolver@3.0.0:
     resolution: {integrity: sha512-hOrZIVL5jyYFjzk7+y7n5JDzGlU8rfWDuYyHwGa2WA8/pcmMHezp2xsVwxrebD/Q9t8Nc5DboieySDpCp4WG4A==}
@@ -2077,9 +2074,7 @@ snapshots:
 
   ipaddr.js@2.5.0: {}
 
-  jose@6.2.13: {}
-
-  jose@6.2.16: {}
+  jose@6.2.17: {}
 
   json-schema-ref-resolver@3.0.0:
     dependencies:
@@ -2182,7 +2177,7 @@ snapshots:
 
   openid-client@6.8.9:
     dependencies:
-      jose: 6.2.16
+      jose: 6.2.17
       oauth4webapi: 3.8.8
 
   pg-cloudflare@1.4.1:
