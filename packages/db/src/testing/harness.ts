@@ -15,6 +15,37 @@ export interface TestDatabase {
 
 const suffix = () => randomBytes(6).toString("hex");
 
+/**
+ * pg-pool resolves `end()` as soon as clients leave its list, before the
+ * sockets close. `DROP DATABASE ... WITH (FORCE)` can then terminate those
+ * backends. The driver emits 57P01 on the pool and, with no listener, the
+ * worker crashes after the tests have passed.
+ */
+function endPool(pool: pg.Pool | undefined): Promise<void> {
+	if (!pool) return Promise.resolve();
+	const unexpected: Error[] = [];
+	pool.on("error", (error) => {
+		const code = (error as { code?: unknown }).code;
+		if (code !== "57P01") unexpected.push(error);
+	});
+	const pending = pool.totalCount;
+	let remaining = pending;
+	const closed =
+		pending === 0
+			? Promise.resolve()
+			: new Promise<void>((resolve) => {
+					pool.on("remove", () => {
+						remaining -= 1;
+						if (remaining === 0) resolve();
+					});
+				});
+	return pool.end().then(async () => {
+		await closed;
+		const error = unexpected[0];
+		if (error) throw error;
+	});
+}
+
 function adminUrl(): URL {
 	const raw = process.env.REO_TEST_DATABASE_URL;
 	if (!raw)
@@ -74,9 +105,11 @@ export async function createTestDatabase(
 		url,
 		name,
 		async drop() {
-			await app?.end();
-			await admin.end();
+			await Promise.all([endPool(app), endPool(admin)]);
 			const server = new pg.Client({ connectionString: base.toString() });
+			server.on("error", () => {
+				// Nothing is left to query on this connection once drop starts.
+			});
 			await server.connect();
 			try {
 				await server.query(`DROP DATABASE IF EXISTS ${name} WITH (FORCE)`);
