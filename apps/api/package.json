@@ -15,7 +15,7 @@
 		"@reo/config": "workspace:*",
 		"@reo/db": "workspace:*",
 		"@reo/domain": "workspace:*",
-		"fastify": "5.12.6",
+		"fastify": "5.12.8",
 		"openid-client": "6.8.9",
 		"pg": "8.23.1"
 	},
