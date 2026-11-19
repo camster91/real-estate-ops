@@ -17,7 +17,7 @@
 		"security:source": "node scripts/check-secrets.mjs"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.6.6",
+		"@biomejs/biome": "2.6.8",
 		"@playwright/test": "1.65.0",
 		"@types/node": "26.6.5",
 		"tsx": "4.23.15",
